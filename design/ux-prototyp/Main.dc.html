@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<title>Úvod</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#1F4FA8}a:hover{color:#163B7E}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;min-height:48px;border-radius:10px;font-weight:600;font-size:16px;text-decoration:none;box-sizing:border-box}
+.btn-primary{background:#1F4FA8;color:#fff}.btn-primary:hover{color:#fff;background:#163B7E}
+.btn-secondary{background:#fff;color:#1A1D21;border:1px solid #C9CDD3}.btn-secondary:hover{color:#1A1D21;background:#F0F2F5}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #F6F7F9; color: #1A1D21; font-family: Inter, system-ui, sans-serif; display: flex; flex-direction: column">
+  <header style="display: flex; align-items: center; gap: 10px; padding: 16px 20px; background: #fff; border-bottom: 1px solid #E3E6EA">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1F4FA8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"></rect><path d="M8 8h8M8 12h8M8 16h5"></path></svg>
+    <span style="font-weight: 700; font-size: 17px">Cestovní příkazy</span>
+  </header>
+
+  <main style="flex-grow: 1; padding: 24px 20px; display: flex; flex-direction: column; gap: 20px; overflow: hidden">
+    <div style="display: flex; flex-direction: column; gap: 8px">
+      <h1 style="margin: 0; font-size: 26px; line-height: 1.2; font-weight: 700">Cestovní příkaz a vyúčtování cesty</h1>
+      <p style="margin: 0; font-size: 15px; line-height: 1.5; color: #4A5260">Vyplňte cestu, nechte si spočítat stravné a náhrady, přiložte doklady a stáhněte PDF pro účetní. Bez registrace.</p>
+    </div>
+
+    <section style="display: flex; gap: 12px; padding: 14px; background: #EAF1FC; border: 1px solid #BFD3F2; border-radius: 12px">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1F4FA8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0; margin-top: 1px"><rect x="5" y="11" width="14" height="10" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg>
+      <div style="display: flex; flex-direction: column; gap: 4px; font-size: 14px; line-height: 1.45">
+        <strong>Data zůstávají jen v tomto prohlížeči</strong>
+        <span style="color: #2F3A4C">Nic se neodesílá na server. Pro přenos na jiné zařízení nebo zálohu si stáhněte pracovní projekt. Data se smažou po 30 dnech nečinnosti.</span>
+      </div>
+    </section>
+
+    <div style="display: flex; flex-direction: column; gap: 10px">
+      <a class="btn btn-primary" href="Zalozeni.dc.html">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+        Nová pracovní cesta
+      </a>
+      <a class="btn btn-secondary" href="#">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3M7 8l5-5 5 5M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"></path></svg>
+        Načíst pracovní projekt (ZIP)
+      </a>
+    </div>
+
+    <section style="display: flex; flex-direction: column; gap: 10px">
+      <h2 style="margin: 0; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: #5B6472">Rozpracované v tomto prohlížeči</h2>
+      <a href="Souhrn.dc.html" style="display: flex; flex-direction: column; gap: 6px; padding: 14px; background: #fff; border: 1px solid #E3E6EA; border-radius: 12px; text-decoration: none; color: #1A1D21">
+        <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 8px">
+          <strong style="font-size: 16px">Vídeň – jednání s dodavatelem</strong>
+          <span style="font-size: 13px; color: #5B6472">CP-2026-0042</span>
+        </div>
+        <span style="font-size: 14px; color: #4A5260">14.–16. 10. 2026 · zahraniční · 5 výdajů</span>
+        <div style="display: flex; align-items: center; gap: 8px; margin-top: 4px">
+          <div style="flex-grow: 1; height: 6px; background: #E3E6EA; border-radius: 3px; overflow: hidden"><div style="width: 78%; height: 6px; background: #1F4FA8"></div></div>
+          <span style="font-size: 13px; color: #4A5260">Krok 7 z 9</span>
+        </div>
+        <span style="font-size: 12px; color: #5B6472">Smaže se 20. 11. 2026, pokud ji neotevřete</span>
+      </a>
+    </section>
+  </main>
+
+  <footer style="display: flex; justify-content: center; gap: 16px; padding: 14px 20px; font-size: 13px; border-top: 1px solid #E3E6EA; background: #fff">
+    <a href="#">Ochrana soukromí</a>
+    <a href="#">Jak se počítá stravné</a>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

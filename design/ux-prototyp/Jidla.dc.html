@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<title>Bezplatná jídla</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#1F4FA8}a:hover{color:#163B7E}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;min-height:48px;border-radius:10px;font-weight:600;font-size:16px;text-decoration:none;box-sizing:border-box;padding:0 18px}
+.btn-primary{background:#1F4FA8;color:#fff}.btn-primary:hover{color:#fff;background:#163B7E}
+.btn-secondary{background:#fff;color:#1A1D21;border:1px solid #C9CDD3}.btn-secondary:hover{color:#1A1D21}
+.meal{flex:1 1 0;min-height:44px;border-radius:8px;font:inherit;font-size:14px;font-weight:600;cursor:pointer}
+.meal-off{background:#fff;border:1px solid #C9CDD3;color:#2F3A4C}
+.meal-on{background:#1F4FA8;border:1px solid #1F4FA8;color:#fff}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #F6F7F9; color: #1A1D21; font-family: Inter, system-ui, sans-serif; display: flex; flex-direction: column">
+  <header style="display: flex; flex-direction: column; gap: 10px; padding: 12px 16px; background: #fff; border-bottom: 1px solid #E3E6EA">
+    <div style="display: flex; align-items: center; gap: 8px">
+      <a href="CasovaOsa.dc.html" aria-label="Zpět" style="display: flex; width: 44px; height: 44px; align-items: center; justify-content: center; color: #1A1D21"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"></path></svg></a>
+      <div style="display: flex; flex-direction: column; flex-grow: 1">
+        <span style="font-size: 12px; color: #5B6472">CP-2026-0042 · Vídeň</span>
+        <strong style="font-size: 17px">Bezplatná jídla</strong>
+      </div>
+      <span style="font-size: 13px; color: #4A5260">Krok 4 z 9</span>
+    </div>
+    <div style="height: 4px; background: #E3E6EA; border-radius: 2px"><div style="width: 44%; height: 4px; background: #1F4FA8; border-radius: 2px"></div></div>
+  </header>
+
+  <main style="flex-grow: 1; padding: 16px; display: flex; flex-direction: column; gap: 12px; overflow: hidden">
+    <p style="margin: 0; font-size: 14px; line-height: 1.45; color: #4A5260">Označte jídla, která jste dostali zdarma – od hostitele, na školení nebo v ceně ubytování. Snižují stravné.</p>
+    <a class="btn btn-secondary" href="#" style="font-size: 14px; min-height: 44px">Snídaně v ceně hotelu každé ráno</a>
+
+    <sc-for list="{{days}}" as="d" hint-placeholder-count="3">
+      <section style="display: flex; flex-direction: column; gap: 10px; padding: 12px 14px; background: #fff; border: 1px solid #E3E6EA; border-radius: 12px">
+        <div style="display: flex; justify-content: space-between; align-items: baseline">
+          <strong style="font-size: 15px">{{d.label}}</strong>
+          <span style="font-size: 13px; color: #4A5260">{{d.time}}</span>
+        </div>
+        <div style="display: flex; gap: 8px">
+          <button type="button" class="{{d.bClass}}" aria-pressed="{{d.bOn}}" onClick="{{d.toggleB}}">Snídaně</button>
+          <button type="button" class="{{d.lClass}}" aria-pressed="{{d.lOn}}" onClick="{{d.toggleL}}">Oběd</button>
+          <button type="button" class="{{d.dClass}}" aria-pressed="{{d.dOn}}" onClick="{{d.toggleD}}">Večeře</button>
+        </div>
+        <div style="display: flex; justify-content: space-between; font-size: 13px; color: #4A5260">
+          <span>{{d.calc}}</span>
+          <strong style="color: #1A1D21">{{d.result}} EUR</strong>
+        </div>
+      </section>
+    </sc-for>
+    <p style="margin: 0; font-size: 13px; color: #5B6472">Stravné celkem: <strong style="color: #1A1D21">{{total}} EUR</strong> · ilustrativní sazba 45 EUR</p>
+  </main>
+
+  <footer style="display: flex; gap: 10px; padding: 12px 16px; background: #fff; border-top: 1px solid #E3E6EA">
+    <a class="btn btn-secondary" href="CasovaOsa.dc.html">Zpět</a>
+    <a class="btn btn-primary" href="Vydaje.dc.html" style="flex-grow: 1">Pokračovat</a>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { meals: [[false, false, false], [true, true, false], [true, false, false]] };
+  }
+  renderVals() {
+    var base = 45;
+    var defs = [
+      { label: 'St 14. 10.', time: 'v zahraničí 14 h 15 min', share: 2 / 3, cut: 0.35 },
+      { label: 'Čt 15. 10.', time: 'v zahraničí 24 h', share: 1, cut: 0.25 },
+      { label: 'Pá 16. 10.', time: 'v zahraničí 15 h 15 min', share: 2 / 3, cut: 0.35 }
+    ];
+    var self = this;
+    var total = 0;
+    var fmt = function (n) { return n.toFixed(2).replace('.', ','); };
+    var days = defs.map(function (d, i) {
+      var m = self.state.meals[i];
+      var toggle = function (k) {
+        return function () {
+          var next = self.state.meals.map(function (row) { return row.slice(); });
+          next[i][k] = !next[i][k];
+          self.setState({ meals: next });
+        };
+      };
+      var count = m.filter(Boolean).length;
+      var nar = base * d.share;
+      var red = base * d.cut * count;
+      var res = Math.ceil(Math.max(0, Math.round((nar - red) * 100) / 100));
+      total += res;
+      var cls = function (on) { return 'meal ' + (on ? 'meal-on' : 'meal-off'); };
+      return {
+        label: d.label, time: d.time,
+        bClass: cls(m[0]), lClass: cls(m[1]), dClass: cls(m[2]),
+        bOn: String(m[0]), lOn: String(m[1]), dOn: String(m[2]),
+        toggleB: toggle(0), toggleL: toggle(1), toggleD: toggle(2),
+        calc: count ? fmt(nar) + ' − ' + count + ' × ' + Math.round(d.cut * 100) + ' % (' + fmt(red) + ')' : 'nárok ' + fmt(nar) + ', bez krácení',
+        result: fmt(res)
+      };
+    });
+    return { days: days, total: fmt(total) };
+  }
+}
+</script>
+</body>
+</html>

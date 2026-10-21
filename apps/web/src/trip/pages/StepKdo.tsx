@@ -35,12 +35,20 @@ export function StepKdo() {
           hint="Místo, kde obvykle pracujete, např. „Praha, Vinohradská 12“."
         />
         <details className="group">
-          <summary className="min-h-11 cursor-pointer py-2 font-semibold text-accent">Osobní číslo, pozice, útvar, adresa</summary>
+          <summary className="min-h-11 cursor-pointer py-2 font-semibold text-accent">Osobní číslo, pozice, útvar, adresa, číslo účtu</summary>
           <div className="mt-2 grid gap-4 sm:grid-cols-2">
             <TextField label="Osobní číslo" optional value={trip.employee.personalNumber} onChange={emp('personalNumber')} />
             <TextField label="Pracovní pozice" optional value={trip.employee.position} onChange={emp('position')} />
             <TextField label="Útvar" optional value={trip.employee.department} onChange={emp('department')} />
             <TextField label="Adresa" optional value={trip.employee.address} onChange={emp('address')} />
+            <TextField
+              label="Číslo účtu pro výplatu"
+              optional
+              value={trip.employee.bankAccount}
+              onChange={emp('bankAccount')}
+              placeholder="123456789/0800"
+              hint="Uvede se ve vyúčtování u částky k výplatě."
+            />
           </div>
         </details>
       </Card>
@@ -93,6 +101,9 @@ export function StepKdo() {
               onChange={(v) => update((d) => void (d.employerRates.pocketMoneyPct = v))}
               hint="Kapesné je dobrovolné, nejvýše 40 %. Bez pokynu zaměstnavatele nechte prázdné."
             />
+            <Checkbox checked={trip.combineShortDomesticDays} onChange={(v) => update((d) => void (d.combineShortDomesticDays = v))}>
+              Sčítat doby kratší než 5 hodin z více dnů tuzemské cesty (jen pokud to vnitřní předpis firmy výslovně stanoví – viz otázka Ú-5 pro účetní)
+            </Checkbox>
           </div>
         </details>
       </Card>

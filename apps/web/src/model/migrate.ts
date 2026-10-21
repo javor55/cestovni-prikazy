@@ -54,6 +54,12 @@ export function migrateTrip(raw: unknown): TripDoc {
     for (const e of doc.expenses) e.fuelQuantity ??= '';
     doc.vehicle.fuelPriceMode ??= doc.vehicle.receiptPrice ? 'receipt' : 'average';
   }
+  if (version < 7) {
+    // v7: číslo účtu pro výplatu, odpověď na snídani v ceně ubytování.
+    const doc = t as unknown as TripDoc;
+    doc.employee.bankAccount ??= '';
+    for (const e of doc.expenses) e.breakfast ??= '';
+  }
   t.schemaVersion = SCHEMA_VERSION;
   return t as unknown as TripDoc;
 }

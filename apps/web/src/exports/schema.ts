@@ -50,6 +50,7 @@ const expense = z.object({
   documentNumber: short,
   reimbursable: z.boolean(),
   fuelQuantity: short,
+  breakfast: z.enum(['', 'yes', 'no']),
   note: text,
 });
 
@@ -62,7 +63,7 @@ export const tripSchema = z.object({
   updatedAt: isoTime,
   lastOpenedAt: isoTime,
   number: short,
-  employee: z.object({ name: short, personalNumber: short, position: short, department: short, regularWorkplace: short, address: short }),
+  employee: z.object({ name: short, personalNumber: short, position: short, department: short, regularWorkplace: short, address: short, bankAccount: short }),
   employer: z.object({ name: short, ico: short, seat: short, unit: short, costCenter: short, project: short }),
   sector: z.enum(['business', 'public']),
   kind: z.enum(['domestic', 'foreign']),
@@ -137,7 +138,7 @@ const docModelSchema = z.object({
   ruleSet: s,
   issued: z.object({ place: s, date: s }),
   employer: z.object({ name: s, ico: s, seat: s, unit: s, costCenter: s, project: s, sector: s }),
-  employee: z.object({ name: s, personalNumber: s, position: s, department: s, regularWorkplace: s, address: s }),
+  employee: z.object({ name: s, personalNumber: s, position: s, department: s, regularWorkplace: s, address: s, bankAccount: s.optional() }),
   trip: z.object({ kind: s, purpose: s, startPlace: s, endPlace: s, plannedStart: s, plannedEnd: s, destinations: s, via: s, transport: s, advances: z.array(s).max(100), note: s }),
   actual: z.object({ start: s, end: s, km: s }),
   segments: z.array(z.object({ n: s, from: s, to: s, departure: s, arrival: s, transport: s, km: s, border: s })).max(500),

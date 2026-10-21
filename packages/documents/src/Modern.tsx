@@ -271,6 +271,7 @@ export function PartB({ m }: { m: DocModel }) {
           rows={m.settlement.rows.map((r) => [r.label, r.foreign, r.czk])}
           foot={[`${m.settlement.payoutLabel} (zaokrouhleno na celé Kč)`, '', m.settlement.payout]}
         />
+        {m.employee.bankAccount ? <Text style={s.note}>Číslo účtu zaměstnance pro výplatu: {m.employee.bankAccount}</Text> : null}
       </Section>
 
       <Section title="Prohlášení a schválení">

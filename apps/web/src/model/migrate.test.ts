@@ -29,6 +29,17 @@ describe('migrace uložené cesty', () => {
     expect(t).toMatchObject({ destinationCountry: 'AT', route: [], plannedTransportKinds: [] });
   });
 
+  it('v6 → v7: číslo účtu a odpověď na snídani u ubytování', () => {
+    const v6 = { ...newTrip(new Date()), schemaVersion: 6 } as Record<string, unknown>;
+    const employee = { ...(v6.employee as Record<string, unknown>) };
+    delete employee.bankAccount;
+    v6.employee = employee;
+    (v6.expenses as unknown[]) = [{ id: 'e', category: 'Ubytování' }];
+    const t = migrateTrip(v6);
+    expect(t.employee.bankAccount).toBe('');
+    expect(t.expenses[0]!.breakfast).toBe('');
+  });
+
   it('aktuální verzi nechá beze změny a novější odmítne', () => {
     const t = newTrip(new Date());
     expect(migrateTrip(t)).toEqual(t);

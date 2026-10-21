@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { currencyOptions } from '../../model/countries.js';
 import { convertToCzk, impliedRate } from '@cp/core';
 import { formatDay, formatMinor, formatRate, normalizeDecimal, toMinor } from '../../model/format.js';
+import { datesOf, markBreakfasts } from '../../model/meals.js';
 import { actualTimes, FUEL_CATEGORIES } from '../../model/toInput.js';
 import { CnbButton } from '../../rates/CnbButton.js';
 import { AttachmentList } from '../../attachments/AttachmentList.js';
@@ -11,7 +12,8 @@ import { db } from '../../storage/db.js';
 import { useLiveQuery } from 'dexie-react-hooks';
 import type { Attachment } from '../../attachments/model.js';
 import { emptyExpense, expenseCategories, paymentLabels, rateSourceLabels, type ExpenseDoc, type RateSource } from '../../model/trip.js';
-import { Button, Card, Checkbox, Icon, icons, NumberField, SelectField, TextField } from '../../ui/controls.js';
+import { Link } from 'react-router';
+import { Button, Card, Checkbox, Icon, icons, Notice, NumberField, SelectField, TextField } from '../../ui/controls.js';
 import { useTrip } from '../context.js';
 import { StepIssues } from '../IssueList.js';
 
@@ -121,6 +123,21 @@ export function StepVydaje() {
                     <Conversion e={e} />
                   </div>
                 )}
+                {e.category === 'Ubytování' && (
+                  <BreakfastQuestion
+                    answer={e.breakfast}
+                    tripId={trip.id}
+                    onAnswer={(yes) =>
+                      update((d) => {
+                        const was = d.expenses[i]!.breakfast;
+                        d.expenses[i]!.breakfast = yes ? 'yes' : 'no';
+                        const { start, end } = actualTimes(d);
+                        // Zpětné „nebyla“ zruší snídaně, které aplikace označila.
+                        if (yes || was === 'yes') markBreakfasts(d, datesOf(start, end), yes);
+                      })
+                    }
+                  />
+                )}
                 {FUEL_CATEGORIES.has(e.category) && (
                   <NumberField
                     label={e.category === 'Nabíjení elektromobilu' ? 'Množství (kWh)' : 'Množství (l)'}
@@ -213,5 +230,36 @@ function Conversion({ e }: { e: ExpenseDoc }) {
     <p className="text-[15px]">
       = <strong>{formatMinor(convertToCzk(money, rate, unit))}</strong>
     </p>
+  );
+}
+
+/** Snídaně v ceně ubytování krátí stravné (Ú-6) – aplikace se zeptá přímo u ubytování. */
+function BreakfastQuestion({ answer, tripId, onAnswer }: { answer: ExpenseDoc['breakfast']; tripId: string; onAnswer: (yes: boolean) => void }) {
+  if (answer === 'yes')
+    return (
+      <p className="text-sm text-muted">
+        Snídaně v ceně ubytování jsou označené v kroku{' '}
+        <Link to={`/cesta/${tripId}/jidla`} className="font-semibold text-accent underline">
+          Bezplatná jídla
+        </Link>{' '}
+        (každé ráno po první noci). Upravit je můžete tam.{' '}
+        <button type="button" className="font-semibold text-accent underline" onClick={() => onAnswer(false)}>
+          Snídaně v ceně nebyla
+        </button>
+      </p>
+    );
+  if (answer === 'no') return null;
+  return (
+    <Notice title="Byla v ceně ubytování snídaně?">
+      <span className="flex flex-col gap-2">
+        Snídaně, kterou platí zaměstnavatel (v ceně ubytování), snižuje stravné.
+        <span className="flex flex-wrap gap-2">
+          <Button onClick={() => onAnswer(true)}>Ano, označit snídaně</Button>
+          <Button variant="secondary" onClick={() => onAnswer(false)}>
+            Ne
+          </Button>
+        </span>
+      </span>
+    </Notice>
   );
 }

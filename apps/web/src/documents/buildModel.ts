@@ -79,7 +79,11 @@ export function buildDocModel({ trip, mapped, result, docCounts, documentCount, 
       endPlace: trip.endPlace,
       plannedStart: formatDateTime(trip.plannedStart),
       plannedEnd: formatDateTime(trip.plannedEnd),
-      destinations: trip.destinations,
+      // Cíl v zahraničí se státem v závorce, např. „Záhřeb (Chorvatsko)“.
+      destinations:
+        trip.kind === 'foreign' && trip.destinationCountry && trip.destinationCountry !== 'CZ' && trip.destinations
+          ? `${trip.destinations} (${countryName(trip.destinationCountry)})`
+          : trip.destinations,
       via: [...trip.route.map((r) => [r.place, r.country && trip.kind === 'foreign' ? countryName(r.country) : ''].filter(Boolean).join(' – ')), trip.via].filter(Boolean).join(', '),
       transport: plannedTransportText(trip),
       advances: trip.advances.filter((a) => a.amount).map((a) => `${a.amount} ${a.currency}${a.providedOn ? ` (${formatDay(a.providedOn)})` : ''}`),

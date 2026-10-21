@@ -32,6 +32,13 @@ test('ubytování se zeptá na snídani; kontrola ukáže lhůtu pro odevzdání
   await go(page, `${base}/jidla`);
   await expect(breakfast(/15\. 10\. 2026/)).toHaveAttribute('aria-pressed', 'false');
 
+  // Hromadně: večeře každý večer (např. pozvání od hostitele) a zase zrušit.
+  await page.getByRole('button', { name: 'Večeře každý večer' }).click();
+  const dinner = (day: RegExp) => page.getByRole('region', { name: day }).getByRole('button', { name: 'Večeře' });
+  for (const d of [/14\. 10\. 2026/, /15\. 10\. 2026/, /16\. 10\. 2026/]) await expect(dinner(d)).toHaveAttribute('aria-pressed', 'true');
+  await page.getByRole('button', { name: 'Zrušit večeře' }).click();
+  await expect(dinner(/15\. 10\. 2026/)).toHaveAttribute('aria-pressed', 'false');
+
   await go(page, `${base}/kontrola`);
   // Konec v pátek 16. 10. 2026, 28. 10. je svátek → 10. pracovní den je 2. 11. 2026.
   await expect(page.getByText('Vyúčtování předložte zaměstnavateli do 2. 11. 2026')).toBeVisible();

@@ -17,7 +17,12 @@ export function datesOf(start: string, end: string): string[] {
 
 const none: MealsDoc = { breakfast: false, lunch: false, dinner: false };
 
+/** Označí (nebo zruší) jedno jídlo ve všech zadaných dnech. */
+export function setMealAll(d: TripDoc, dates: string[], kind: keyof MealsDoc, value: boolean): void {
+  for (const date of dates) d.meals[date] = { ...(d.meals[date] ?? none), [kind]: value };
+}
+
 /** Snídaně v ceně ubytování: označí (nebo zruší) snídani každé ráno po první noci, tj. od druhého dne cesty. */
 export function markBreakfasts(d: TripDoc, dates: string[], value = true): void {
-  for (const date of dates.slice(1)) d.meals[date] = { ...(d.meals[date] ?? none), breakfast: value };
+  setMealAll(d, dates.slice(1), 'breakfast', value);
 }

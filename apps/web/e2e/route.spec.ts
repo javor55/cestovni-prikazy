@@ -17,7 +17,10 @@ test('cesta autem do Záhřebu: plán se státy po cestě, převzetí do průbě
   await route.getByLabel('Stát').nth(0).selectOption('AT');
   await page.getByRole('button', { name: 'Místo nebo stát po cestě' }).click();
   await route.getByLabel('Stát').nth(1).selectOption('SI');
-  await page.getByText('Soukromé auto', { exact: true }).click();
+  await page.getByLabel('Dopravní prostředky', { exact: true }).selectOption('soukrome-auto');
+  await page.getByLabel('Dopravní prostředky', { exact: true }).selectOption('taxi');
+  await expect(page.getByRole('list', { name: 'Vybrané dopravní prostředky' })).toContainText('Soukromé autoTaxi');
+  await page.getByRole('button', { name: 'Odebrat Taxi' }).click();
   await page.getByLabel('Plánovaný začátek').fill('2026-10-14T05:00');
   await page.getByLabel('Plánovaný konec').fill('2026-10-15T22:00');
 

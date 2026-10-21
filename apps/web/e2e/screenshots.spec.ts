@@ -43,7 +43,7 @@ test('ukázková cesta do Vídně', async ({ page }) => {
   await page.getByLabel('Plánovaný konec').fill('2026-10-16T19:00');
   await page.getByLabel('Cílová místa').fill('Vídeň');
   await page.getByLabel('Stát cíle').selectOption('AT');
-  await page.getByText('Soukromé auto', { exact: true }).click();
+  await page.getByLabel('Dopravní prostředky', { exact: true }).selectOption('soukrome-auto');
   await page.getByLabel('Místo vystavení příkazu').fill('Praha');
   await page.getByLabel('Datum vystavení příkazu').fill('2026-10-12');
   await page.getByRole('button', { name: 'Přidat zálohu' }).click();
@@ -70,7 +70,7 @@ test('ukázková cesta do Vídně', async ({ page }) => {
   await shot(page, '03-prubeh');
 
   await go(page, `${base}/jidla`);
-  await page.getByRole('button', { name: 'Snídaně v ceně ubytování každé ráno' }).click();
+  await page.getByRole('button', { name: 'Snídaně každé ráno (v ceně ubytování)' }).click();
   await page.getByRole('region', { name: /15\. 10\. 2026/ }).getByRole('button', { name: 'Oběd' }).click();
   await shot(page, '04-jidla');
 

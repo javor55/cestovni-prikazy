@@ -1,5 +1,11 @@
-# Cloudflare Pages (postup v docs/07-nasazeni.md). Statické soubory jsou v apps/web/dist,
-# API /api/* obsluhuje funkce functions/api/[[path]].ts.
+# Cloudflare Workers (postup v docs/07-nasazeni.md). Statické soubory aplikace jsou v apps/web/dist,
+# Worker (apps/server/src/worker.ts) obsluhuje jen /api/*.
 name = "cestovni-prikazy"
-pages_build_output_dir = "apps/web/dist"
+main = "apps/server/src/worker.ts"
 compatibility_date = "2026-10-01"
+
+[assets]
+directory = "apps/web/dist"
+# Aplikace je SPA – neznámé adresy vrací index.html.
+not_found_handling = "single-page-application"
+run_worker_first = ["/api/*"]

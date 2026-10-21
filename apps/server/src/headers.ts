@@ -1,4 +1,4 @@
-// Bezpečnostní hlavičky – jeden zdroj pro server v Node (Docker), soubor _headers na Cloudflare Pages
+// Bezpečnostní hlavičky – jeden zdroj pro server v Node (Docker), soubor _headers na Cloudflare
 // a náhled ve Vite, ve kterém běží E2E testy (aplikace se tak testuje se stejnou CSP jako v provozu).
 
 /**
@@ -33,7 +33,7 @@ export const securityHeaders: Record<string, string> = {
   'X-Robots-Tag': 'noindex',
 };
 
-/** Obsah souboru _headers pro Cloudflare Pages. */
+/** Obsah souboru _headers pro statické soubory na Cloudflare. */
 export function cloudflareHeaders(): string {
   const all = Object.entries(securityHeaders).map(([k, v]) => `  ${k}: ${v}`);
   return [

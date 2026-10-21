@@ -95,7 +95,7 @@ describe('GET /api/kurzy', () => {
   });
 });
 
-describe('Cloudflare Pages', () => {
+describe('Cloudflare', () => {
   it('soubor _headers obsahuje CSP pro všechny stránky a dlouhou mezipaměť pro assets', () => {
     const h = cloudflareHeaders();
     expect(h).toMatch(/^\/\*\n  Content-Security-Policy: default-src 'self';/);

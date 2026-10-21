@@ -4,7 +4,7 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 const root = new URL('../../../', import.meta.url).pathname;
-const dirs = ['apps/web/src', 'apps/server/src', 'packages/core/src', 'packages/documents/src', 'packages/rules/src', 'functions'];
+const dirs = ['apps/web/src', 'apps/server/src', 'packages/core/src', 'packages/documents/src', 'packages/rules/src'];
 
 function files(dir: string): string[] {
   return readdirSync(dir).flatMap((f) => {

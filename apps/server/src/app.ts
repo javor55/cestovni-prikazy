@@ -12,7 +12,7 @@ export interface AppOptions {
   rateLimitPerMinute?: number;
 }
 
-/** API aplikace. Sdílí ho server v Node (Docker) i funkce na Cloudflare Pages. */
+/** API aplikace. Sdílí ho server v Node (Docker) i Worker na Cloudflare. */
 export function createApp({ cnb, today = () => new Date().toISOString().slice(0, 10), clientKey = () => 'vsichni', rateLimitPerMinute = 60 }: AppOptions) {
   const app = new Hono();
 

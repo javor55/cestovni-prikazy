@@ -9,39 +9,36 @@ Server tedy neukládá žádné údaje o cestách ani doklady a není potřeba d
 
 | Způsob | Kdy | Cena |
 |---|---|---|
-| [Cloudflare Pages](#1-cloudflare-pages) | testování a veřejný provoz | zdarma (i pro firmy) |
+| [Cloudflare Workers](#1-cloudflare-workers) | testování a veřejný provoz | zdarma (i pro firmy) |
 | [Docker na vlastním serveru](#2-docker-na-ubuntu-vm) | vlastní VM s veřejnou doménou | provoz VM |
 | [Docker ve firemní síti](#3-firemní-síť) | interní provoz bez internetu zvenku | provoz serveru |
 
-## 1. Cloudflare Pages
+## 1. Cloudflare Workers
 
-Cloudflare po každém sloučení do `main` aplikaci sám sestaví a nasadí. Ke každému pull requestu vytvoří náhledovou adresu, takže změnu jde vyzkoušet ještě před schválením.
+Cloudflare po každém sloučení do `main` aplikaci sám sestaví a nasadí. Pro ostatní větve (např. pull requesty) vytvoří náhledovou verzi s vlastní adresou. Workers je hlavní platforma Cloudflare. Starší služba Pages dál funguje, ale nové funkce už dostávají jen Workers.
 
 ### Jednorázové nastavení (asi 10 minut)
 
 1. Založte si účet zdarma na <https://dash.cloudflare.com/sign-up>.
-2. V levém menu otevřete **Compute (Workers & Pages)** → **Create** → záložka **Pages** → **Connect to Git** (Import an existing Git repository).
+2. V levém menu otevřete **Compute (Workers & Pages)** → **Create application** → **Import a repository** (Continue with GitHub).
 3. Propojte účet GitHub a vyberte repozitář **javor55/cestovni-prikazy**.
-4. Nastavení sestavení:
+4. Nastavení (*Set up your application*):
 
    | Pole | Hodnota |
    |---|---|
-   | Production branch | `main` |
-   | Framework preset | `None` |
+   | Project name | `cestovni-prikazy` (musí odpovídat `name` ve `wrangler.toml`) |
    | Build command | `pnpm --filter @cp/web build` |
-   | Build output directory | `apps/web/dist` |
-   | Root directory | *(prázdné – kořen repozitáře)* |
+   | Deploy command | `npx wrangler deploy` |
+   | Preview command (non-production branches) | `npx wrangler versions upload` |
 
-   V části **Environment variables** přidejte `NODE_VERSION` = `22` (stejnou verzi určuje i soubor `.node-version`). Pokud by sestavení hlásilo jinou verzi pnpm, přidejte také `PNPM_VERSION` = `10.28.0`.
-5. Klikněte na **Save and Deploy**. Za pár minut poběží aplikace na adrese `https://<název-projektu>.pages.dev`.
+   V **Advanced settings** nechte kořenový adresář `/`. Verzi Node.js určuje soubor `.node-version` (22). Pokud by sestavení hlásilo starou verzi, přidejte proměnnou sestavení `NODE_VERSION` = `22`. Pokud by hlásilo jinou verzi pnpm, přidejte `PNPM_VERSION` = `10.28.0`.
+5. Klikněte na **Deploy**. Za pár minut poběží aplikace na adrese `https://cestovni-prikazy.<váš-účet>.workers.dev`.
 
-Cloudflare najde v repozitáři sám:
+Co Cloudflare v repozitáři použije:
 
-- `functions/api/[[path]].ts`: funkce pro `/api/*`, používá stejné API jako server v Dockeru (`apps/server/src/cloudflare.ts`),
-- `apps/web/dist/_headers`: bezpečnostní hlavičky včetně CSP, vytvoří se při sestavení ze stejného zdroje jako u serveru (`apps/server/src/headers.ts`),
-- `wrangler.toml`: název projektu a výstupní adresář.
-
-Aplikace je SPA. Cloudflare Pages pro neznámé adresy automaticky vrací `index.html`.
+- `wrangler.toml`: název, vstupní soubor Workeru a adresář se statickými soubory. Worker se spouští jen pro `/api/*`, ostatní obsluhuje Cloudflare přímo. Neznámé adresy vrací `index.html` (aplikace je SPA).
+- `apps/server/src/worker.ts`: stejné API jako server v Dockeru (kurzy ČNB, limit požadavků, hlavičky),
+- `apps/web/dist/_headers`: bezpečnostní hlavičky včetně CSP pro statické soubory. Vytvoří se při sestavení ze stejného zdroje jako u serveru (`apps/server/src/headers.ts`).
 
 ### Kontrola po nasazení
 
@@ -51,11 +48,18 @@ Aplikace je SPA. Cloudflare Pages pro neznámé adresy automaticky vrací `index
 
 ### Volitelně: přístup jen pro zaměstnance
 
-Aplikace je bez přihlášení, protože nic neukládá na server. Pokud ji chcete skrýt před veřejností, použijte **Cloudflare Access** (Zero Trust, pro malý počet uživatelů zdarma). Nejjednodušší je to s vlastní doménou: Zero Trust → Access → Applications → Add an application → Self-hosted, zadat doménu aplikace a pravidlo „Emails ending in @vase-firma.cz“. Uživatel se pak přihlásí jednorázovým kódem z e-mailu. Náhledové adresy pull requestů lze v nastavení projektu Pages (Settings → General → Access policy) omezit stejně.
+Aplikace je bez přihlášení, protože nic neukládá na server. Pokud ji chcete skrýt před veřejností, použijte **Cloudflare Access** (Zero Trust, pro malý počet uživatelů zdarma). V nastavení Workeru (Settings → Domains & Routes) lze u adresy `workers.dev` i u náhledových adres zapnout Cloudflare Access. Pro vlastní doménu: Zero Trust → Access → Applications → Add an application → Self-hosted, zadat doménu aplikace a pravidlo „Emails ending in @vase-firma.cz“. Uživatel se pak přihlásí jednorázovým kódem z e-mailu.
 
 ### Vlastní doména
 
-Pages → projekt → **Custom domains** → Set up a domain. Pokud doménu spravuje jiný registrátor, Cloudflare ukáže záznam CNAME, který je potřeba přidat.
+Worker → **Settings** → **Domains & Routes** → Add → Custom domain. Doména musí být spravovaná v Cloudflare (DNS zóna v účtu).
+
+### Lokální vyzkoušení
+
+```bash
+pnpm --filter @cp/web build
+npx wrangler dev            # simulace Cloudflare na http://localhost:8787
+```
 
 ## 2. Docker na Ubuntu VM
 
@@ -111,7 +115,7 @@ Postup je stejný jako v bodě 2, s těmito rozdíly:
 
 Sazby jsou v souboru `packages/rules/data/cz-2026.json` (postup je v [06 – Aktualizace sazeb](06-aktualizace-sazeb.md)). Změnu udělejte přes pull request. Testy ověří, že soubor odpovídá schématu a výpočty sedí. Po sloučení:
 
-- **Cloudflare Pages** nasadí novou verzi automaticky,
+- **Cloudflare** nasadí novou verzi automaticky,
 - **Docker:** `git pull && sudo docker compose up -d --build`.
 
 Sazby se záměrně nemění za běhu souborem na serveru. Výpočet běží v prohlížeči a každé vytvořené PDF si pamatuje verzi sazeb (`CZ-2026 v1.0.0`). Změna v repozitáři má historii, projde testy a v dokumentu je vidět, podle které verze se počítalo. Jednotlivou sazbu pro konkrétní cestu (např. vyšší stravné u zaměstnavatele) lze zadat přímo v aplikaci.

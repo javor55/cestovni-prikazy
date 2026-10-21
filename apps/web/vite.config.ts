@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import { cloudflareHeaders, securityHeaders } from '../server/src/headers.js';
 
-/** Při sestavení přidá soubor _headers s bezpečnostními hlavičkami pro Cloudflare Pages. */
+/** Při sestavení přidá soubor _headers s bezpečnostními hlavičkami pro Cloudflare. */
 const cloudflare = (): Plugin => ({
   name: 'cloudflare-headers',
   apply: 'build',

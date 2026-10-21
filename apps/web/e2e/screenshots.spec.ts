@@ -30,7 +30,7 @@ test('ukázková cesta do Vídně', async ({ page }) => {
   await page.getByLabel('Pravidelné pracoviště').fill('Praha, Ukázková 12');
   await page.getByLabel('Název').fill('Ukázková firma s.r.o.');
   await page.getByText('IČO, organizační jednotka').click();
-  await page.getByLabel('IČO').fill('12345678');
+  await page.getByLabel('IČO').fill('87654326');
   await page.getByLabel('Sídlo').fill('Ukázková 12, Praha 1');
 
   await go(page, `${base}/cesta`);

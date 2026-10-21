@@ -18,6 +18,7 @@ Webová aplikace pro zaměstnance: vyplní pracovní cestu, nechá si spočítat
 - **PDF k podpisu** ve dvou vzhledech (moderní a konzervativní). Podpis jako nahraný sken, nebo vložený obrázek podpisu s razítkem.
 - **Kompletní dokumentace** – jedno PDF s krycím listem, obsahem, podepsaným dokumentem, rozpisem výpočtu a všemi doklady seřazenými podle výdajů, s čísly stran a záložkami.
 - **Exporty** – XLSX a CSV pro účetní, JSON s úplnými daty, ZIP s originály dokladů a pracovní projekt (ZIP), který jde načíst v jiném prohlížeči nebo zařízení.
+- **Zaměstnavatel z ARES** – vyhledání firmy podle IČO nebo názvu doplní název, IČO a sídlo. U státu, obce, kraje nebo příspěvkové organizace nastaví platovou sféru.
 - **Hlídá formality** – dotaz na snídani v ceně ubytování, upozornění na doklad bez potvrzení o zaplacení, lhůta 10 pracovních dnů pro předložení vyúčtování, číslo účtu pro výplatu ve vyúčtování.
 - **Na telefonu jako aplikace** – jde přidat na plochu a po první návštěvě funguje i bez připojení.
 - **Sazby 2026** – tuzemské stravné, náhrada za km a ceny paliv podle vyhlášky 573/2025 Sb. a jejích novel, zahraniční stravné pro 227 států a území podle vyhlášky 489/2025 Sb. Odkazy na předpisy jsou přímo v aplikaci.
@@ -50,7 +51,7 @@ Výsledné dokumenty ([ukázkové PDF](docs/img/ukazka-cestovni-prikaz.pdf)):
 
 ## Data a soukromí
 
-- Údaje o cestách, doklady i vytvořená PDF jsou **jen v prohlížeči** (IndexedDB). Na server se nic neposílá. Server poskytuje jen soubory aplikace a kurzy ČNB – dotaz obsahuje pouze datum.
+- Údaje o cestách, doklady i vytvořená PDF jsou **jen v prohlížeči** (IndexedDB). Na server se nic neposílá. Server poskytuje jen soubory aplikace, kurzy ČNB (dotaz obsahuje pouze datum) a vyhledání zaměstnavatele v ARES (dotaz obsahuje pouze zadané IČO nebo název firmy).
 - Cesta, kterou nikdo 30 dní neotevře, se automaticky smaže. Týden předem na to aplikace upozorní. Kdykoli jde smazat jednu cestu nebo všechna data.
 - Pro práci na jiném zařízení nebo pro archiv slouží **pracovní projekt** (ZIP s daty a originály dokladů). Při načtení se kontrolují kontrolní součty i formát souborů.
 
@@ -66,7 +67,7 @@ Potřebujete Node.js 22 a pnpm 10.
 
 ```
 pnpm install
-pnpm --filter @cp/server dev   # server s kurzy ČNB na http://localhost:8787
+pnpm --filter @cp/server dev   # server s kurzy ČNB a ARES na http://localhost:8787
 pnpm --filter @cp/web dev      # aplikace na http://localhost:5173 (/api přesměruje na server)
 pnpm check                     # kontrola typů + jednotkové testy
 pnpm e2e                       # testy v prohlížeči (mobil 320 px, mobil, desktop) se zapnutou CSP
@@ -81,7 +82,7 @@ Screenshoty v README se obnoví příkazem
 | `packages/rules` | sazby a pravidla pro rok 2026, schéma, import přílohy vyhlášky o zahraničním stravném |
 | `packages/documents` | PDF k podpisu (React PDF), kompletní dokumentace (pdf-lib), zápis XLSX a CSV |
 | `apps/web` | webová aplikace (React, Vite, Tailwind, IndexedDB), E2E testy (Playwright) |
-| `apps/server` | API kurzů ČNB a bezpečnostní hlavičky – jako server v Node.js (Docker) i jako Cloudflare Worker |
+| `apps/server` | API kurzů ČNB a vyhledávání v ARES, bezpečnostní hlavičky – jako server v Node.js (Docker) i jako Cloudflare Worker |
 
 ## Nasazení
 

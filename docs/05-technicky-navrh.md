@@ -15,7 +15,7 @@ Navazuje na schválenou [analýzu](01-analyza.md) (lokální architektura, R10).
 | Obrázky | canvas API, `heic2any`, otočení podle EXIF přes `createImageBitmap` |
 | Exporty | vlastní zápis XLSX (SpreadsheetML) a CSV, `fflate` (ZIP); ExcelJS jen v testech ke kontrole souboru |
 | Testy | Vitest (jádro, pravidla, dokumenty, aplikace, server), Playwright (E2E v Chromiu: 320 px, mobil, desktop; axe-core) |
-| Server | Hono: `/api/kurzy` a bezpečnostní hlavičky – jako server v Node.js (Docker, i statické soubory) nebo jako Cloudflare Worker |
+| Server | Hono: `/api/kurzy`, `/api/ares` a bezpečnostní hlavičky – jako server v Node.js (Docker, i statické soubory) nebo jako Cloudflare Worker |
 | Nasazení | Cloudflare Workers (`wrangler.toml`), Docker (multi-stage), Docker Compose, Caddy (HTTPS) |
 
 ### Porovnání s variantou .NET
@@ -45,13 +45,16 @@ flowchart LR
   subgraph Server[Server: Cloudflare Worker nebo kontejner]
     STATIC[statické soubory]
     API["/api/kurzy<br/>cache kurzů ČNB"]
+    ARESAPI["/api/ares<br/>vyhledání zaměstnavatele"]
   end
   UI -- načtení aplikace --> STATIC
   UI -- datum --> API
   API -- denní kurzy --> CNB[(ČNB)]
+  UI -- IČO nebo název firmy --> ARESAPI
+  ARESAPI -- údaje o subjektu --> ARES[(ARES)]
 ```
 
-- Na server neodchází žádný osobní údaj. Požadavek na kurz obsahuje jen datum.
+- Na server neodchází žádný osobní údaj. Požadavek na kurz obsahuje jen datum, vyhledání v ARES jen zadané IČO nebo název firmy.
 - `core`, `rules` a `documents` nezávisí na prohlížeči, takže je může použít budoucí server.
 - Modulární monolit: jedna aplikace, jeden kontejner.
 
@@ -119,6 +122,13 @@ Kontrola testů mutací: po změně jediné sazby selže 11 testů.
 - Server stahuje pouze z pevně dané adresy ČNB (nastavitelné přes `CNB_URL`). Výsledky ukládá do mezipaměti v paměti a v Dockeru i na disk (kurzy se zpětně nemění), na Cloudflare do jeho mezipaměti. Limit počtu požadavků je přímo v serveru (`RATE_LIMIT_PER_MINUTE`, výchozí 60 za minutu z jedné adresy).
 - Aplikace uloží ke každé částce kurz, datum kurzu a zdroj. Výpočet je tím reprodukovatelný i bez sítě.
 - Tlačítko „Načíst kurz ČNB“ bere kurz ke dni výdaje, u zahraničního stravného bez zálohy ke dni začátku cesty (otevřená otázka Ú-10).
+
+## 5a. Vyhledání zaměstnavatele v ARES
+
+- `GET /api/ares?ico=…` nebo `GET /api/ares?nazev=…` vrátí subjekty z ARES (veřejné REST API Ministerstva financí, bez registrace) ve zjednodušeném tvaru: název, IČO, sídlo jako jeden řádek, kód právní formy, příznak platové sféry a případné datum zániku.
+- Prohlížeč se na ARES nepřipojuje přímo (CSP povoluje připojení jen k vlastní doméně). Server kontroluje vstup (IČO 8 číslic s kontrolní číslicí, bez úvodních nul se doplní; název 3–100 znaků), vrací nejvýše 10 výsledků a odpovědi drží 24 hodin v paměti. Platí pro něj stejný limit požadavků jako pro kurzy.
+- Krok „Kdo cestuje“: zadané číslice se hledají jako IČO a jediný výsledek se doplní rovnou, text se hledá jako název a uživatel vybere ze seznamu. Doplní se název, IČO a sídlo, pole jdou dál ručně upravit. U právní formy organizační složky státu, příspěvkové organizace, obce, kraje nebo městské části se nastaví platová sféra s upozorněním ke kontrole.
+- Pole IČO hlásí chybu, když nesedí kontrolní číslice.
 
 ## 6. Přílohy
 

@@ -4,6 +4,7 @@ Aplikace má dvě části:
 
 - **webová aplikace** (statické soubory v `apps/web/dist`): formuláře, výpočet, PDF i exporty běží v prohlížeči a data cest se ukládají jen do prohlížeče,
 - **API kurzů ČNB** (`/api/kurzy?datum=RRRR-MM-DD`): stáhne kurzovní lístek ČNB a podrží ho v mezipaměti. Dotaz obsahuje jen datum.
+- **vyhledání zaměstnavatele v ARES** (`/api/ares?ico=…` nebo `?nazev=…`): přepošle dotaz do veřejného registru ARES. Dotaz obsahuje jen zadané IČO nebo název firmy.
 
 Server tedy neukládá žádné údaje o cestách ani doklady a není potřeba databáze ani zálohování.
 
@@ -37,13 +38,14 @@ Cloudflare po každém sloučení do `main` aplikaci sám sestaví a nasadí. Pr
 Co Cloudflare v repozitáři použije:
 
 - `wrangler.toml`: název, vstupní soubor Workeru a adresář se statickými soubory. Worker se spouští jen pro `/api/*`, ostatní obsluhuje Cloudflare přímo. Neznámé adresy vrací `index.html` (aplikace je SPA).
-- `apps/server/src/worker.ts`: stejné API jako server v Dockeru (kurzy ČNB, limit požadavků, hlavičky),
+- `apps/server/src/worker.ts`: stejné API jako server v Dockeru (kurzy ČNB, ARES, limit požadavků, hlavičky),
 - `apps/web/dist/_headers`: bezpečnostní hlavičky včetně CSP pro statické soubory. Vytvoří se při sestavení ze stejného zdroje jako u serveru (`apps/server/src/headers.ts`).
 
 ### Kontrola po nasazení
 
 - `https://<adresa>/` se otevře a jde založit cestu,
 - `https://<adresa>/api/kurzy?datum=2026-10-16` vrátí JSON s kurzy,
+- `https://<adresa>/api/ares?ico=00006947` vrátí Ministerstvo financí,
 - v nástrojích pro vývojáře (záložka Network) má hlavní stránka hlavičku `content-security-policy`.
 
 ### Volitelně: přístup jen pro zaměstnance
@@ -97,6 +99,7 @@ Postup je stejný jako v bodě 2, s těmito rozdíly:
 
 - **HTTPS je nutné i v interní síti.** Prohlížeč přes čisté HTTP nepovolí šifrovací funkce, které aplikace používá (kontrolní součty dokladů, náhodná id). Výjimkou je jen `localhost`. V `.env` nastavte `CADDYFILE=Caddyfile.intranet` a interní název serveru do `DOMAIN`. Certifikát pak vydá interní certifikační autorita Caddy (její kořenový certifikát musí IT nainstalovat do zařízení), nebo použijte firemní certifikát. Návod je přímo v `deploy/Caddyfile.intranet`.
 - **Kurzy ČNB:** server potřebuje přístup na `www.cnb.cz`. Pokud ho nemá, aplikace při výpadku nabídne ruční zadání kurzu. Přes proměnnou `CNB_URL` lze nastavit interní zrcadlo nebo proxy, které vrací stejný textový formát.
+- **ARES:** server potřebuje přístup na `ares.gov.cz`. Bez něj vyhledávání nahlásí, že ARES neodpovídá, a údaje zaměstnavatele se vyplní ručně. `ARES_URL=off` vyhledávání vypne úplně.
 - Aplikace nepotřebuje žádné další služby (databázi, e-mail, úložiště).
 
 ## 4. Proměnné prostředí serveru
@@ -107,6 +110,7 @@ Postup je stejný jako v bodě 2, s těmito rozdíly:
 | `STATIC_DIR` | `/app/public` v obrazu | adresář sestavené webové aplikace (bez něj server poskytuje jen API) |
 | `RATE_CACHE_DIR` | `/data/kurzy` v obrazu | mezipaměť kurzovních lístků za uplynulé dny |
 | `CNB_URL` | adresa ČNB | zdroj kurzovního lístku (textový formát ČNB) |
+| `ARES_URL` | adresa ARES | REST API ARES (`…/ekonomicke-subjekty-v-be/rest/ekonomicke-subjekty`), `off` = vyhledávání vypnuté |
 | `RATE_LIMIT_PER_MINUTE` | `60` | počet dotazů na API za minutu z jedné adresy |
 | `TRUST_PROXY` | – | `1` = server je za reverzní proxy, adresa klienta se bere z `X-Forwarded-For` (v `compose.yaml` zapnuto) |
 | `DOMAIN`, `CADDYFILE` | – | jen pro Caddy v `compose.yaml` |

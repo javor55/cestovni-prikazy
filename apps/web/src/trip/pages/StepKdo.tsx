@@ -1,14 +1,24 @@
 import { ruleSets } from '@cp/rules';
 import { useEffect, useState } from 'react';
 import { formatMinor } from '../../model/format.js';
+import { validIco, type AresSubject } from '../../registry/ares.js';
 import { getRemembered, setRemembered } from '../../storage/db.js';
-import { Card, Checkbox, H2, NumberField, RadioCards, TextField } from '../../ui/controls.js';
+import { Card, Checkbox, H2, Notice, NumberField, RadioCards, TextField } from '../../ui/controls.js';
+import { AresLookup } from '../AresLookup.js';
 import { useTrip } from '../context.js';
 import { StepIssues } from '../IssueList.js';
+
+function icoError(text: string): string | undefined {
+  const ico = text.replace(/\s/g, '');
+  if (!ico) return undefined;
+  if (!/^\d{8}$/.test(ico)) return 'IČO má 8 číslic.';
+  return validIco(ico) ? undefined : 'IČO nesedí s kontrolní číslicí – zkontrolujte ho.';
+}
 
 export function StepKdo() {
   const { trip, update } = useTrip();
   const [remember, setRemember] = useState(false);
+  const [fromAres, setFromAres] = useState<AresSubject>();
   const bands = ruleSets[0]!.domestic.bands;
 
   useEffect(() => {
@@ -55,6 +65,24 @@ export function StepKdo() {
 
       <Card>
         <H2>Zaměstnavatel</H2>
+        <AresLookup
+          onPick={(s) => {
+            setFromAres(s);
+            update((d) => {
+              d.employer.name = s.name;
+              d.employer.ico = s.ico;
+              d.employer.seat = s.seat;
+              // Právní forma státu, obce, kraje nebo příspěvkové organizace = platová sféra.
+              if (s.publicSector) d.sector = 'public';
+            });
+          }}
+        />
+        {fromAres && (
+          <Notice tone={fromAres.dissolved ? 'warn' : 'info'}>
+            Doplněno z ARES: {fromAres.name}, IČO {fromAres.ico}.{fromAres.dissolved && ' Subjekt podle ARES zanikl – zkontrolujte, zda jde o správného zaměstnavatele.'}
+            {fromAres.publicSector && ' Podle právní formy jde o platovou sféru – typ zaměstnavatele je nastavený, zkontrolujte ho.'}
+          </Notice>
+        )}
         <TextField label="Název" value={trip.employer.name} onChange={er('name')} autoComplete="organization" />
         <TextField label="Sídlo" value={trip.employer.seat} onChange={er('seat')} />
         <RadioCards
@@ -70,7 +98,14 @@ export function StepKdo() {
         <details>
           <summary className="min-h-11 cursor-pointer py-2 font-semibold text-accent">IČO, organizační jednotka, nákladové středisko, zakázka</summary>
           <div className="mt-2 grid gap-4 sm:grid-cols-2">
-            <TextField label="IČO" optional value={trip.employer.ico} onChange={er('ico')} inputMode="numeric" />
+            <TextField
+              label="IČO"
+              optional
+              value={trip.employer.ico}
+              onChange={er('ico')}
+              inputMode="numeric"
+              error={icoError(trip.employer.ico)}
+            />
             <TextField label="Organizační jednotka" optional value={trip.employer.unit} onChange={er('unit')} />
             <TextField label="Nákladové středisko" optional value={trip.employer.costCenter} onChange={er('costCenter')} />
             <TextField label="Projekt nebo zakázka" optional value={trip.employer.project} onChange={er('project')} />

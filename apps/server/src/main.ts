@@ -1,10 +1,11 @@
-// Server pro Docker / vlastní počítač: API kurzů ČNB a sestavená webová aplikace.
+// Server pro Docker / vlastní počítač: API kurzů ČNB, vyhledávání v ARES a sestavená webová aplikace.
 
 import { serve } from '@hono/node-server';
 import { getConnInfo } from '@hono/node-server/conninfo';
 import { serveStatic } from '@hono/node-server/serve-static';
 import type { Context } from 'hono';
 import { createApp } from './app.js';
+import { aresClient, ARES_URL } from './ares.js';
 import { cnbClient, CNB_URL } from './cnb.js';
 import { fileStore } from './fileStore.js';
 
@@ -25,6 +26,8 @@ function clientKey(c: Context): string {
 
 const app = createApp({
   cnb: cnbClient({ url: env.CNB_URL || CNB_URL, ...(env.RATE_CACHE_DIR && { store: fileStore(env.RATE_CACHE_DIR) }) }),
+  // ARES_URL=off vyhledávání vypne (např. ve firemní síti bez přístupu na internet).
+  ...(env.ARES_URL !== 'off' && { ares: aresClient({ url: env.ARES_URL || ARES_URL }) }),
   clientKey,
   ...(env.RATE_LIMIT_PER_MINUTE && { rateLimitPerMinute: Number(env.RATE_LIMIT_PER_MINUTE) }),
 });

@@ -4,9 +4,20 @@
 import type { EmployerSector, PaymentMethod } from '@cp/core';
 import type { FuelType, VehicleType } from '@cp/rules';
 
-export const SCHEMA_VERSION = 5;
+export const SCHEMA_VERSION = 6;
 
-export type TransportKind = 'soukrome-auto' | 'firemni-auto' | 'vlak' | 'autobus' | 'letadlo' | 'mhd' | 'taxi' | 'jine';
+export type TransportKind =
+  | 'soukrome-auto'
+  | 'pujcene-auto'
+  | 'pronajate-auto'
+  | 'firemni-auto'
+  | 'vlak'
+  | 'autobus'
+  | 'letadlo'
+  | 'lod'
+  | 'mhd'
+  | 'taxi'
+  | 'jine';
 
 export interface SegmentDoc {
   id: string;
@@ -36,6 +47,15 @@ export interface CrossingDoc {
   at: string;
 }
 
+export interface RouteStopDoc {
+  id: string;
+  /** Místo (nepovinné – stačí stát, kterým se projíždí). */
+  place: string;
+  country: string;
+  /** Zastávka (jednání, přespání) – v průběhu cesty se tu cesta rozdělí na dva úseky. */
+  stop: boolean;
+}
+
 export interface MealsDoc {
   breakfast: boolean;
   lunch: boolean;
@@ -63,6 +83,8 @@ export interface ExpenseDoc {
   documentNumber: string;
   /** false = neproplácí se (např. tankování, když se počítá náhrada za vozidlo). */
   reimbursable: boolean;
+  /** U tankování a nabíjení množství v l / kWh – z dokladů se počítá cena paliva pro náhradu za vozidlo. */
+  fuelQuantity: string;
   note: string;
 }
 
@@ -89,6 +111,8 @@ export interface VehicleDoc {
   km: string;
   receiptPrice: string;
   receiptDate: string;
+  /** Cena paliva: z dokladů o tankování mezi výdaji (vážený průměr), z jednoho dokladu, nebo průměrná podle vyhlášky. */
+  fuelPriceMode: 'receipts' | 'receipt' | 'average';
   requestedByEmployer: boolean;
   note: string;
 }
@@ -113,13 +137,14 @@ export interface TripDoc {
   via: string;
   plannedStart: string;
   plannedEnd: string;
-  /** Plánovaný dopravní prostředek; prázdné = nezvoleno (starší cesty mají jen text). */
-  plannedTransportKind: TransportKind | '';
+  /** Plánované dopravní prostředky (může jich být víc, např. taxi a letadlo). */
+  plannedTransportKinds: TransportKind[];
   /** Upřesnění dopravního prostředku (např. „Railjet“, „vlastní vůz“). */
   plannedTransport: string;
   /** Stát cíle cesty a státy, kterými se po cestě projíždí – z nich se předvyplní průběh cesty. */
   destinationCountry: string;
-  transitCountries: string[];
+  /** Trasa mezi místem nástupu a cílem: místa a státy po cestě v pořadí cesty tam. */
+  route: RouteStopDoc[];
   /** Místo a datum vystavení cestovního příkazu. */
   issuedPlace: string;
   issuedOn: string;
@@ -184,6 +209,7 @@ export function emptyExpense(date = ''): ExpenseDoc {
     czkAmount: '',
     documentNumber: '',
     reimbursable: true,
+    fuelQuantity: '',
     note: '',
   };
 }
@@ -208,10 +234,10 @@ export function newTrip(now: Date, remembered?: Pick<TripDoc, 'employee' | 'empl
     via: '',
     plannedStart: '',
     plannedEnd: '',
-    plannedTransportKind: '',
+    plannedTransportKinds: [],
     plannedTransport: '',
     destinationCountry: '',
-    transitCountries: [],
+    route: [],
     issuedPlace: '',
     issuedOn: '',
     actualStart: '',
@@ -233,6 +259,7 @@ export function newTrip(now: Date, remembered?: Pick<TripDoc, 'employee' | 'empl
       km: '',
       receiptPrice: '',
       receiptDate: '',
+      fuelPriceMode: 'average',
       requestedByEmployer: true,
       note: '',
     },
@@ -251,10 +278,13 @@ export function suggestNumber(now: Date): string {
 
 export const transportLabels: Record<TransportKind, string> = {
   'soukrome-auto': 'Soukromé auto',
+  'pujcene-auto': 'Půjčené auto (od rodiny, známého)',
+  'pronajate-auto': 'Auto z autopůjčovny',
   'firemni-auto': 'Firemní auto',
   vlak: 'Vlak',
   autobus: 'Autobus',
   letadlo: 'Letadlo',
+  lod: 'Loď, trajekt',
   mhd: 'MHD',
   taxi: 'Taxi',
   jine: 'Jiné',
@@ -307,8 +337,8 @@ export const fuelLabels: Record<FuelType, string> = {
 };
 
 /** Plánovaný dopravní prostředek jako text pro dokumenty: druh a upřesnění. */
-export function plannedTransportText(t: Pick<TripDoc, 'plannedTransportKind' | 'plannedTransport'>): string {
-  return [t.plannedTransportKind && transportLabels[t.plannedTransportKind], t.plannedTransport].filter(Boolean).join(', ');
+export function plannedTransportText(t: Pick<TripDoc, 'plannedTransportKinds' | 'plannedTransport'>): string {
+  return [...t.plannedTransportKinds.map((k) => transportLabels[k]), t.plannedTransport].filter(Boolean).join(', ');
 }
 
 /** Přechody hranic úseku jako text, např. „CZ–AT 14. 10. 2026 9:45, AT–SI čas nezadán“. */

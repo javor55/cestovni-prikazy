@@ -1,7 +1,9 @@
 import type { FuelType } from '@cp/rules';
-import { formatMinor } from '../../model/format.js';
+import { AttachmentList } from '../../attachments/AttachmentList.js';
+import { formatMinor, normalizeDecimal } from '../../model/format.js';
+import { FUEL_CATEGORIES } from '../../model/toInput.js';
 import { fuelLabels, type VehicleDoc } from '../../model/trip.js';
-import { Button, Card, Checkbox, H2, NumberField, RadioCards, SelectField, TextField } from '../../ui/controls.js';
+import { Button, Card, Checkbox, H2, Notice, NumberField, RadioCards, SelectField, TextField } from '../../ui/controls.js';
 import { useTrip } from '../context.js';
 import { StepIssues } from '../IssueList.js';
 
@@ -11,10 +13,13 @@ export function StepVozidlo() {
   const { trip, update, result } = useTrip();
   const v = trip.vehicle;
   const set = <K extends keyof VehicleDoc>(k: K) => (val: VehicleDoc[K]) => update((d) => void (d.vehicle[k] = val));
-  const carKm = trip.segments.filter((s) => s.transport === 'soukrome-auto').reduce((s, x) => s + (Number(x.km.replace(',', '.')) || 0), 0);
+  const carKm = trip.segments.filter((s) => s.transport === 'soukrome-auto' || s.transport === 'pujcene-auto').reduce((s, x) => s + (Number(x.km.replace(',', '.')) || 0), 0);
   const three = v.consumption.length === 3;
   const unit = v.fuel === 'electricity' ? 'kWh' : 'l';
   const r = result?.vehicle;
+  const uses = (k: string) => trip.segments.some((s) => s.transport === k);
+  const fuelReceipts = trip.expenses.filter((e) => FUEL_CATEGORIES.has(e.category) && normalizeDecimal(e.fuelQuantity));
+  const priceSource = { RECEIPTS: 'podle dokladů o tankování', RECEIPT: 'cena z dokladu', AVERAGE: 'průměrná cena' } as const;
 
   return (
     <>
@@ -23,6 +28,16 @@ export function StepVozidlo() {
         Na cestě jsem použil(a) osobní vozidlo
       </Checkbox>
       {!v.used && <p className="text-[15px] text-muted">Pokud jste cestovali jen hromadnou dopravou, tento krok přeskočte.</p>}
+      {uses('pronajate-auto') && (
+        <Notice title="Auto z autopůjčovny">
+          Nájemné, palivo, dálniční známku apod. zadejte jako výdaje. Náhrada za kilometry podle zákoníku práce u vozidla z autopůjčovny obvykle nenáleží – postup ověřte u účetní.
+        </Notice>
+      )}
+      {uses('pujcene-auto') && (
+        <Notice title="Půjčené auto">
+          Auto půjčené např. od rodiny se pro náhradu posuzuje stejně jako vlastní (není to vozidlo zaměstnavatele). Vyplňte vlastníka a přiložte technický průkaz a smlouvu o výpůjčce.
+        </Notice>
+      )}
       {v.used && (
         <>
           <Card>
@@ -31,7 +46,7 @@ export function StepVozidlo() {
               value={v.ownership}
               onChange={set('ownership')}
               options={[
-                { value: 'private', title: 'Soukromé', hint: 'Náleží základní náhrada za km a náhrada za palivo.' },
+                { value: 'private', title: 'Soukromé nebo půjčené', hint: 'Náleží základní náhrada za km a náhrada za palivo.' },
                 { value: 'company', title: 'Firemní', hint: 'Náhrada se neposkytuje. Tankování zadejte jako výdaj.' },
               ]}
             />
@@ -90,12 +105,41 @@ export function StepVozidlo() {
                 )}
               </Card>
               <Card>
-                <H2>Cena paliva</H2>
-                <p className="text-[15px] text-muted">Pokud máte doklad o tankování, zadejte cenu z něj. Jinak se použije průměrná cena podle vyhlášky.</p>
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <NumberField label={`Cena za 1 ${unit} z dokladu (Kč)`} optional value={v.receiptPrice} onChange={set('receiptPrice')} />
-                  <TextField label="Datum dokladu" optional type="date" value={v.receiptDate} onChange={set('receiptDate')} />
-                </div>
+                <RadioCards
+                  legend="Cena paliva"
+                  value={v.fuelPriceMode}
+                  onChange={set('fuelPriceMode')}
+                  options={[
+                    {
+                      value: 'receipts',
+                      title: 'Podle dokladů o tankování',
+                      hint: 'Vážený průměr: cena všech tankování ÷ množství. Tankování zadejte ve výdajích (kategorie Pohonné hmoty) i s množstvím.',
+                    },
+                    { value: 'receipt', title: 'Cena z jednoho dokladu', hint: 'Zadáte cenu za litr nebo kWh ručně.' },
+                    { value: 'average', title: 'Průměrná cena podle vyhlášky', hint: 'Když doklad o tankování nemáte.' },
+                  ]}
+                />
+                {v.fuelPriceMode === 'receipts' &&
+                  (fuelReceipts.length ? (
+                    <p className="text-[15px] text-muted">
+                      Započítané doklady: {fuelReceipts.map((e) => `${e.amount} ${e.currency} / ${e.fuelQuantity} ${e.category === 'Nabíjení elektromobilu' ? 'kWh' : 'l'}`).join(' · ')}
+                    </p>
+                  ) : (
+                    <Notice tone="warn">Zatím žádný výdaj za pohonné hmoty s vyplněným množstvím. Do té doby se počítá s průměrnou cenou podle vyhlášky.</Notice>
+                  ))}
+                {v.fuelPriceMode === 'receipt' && (
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <NumberField label={`Cena za 1 ${unit} z dokladu (Kč)`} value={v.receiptPrice} onChange={set('receiptPrice')} />
+                    <TextField label="Datum dokladu" optional type="date" value={v.receiptDate} onChange={set('receiptDate')} />
+                  </div>
+                )}
+              </Card>
+              <Card>
+                <H2>Doklady k vozidlu</H2>
+                <p className="text-[15px] text-muted">
+                  Fotka technického průkazu (strana se spotřebou) nebo výpis z registru vozidel, u půjčeného auta smlouva o výpůjčce. V kompletním PDF budou v oddílu „Doklady k vozidlu“.
+                </p>
+                <AttachmentList tripId={trip.id} expenseId={null} defaultKind="vehicle" fixedKind="vehicle" />
               </Card>
               {r && (
                 <Card aria-label="Výpočet náhrady">
@@ -106,7 +150,7 @@ export function StepVozidlo() {
                     </dt>
                     <dd className="text-right">{formatMinor(r.basic)}</dd>
                     <dt className="text-muted">
-                      {r.quantity.replace('.', ',')} {r.unit} × {formatMinor(r.fuelPrice)} ({r.fuelPriceSource === 'RECEIPT' ? 'cena z dokladu' : 'průměrná cena, ' + r.fuelPriceRef})
+                      {r.quantity.replace('.', ',')} {r.unit} × {formatMinor(r.fuelPrice)} ({priceSource[r.fuelPriceSource]}, {r.fuelPriceRef})
                     </dt>
                     <dd className="text-right">{formatMinor(r.fuelCompensation)}</dd>
                     <dt className="font-bold">Celkem</dt>

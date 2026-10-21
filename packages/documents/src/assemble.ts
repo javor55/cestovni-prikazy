@@ -8,7 +8,7 @@ import { createElement, type ReactElement } from 'react';
 import { CalculationOverview, CoverAndToc, ExpenseIdPages, ExpenseOverview, type CoverInfo, type IdPageFile, type TocEntry } from './Appendix.js';
 import type { DocModel } from './model.js';
 
-export type FileKind = 'accounting' | 'payment' | 'supporting' | 'signed';
+export type FileKind = 'accounting' | 'payment' | 'supporting' | 'vehicle' | 'signed';
 
 export interface AssemblyFile {
   name: string;
@@ -28,6 +28,8 @@ export interface AssemblyInput {
   expenses: { n: string; files: AssemblyFile[] }[];
   /** Doplňující dokumenty k celé cestě. */
   supporting: AssemblyFile[];
+  /** Doklady k soukromému vozidlu (technický průkaz, výpis z registru, smlouva o výpůjčce). */
+  vehicle?: AssemblyFile[];
   fonts: { regular: Uint8Array; bold: Uint8Array };
   /** Vyrenderuje prvek @react-pdf na PDF (v prohlížeči přes pdf().toBlob(), v Node přes renderToBuffer). */
   render: (element: ReactElement) => Promise<Uint8Array>;
@@ -38,6 +40,7 @@ export interface AssemblyStats {
   accountingDocs: number;
   paymentDocs: number;
   supportingDocs: number;
+  vehicleDocs: number;
   expensesWithoutDocs: number;
   size: number;
   unsigned: boolean;
@@ -49,6 +52,7 @@ const kindLabel: Record<FileKind, string> = {
   accounting: 'Účetní doklad',
   payment: 'Doklad o zaplacení',
   supporting: 'Doplňující dokument',
+  vehicle: 'Doklad k vozidlu',
   signed: 'Podepsaný dokument',
 };
 
@@ -121,7 +125,7 @@ export async function assemble(input: AssemblyInput): Promise<{ bytes: Uint8Arra
     const group = { n: e.n, accounting: [] as Source[], payment: [] as Source[], supporting: [] as Source[] };
     idFiles[e.n] = [];
     for (const f of e.files) {
-      if (f.kind === 'signed') continue;
+      if (f.kind === 'signed' || f.kind === 'vehicle') continue;
       const src = await fileSources(f, `${title} · ${kindLabel[f.kind]} · ${f.name}`);
       group[f.kind].push(...src);
       idFiles[e.n]!.push({ kind: kindLabel[f.kind], name: f.name, pages: src.length });
@@ -131,6 +135,8 @@ export async function assemble(input: AssemblyInput): Promise<{ bytes: Uint8Arra
   const idPages = m.expenses.length ? await ownPages(createElement(ExpenseIdPages, { m, files: idFiles })) : [];
   const supporting: Source[] = [];
   for (const f of input.supporting) supporting.push(...(await fileSources(f, `${kindLabel.supporting} · ${f.name}`)));
+  const vehicle: Source[] = [];
+  for (const f of input.vehicle ?? []) vehicle.push(...(await fileSources(f, `${kindLabel.vehicle} · ${f.name}`)));
 
   // Pořadí těla dokumentu a položky obsahu (čísla stran zatím relativně od začátku těla).
   const body: Source[] = [];
@@ -155,6 +161,7 @@ export async function assemble(input: AssemblyInput): Promise<{ bytes: Uint8Arra
     toc.push({ title: 'Doklady o zaplacení', page: 0, level: 0, rel: body.length });
     for (const g of expenseSources) if (g.payment.length) section(`Výdaj č. ${g.n}`, g.payment, 1);
   }
+  section('Doklady k vozidlu', vehicle);
   const allSupporting = [...expenseSources.flatMap((g) => g.supporting), ...supporting];
   section('Doplňující přílohy', allSupporting);
 
@@ -165,6 +172,7 @@ export async function assemble(input: AssemblyInput): Promise<{ bytes: Uint8Arra
     accountingDocs: count('accounting'),
     paymentDocs: count('payment'),
     supportingDocs: count('supporting') + input.supporting.length,
+    vehicleDocs: input.vehicle?.length ?? 0,
     expensesWithoutDocs: input.expenses.filter((e) => !e.files.some((f) => f.kind === 'accounting')).length,
     problems,
   });

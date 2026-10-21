@@ -223,7 +223,7 @@ export async function exportOriginals(tripId: string, now = new Date(), d: AppDb
   const { trip, attachments } = await loadTrip(tripId, d);
   const files: Zippable = {};
   const used = new Set<string>();
-  const kindName = { accounting: 'ucetni-doklad', payment: 'doklad-o-zaplaceni', supporting: 'doplnujici', signed: 'podepsany-dokument', signature: 'podpis' } as const;
+  const kindName = { accounting: 'ucetni-doklad', payment: 'doklad-o-zaplaceni', supporting: 'doplnujici', vehicle: 'doklad-k-vozidlu', signed: 'podepsany-dokument', signature: 'podpis' } as const;
   const counters = new Map<string, number>();
   for (const a of attachments) {
     const blob = (await d.blobs.get(`${a.id}:original`))?.blob;
@@ -234,7 +234,9 @@ export async function exportOriginals(tripId: string, now = new Date(), d: AppDb
         ? `${String(ei + 1).padStart(2, '0')}_${slug(trip.expenses[ei]!.category, 'vydaj')}`
         : a.kind === 'signed' || a.kind === 'signature'
           ? 'podpis'
-          : 'doplnujici-dokumenty';
+          : a.kind === 'vehicle'
+            ? 'vozidlo'
+            : 'doplnujici-dokumenty';
     const n = (counters.get(folder) ?? 0) + 1;
     counters.set(folder, n);
     const base = slug(a.originalName.replace(/\.[^.]+$/, ''));

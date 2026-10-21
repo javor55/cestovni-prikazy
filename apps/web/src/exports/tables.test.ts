@@ -113,7 +113,7 @@ describe('tabulky exportu', () => {
     const f = jsonFile(i, [att], new Date('2026-10-21T10:00:00Z'));
     expect(f.name).toBe('CP-2026-0042_data.json');
     const data = JSON.parse(strFromU8(f.bytes));
-    expect(data).toMatchObject({ format: 'cestovni-prikazy-data', schemaVersion: 5, exportedAt: '2026-10-21T10:00:00.000Z' });
+    expect(data).toMatchObject({ format: 'cestovni-prikazy-data', schemaVersion: 6, exportedAt: '2026-10-21T10:00:00.000Z' });
     expect(data.trip.expenses).toHaveLength(5);
     expect(data.attachments[0]).toMatchObject({ originalName: 'uctenka.jpg', sha256: 'a'.repeat(64) });
     expect(data.attachments[0].tripId).toBeUndefined();

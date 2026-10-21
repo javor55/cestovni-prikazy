@@ -1,13 +1,13 @@
-import { countryName, countryOptions, currencyOptions } from '../../model/countries.js';
+import { countryOptions, currencyOptions } from '../../model/countries.js';
 import { CnbButton } from '../../rates/CnbButton.js';
 import { newId, suggestNumber, transportLabels, type TransportKind } from '../../model/trip.js';
-import { Button, Card, H2, Icon, icons, NumberField, RadioCards, SelectField, TextArea, TextField } from '../../ui/controls.js';
+import { Button, Card, Checkbox, H2, Icon, icons, NumberField, RadioCards, SelectField, TextArea, TextField } from '../../ui/controls.js';
 import { useTrip } from '../context.js';
 import { StepIssues } from '../IssueList.js';
 
-const transportOptions: [TransportKind | '', string][] = [['', 'Vyberte'], ...(Object.entries(transportLabels) as [TransportKind, string][])];
+const transportChoices = Object.entries(transportLabels) as [TransportKind, string][];
 const destinationOptions: [string, string][] = [['', 'Vyberte stát'], ...countryOptions.filter(([c]) => c !== 'CZ')];
-const transitAdd: [string, string][] = [['', 'Přidat stát…'], ...countryOptions.filter(([c]) => c !== 'CZ')];
+const routeCountryOptions: [string, string][] = [['', 'Vyberte stát'], ...countryOptions];
 
 export function StepCesta() {
   const { trip, update } = useTrip();
@@ -50,42 +50,63 @@ export function StepCesta() {
           ) : (
             <span className="hidden sm:block" />
           )}
-          {trip.kind === 'foreign' && (
-            <div className="flex flex-col gap-2 sm:col-span-2">
-              <SelectField
-                label="Státy po cestě"
-                optional
-                value=""
-                options={transitAdd}
-                onChange={(v) => v && update((d) => void d.transitCountries.push(v))}
-                hint="Státy, kterými pojedete, v pořadí cesty tam (např. Rakousko, Slovinsko). Předvyplní se z nich přechody hranic v průběhu cesty."
-              />
-              {trip.transitCountries.length > 0 && (
-                <ol className="flex flex-wrap gap-2" aria-label="Vybrané státy po cestě">
-                  {trip.transitCountries.map((c, i) => (
-                    <li key={`${c}-${i}`} className="flex items-center gap-1 rounded-full border border-line-strong bg-white py-1 pr-1 pl-3 text-sm">
-                      {i + 1}. {countryName(c)}
-                      <button
-                        type="button"
-                        className="flex size-8 items-center justify-center rounded-full text-danger hover:bg-danger-soft"
-                        aria-label={`Odebrat ${countryName(c)}`}
-                        onClick={() => update((d) => void d.transitCountries.splice(i, 1))}
-                      >
-                        <Icon d="M6 6l12 12M18 6L6 18" className="size-4" />
-                      </button>
-                    </li>
-                  ))}
-                </ol>
-              )}
-            </div>
+        </div>
+
+        <fieldset className="flex flex-col gap-3">
+          <legend className="text-sm font-semibold">Trasa</legend>
+          <p className="text-[13px] leading-snug text-subtle">
+            Místa a státy po cestě tam, v pořadí. Stačí stát, kterým projíždíte (např. Rakousko, Slovinsko). U místa, kde se zastavíte (jednání, přespání), zaškrtněte zastávku – v průběhu
+            cesty se tam cesta rozdělí na úseky.
+          </p>
+          {trip.route.length > 0 && (
+            <ol className="flex flex-col gap-2" aria-label="Trasa">
+              {trip.route.map((r, i) => (
+                <li key={r.id} className="grid items-end gap-2 rounded-xl border border-line p-3 sm:grid-cols-[1fr_1fr_auto_auto]">
+                  <TextField label={`${i + 1}. místo`} optional value={r.place} onChange={(v) => update((d) => void (d.route[i]!.place = v))} placeholder="např. Linec" />
+                  {trip.kind === 'foreign' ? (
+                    <SelectField label="Stát" value={r.country} options={routeCountryOptions} onChange={(v) => update((d) => void (d.route[i]!.country = v))} />
+                  ) : (
+                    <span className="hidden sm:block" />
+                  )}
+                  <Checkbox checked={r.stop} onChange={(v) => update((d) => void (d.route[i]!.stop = v))}>
+                    Zastávka
+                  </Checkbox>
+                  <Button variant="danger" className="min-h-11 px-3" aria-label={`Odebrat ${i + 1}. místo trasy`} onClick={() => update((d) => void d.route.splice(i, 1))}>
+                    <Icon d={icons.trash} />
+                  </Button>
+                </li>
+              ))}
+            </ol>
           )}
-          <TextField label="Průjezdní místa" optional value={trip.via} onChange={set('via')} />
-          <SelectField
-            label="Dopravní prostředek"
-            value={trip.plannedTransportKind}
-            options={transportOptions}
-            onChange={(v) => update((d) => void (d.plannedTransportKind = v))}
-          />
+          <Button
+            variant="secondary"
+            className="self-start"
+            onClick={() => update((d) => void d.route.push({ id: newId(), place: '', country: d.kind === 'foreign' ? '' : 'CZ', stop: false }))}
+          >
+            <Icon d={icons.plus} /> Místo nebo stát po cestě
+          </Button>
+          {trip.via && <TextField label="Průjezdní místa (dřívější zápis)" optional value={trip.via} onChange={set('via')} />}
+        </fieldset>
+
+        <fieldset className="flex flex-col gap-2">
+          <legend className="text-sm font-semibold">Dopravní prostředky</legend>
+          <div className="grid gap-x-4 sm:grid-cols-2">
+            {transportChoices.map(([k, label]) => (
+              <Checkbox
+                key={k}
+                checked={trip.plannedTransportKinds.includes(k)}
+                onChange={(on) =>
+                  update((d) => {
+                    d.plannedTransportKinds = on ? [...d.plannedTransportKinds, k] : d.plannedTransportKinds.filter((x) => x !== k);
+                  })
+                }
+              >
+                {label}
+              </Checkbox>
+            ))}
+          </div>
+        </fieldset>
+        <div className="grid gap-4 sm:grid-cols-2">
           <TextField label="Upřesnění dopravy" optional value={trip.plannedTransport} onChange={set('plannedTransport')} placeholder="např. Railjet, vlastní vůz" />
           <TextField label="Místo vystavení příkazu" optional value={trip.issuedPlace} onChange={set('issuedPlace')} placeholder="Praha" />
           <TextField label="Datum vystavení příkazu" optional type="date" value={trip.issuedOn} onChange={set('issuedOn')} hint="Obvykle den před cestou. Prázdné pole zůstane v PDF k ručnímu doplnění." />

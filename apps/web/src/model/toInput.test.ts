@@ -19,7 +19,7 @@ function viennaTrip(): TripDoc {
     { ...emptyExpense('2026-10-15'), category: 'MHD', amount: '8', currency: 'EUR', paymentMethod: 'ADVANCE' },
     { ...emptyExpense('2026-10-16'), category: 'Pohonné hmoty', amount: '1 758,28', reimbursable: false },
   ];
-  t.vehicle = { ...t.vehicle, used: true, consumption: ['5,6'], km: '686', receiptPrice: '38,90', receiptDate: '2026-10-16' };
+  t.vehicle = { ...t.vehicle, used: true, consumption: ['5,6'], km: '686', receiptPrice: '38,90', receiptDate: '2026-10-16', fuelPriceMode: 'receipt' };
   return t;
 }
 

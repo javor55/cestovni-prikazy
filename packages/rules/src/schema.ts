@@ -35,7 +35,8 @@ export const ruleSetSchema = z.object({
   validTo: isoDate,
   description: z.string(),
   verification: z.string(),
-  sources: z.array(z.object({ id: z.string(), title: z.string() })),
+  /** Předpisy, ze kterých sazby pocházejí, s odkazem na úplné znění. */
+  sources: z.array(z.object({ id: z.string(), title: z.string(), url: z.string().url().optional() })),
   domestic: z.object({ source: z.string(), bands: z.array(domesticBand).min(1) }),
   foreign: z.object({
     source: z.string(),
@@ -47,6 +48,8 @@ export const ruleSetSchema = z.object({
       z.string().regex(/^[A-Z]{2}$/),
       z.object({ name: z.string(), currency, amount: minor.positive(), verified: z.boolean() }),
     ),
+    /** Sazba pro státy, které příloha vyhlášky jmenovitě neuvádí („Ostatní země neuvedené v příloze“). */
+    otherCountries: z.object({ currency, amount: minor.positive() }).optional(),
   }),
   vehicle: z.object({
     source: z.string(),

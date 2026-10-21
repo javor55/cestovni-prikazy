@@ -1,6 +1,9 @@
 import type { Conversion, Expense, ExpensePayer, Issue, PaymentMethod, TripInput } from '@cp/core';
 import { normalizeDecimal, toMinor } from './format.js';
 import { missingTransit } from './route.js';
+
+/** Kategorie výdajů, u kterých se zadává množství paliva (l / kWh). */
+export const FUEL_CATEGORIES: ReadonlySet<string> = new Set(['Pohonné hmoty', 'Nabíjení elektromobilu']);
 import type { SegmentDoc, TripDoc } from './trip.js';
 
 const PAYER: Record<PaymentMethod, ExpensePayer> = {
@@ -85,6 +88,7 @@ export function toInput(doc: TripDoc, docs?: DocCounts): Mapped {
       paymentMethod: e.paymentMethod,
       payer: payerOf(e.paymentMethod),
       reimbursable: e.reimbursable,
+      ...(FUEL_CATEGORIES.has(e.category) && normalizeDecimal(e.fuelQuantity) && { fuelQuantity: normalizeDecimal(e.fuelQuantity)! }),
       ...(docs && { attachments: docs[e.id] ?? { accounting: 0, payment: 0 } }),
     });
   });
@@ -111,7 +115,7 @@ export function toInput(doc: TripDoc, docs?: DocCounts): Mapped {
   if (v.used) {
     const km = normalizeDecimal(v.km);
     const consumption = v.consumption.map(normalizeDecimal).filter((c): c is string => c !== null);
-    const receipt = v.receiptPrice ? toMinor(v.receiptPrice, 'CZK') : undefined;
+    const receipt = v.fuelPriceMode === 'receipt' && v.receiptPrice ? toMinor(v.receiptPrice, 'CZK') : undefined;
     if (v.ownership === 'private' && (!km || consumption.length === 0)) {
       err('FORM_VEHICLE', 'Soukromé vozidlo: doplňte ujeté kilometry a spotřebu z technického průkazu.', { step: 'vozidlo' });
     } else if (receipt === null) {
@@ -125,6 +129,7 @@ export function toInput(doc: TripDoc, docs?: DocCounts): Mapped {
         km: km ?? '0',
         requestedByEmployer: v.requestedByEmployer,
         ...(receipt !== undefined && { receiptPrice: { amount: receipt, date: v.receiptDate || start.slice(0, 10) } }),
+        ...(v.fuelPriceMode === 'receipts' && { fuelPriceFromExpenses: true }),
       };
     }
   }

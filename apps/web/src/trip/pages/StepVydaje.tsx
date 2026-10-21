@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { currencyOptions } from '../../model/countries.js';
 import { convertToCzk, impliedRate } from '@cp/core';
 import { formatDay, formatMinor, formatRate, normalizeDecimal, toMinor } from '../../model/format.js';
-import { actualTimes } from '../../model/toInput.js';
+import { actualTimes, FUEL_CATEGORIES } from '../../model/toInput.js';
 import { CnbButton } from '../../rates/CnbButton.js';
 import { AttachmentList } from '../../attachments/AttachmentList.js';
 import { deleteForExpense } from '../../attachments/store.js';
@@ -120,6 +120,14 @@ export function StepVydaje() {
                     )}
                     <Conversion e={e} />
                   </div>
+                )}
+                {FUEL_CATEGORIES.has(e.category) && (
+                  <NumberField
+                    label={e.category === 'Nabíjení elektromobilu' ? 'Množství (kWh)' : 'Množství (l)'}
+                    value={e.fuelQuantity}
+                    onChange={set(i, 'fuelQuantity')}
+                    hint="Z dokladu o tankování. Z cen a množství všech tankování se spočítá cena paliva pro náhradu za soukromé vozidlo."
+                  />
                 )}
                 <div className="grid gap-4 sm:grid-cols-2">
                   <TextField label="Číslo dokladu" optional value={e.documentNumber} onChange={set(i, 'documentNumber')} hint="Pomůže odhalit omylem zadaný duplicitní výdaj." />

@@ -46,8 +46,8 @@ export function calculate(trip: TripInput, sets: readonly RuleSet[] = defaultRul
   if (!timeline) return fail();
 
   const perDiem = computePerDiem(trip, timeline, rules, issues);
-  const vehicle = computeVehicle(trip, rules, issues);
   const expenses = computeExpenses(trip, issues);
+  const vehicle = computeVehicle(trip, rules, issues, expenses);
   const settlement = settle(trip, rules, perDiem, expenses, vehicle, issues);
 
   issues.info('RULESET_USED', `Výpočet podle sady pravidel ${rules.id} verze ${rules.version}.`);

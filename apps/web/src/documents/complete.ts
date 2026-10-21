@@ -77,12 +77,14 @@ export async function buildComplete(trip: TripDoc, snapshot: Snapshot, now: Date
     })),
   );
   const supporting = await Promise.all(all.filter((a) => a.expenseId === null && a.kind === 'supporting').map(toFile));
+  const vehicle = trip.vehicle.used ? await Promise.all(all.filter((a) => a.kind === 'vehicle').map(toFile)) : [];
 
   const { bytes: out, stats } = await docs.assemble({
     model,
     signed,
     expenses,
     supporting,
+    vehicle,
     fonts,
     render: async (el) => bytes(await docs.renderPdfElement(el)),
   });

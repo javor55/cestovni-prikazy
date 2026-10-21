@@ -73,7 +73,7 @@ test('PDF k podpisu: vytvoření, stažení, obsah a upozornění na změnu úda
   expect(all).toContain('9. 3. 2026'); // datum vystavení
   // 8,5 h → 155 Kč, oběd zdarma −70 % → 46,50 → 47 Kč
   expect(all).toContain('47,00 Kč');
-  expect(all).toContain('CZ-2026 v1.0.0');
+  expect(all).toContain('CZ-2026 v1.1.0');
 
   // Po změně údajů aplikace upozorní, že PDF už neodpovídá
   await go(page, `${base}/cesta`);

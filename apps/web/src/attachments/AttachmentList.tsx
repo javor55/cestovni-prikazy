@@ -90,14 +90,14 @@ export function AttachmentList({ tripId, expenseId, defaultKind, privatePayment,
                   </span>
                 </div>
               </div>
-              {!fixedKind && <div className="grid gap-2 sm:grid-cols-2">
-                <select aria-label="Typ dokladu" className="min-h-11 w-full min-w-0 rounded-lg border border-line-strong bg-white px-2 text-sm" value={a.kind} onChange={(e) => updateMeta(a.id, { kind: e.target.value as AttachmentKind, subtype: '' })}>
+              {(!fixedKind || subtypes[a.kind].length > 0) && <div className="grid gap-2 sm:grid-cols-2">
+                {!fixedKind && <select aria-label="Typ dokladu" className="min-h-11 w-full min-w-0 rounded-lg border border-line-strong bg-white px-2 text-sm" value={a.kind} onChange={(e) => updateMeta(a.id, { kind: e.target.value as AttachmentKind, subtype: '' })}>
                   {kinds.map(([v, l]) => (
                     <option key={v} value={v}>
                       {l}
                     </option>
                   ))}
-                </select>
+                </select>}
                 <select aria-label="Druh" className="min-h-11 w-full min-w-0 rounded-lg border border-line-strong bg-white px-2 text-sm" value={a.subtype} onChange={(e) => updateMeta(a.id, { subtype: e.target.value })}>
                   <option value="">Upřesnit (nepovinné)</option>
                   {subtypes[a.kind].map((s) => (

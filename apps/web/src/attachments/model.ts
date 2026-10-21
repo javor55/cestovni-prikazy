@@ -1,5 +1,5 @@
-/** signed = strana podepsaného skenu, signature = obrázek podpisu (PNG). */
-export type AttachmentKind = 'accounting' | 'payment' | 'supporting' | 'signed' | 'signature';
+/** vehicle = doklad k soukromému vozidlu (TP, výpis z registru), signed = strana podepsaného skenu, signature = obrázek podpisu (PNG). */
+export type AttachmentKind = 'accounting' | 'payment' | 'supporting' | 'vehicle' | 'signed' | 'signature';
 
 /** Druhy dokladů, které se přiřazují k výdajům a cestě (bez podpisu). */
 export const documentKinds = ['accounting', 'payment', 'supporting'] as const;
@@ -49,6 +49,7 @@ export const kindLabels: Record<AttachmentKind, string> = {
   accounting: 'Účetní doklad',
   payment: 'Doklad o zaplacení',
   supporting: 'Doplňující dokument',
+  vehicle: 'Doklad k vozidlu',
   signed: 'Podepsaný dokument',
   signature: 'Obrázek podpisu',
 };
@@ -57,6 +58,7 @@ export const subtypes: Record<AttachmentKind, string[]> = {
   accounting: ['Účtenka', 'Faktura', 'Jízdenka', 'Parkovací lístek', 'Doklad o ubytování', 'Doklad o dálniční známce', 'Jiný účetní doklad'],
   payment: ['Potvrzení karetní platby', 'Potvrzení z internetového bankovnictví', 'Výpis konkrétní transakce', 'Potvrzení platební brány', 'Pokladní doklad', 'Jiné potvrzení'],
   supporting: ['Rezervace', 'Objednávka', 'Program cesty', 'Pozvánka', 'Vysvětlení chybějícího dokladu', 'Jiný dokument'],
+  vehicle: ['Technický průkaz', 'Výpis z registru vozidel', 'Smlouva o výpůjčce vozidla', 'Jiný doklad k vozidlu'],
   signed: [],
   signature: [],
 };

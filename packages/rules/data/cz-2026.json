@@ -1,58 +1,1535 @@
 {
   "id": "CZ-2026",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "validFrom": "2026-01-01",
   "validTo": "2026-12-31",
   "description": "Cestovní náhrady podle zákoníku práce, sazby pro rok 2026",
-  "verification": "Sazby převzaty ze sekundárních zdrojů (odborné weby) shodně uvádějících obsah vyhlášek. Primární text vyhlášek nebyl při přípravě dostupný. Před ostrým použitím ověřit proti Sbírce zákonů.",
+  "verification": "Zahraniční stravné: úplná příloha vyhlášky č. 489/2025 Sb. převzatá z PDF Ministerstva financí (ověřeno). Tuzemské sazby, náhrada za km a průměrné ceny PHM: převzaty ze sekundárních zdrojů shodně uvádějících obsah vyhlášek 573/2025, 78/2026 a 175/2026 – před ostrým použitím ověřit proti Sbírce zákonů.",
   "sources": [
-    { "id": "573/2025", "title": "Vyhláška č. 573/2025 Sb., o změně sazby základní náhrady za používání silničních motorových vozidel a stravného a o stanovení průměrné ceny pohonných hmot" },
-    { "id": "78/2026", "title": "Vyhláška č. 78/2026 Sb., kterou se mění vyhláška č. 573/2025 Sb. (motorová nafta od 1. 6. 2026)" },
-    { "id": "175/2026", "title": "Vyhláška č. 175/2026 Sb., kterou se mění vyhláška č. 573/2025 Sb. (benzin 95 od 1. 10. 2026)" },
-    { "id": "489/2025", "title": "Vyhláška č. 489/2025 Sb., o stanovení výše základních sazeb zahraničního stravného pro rok 2026" }
+    {
+      "id": "573/2025",
+      "title": "Vyhláška č. 573/2025 Sb., o změně sazby základní náhrady za používání silničních motorových vozidel a stravného a o stanovení průměrné ceny pohonných hmot",
+      "url": "https://www.e-sbirka.cz/sb/2025/573"
+    },
+    {
+      "id": "78/2026",
+      "title": "Vyhláška č. 78/2026 Sb., kterou se mění vyhláška č. 573/2025 Sb. (motorová nafta od 1. 6. 2026)",
+      "url": "https://www.e-sbirka.cz/sb/2026/78"
+    },
+    {
+      "id": "175/2026",
+      "title": "Vyhláška č. 175/2026 Sb., kterou se mění vyhláška č. 573/2025 Sb. (benzin 95 od 1. 10. 2026)",
+      "url": "https://www.e-sbirka.cz/sb/2026/175"
+    },
+    {
+      "id": "489/2025",
+      "title": "Vyhláška č. 489/2025 Sb., o stanovení výše základních sazeb zahraničního stravného pro rok 2026",
+      "url": "https://mf.gov.cz/cs/kontrola-a-regulace/legislativa/legislativni-dokumenty/2025/vyhlaska-c-489-2025-sb-62123"
+    }
   ],
   "domestic": {
     "source": "573/2025",
     "bands": [
-      { "id": "5-12", "minMinutes": 300, "maxMinutes": 720, "business": { "min": 15500 }, "public": { "min": 15500, "max": 18500 }, "mealReductionPct": 70 },
-      { "id": "12-18", "minMinutes": 721, "maxMinutes": 1080, "business": { "min": 23600 }, "public": { "min": 23600, "max": 28400 }, "mealReductionPct": 35 },
-      { "id": "18+", "minMinutes": 1081, "maxMinutes": null, "business": { "min": 37000 }, "public": { "min": 37000, "max": 44200 }, "mealReductionPct": 25 }
+      {
+        "id": "5-12",
+        "minMinutes": 300,
+        "maxMinutes": 720,
+        "business": {
+          "min": 15500
+        },
+        "public": {
+          "min": 15500,
+          "max": 18500
+        },
+        "mealReductionPct": 70
+      },
+      {
+        "id": "12-18",
+        "minMinutes": 721,
+        "maxMinutes": 1080,
+        "business": {
+          "min": 23600
+        },
+        "public": {
+          "min": 23600,
+          "max": 28400
+        },
+        "mealReductionPct": 35
+      },
+      {
+        "id": "18+",
+        "minMinutes": 1081,
+        "maxMinutes": null,
+        "business": {
+          "min": 37000
+        },
+        "public": {
+          "min": 37000,
+          "max": 44200
+        },
+        "mealReductionPct": 25
+      }
     ]
   },
   "foreign": {
     "source": "489/2025",
     "minAbroadMinutes": 60,
     "tiers": [
-      { "id": "1/3", "minMinutes": 60, "maxMinutes": 720, "numerator": 1, "denominator": 3, "mealReductionPct": 70 },
-      { "id": "2/3", "minMinutes": 721, "maxMinutes": 1080, "numerator": 2, "denominator": 3, "mealReductionPct": 35 },
-      { "id": "1/1", "minMinutes": 1081, "maxMinutes": null, "numerator": 1, "denominator": 1, "mealReductionPct": 25 }
+      {
+        "id": "1/3",
+        "minMinutes": 60,
+        "maxMinutes": 720,
+        "numerator": 1,
+        "denominator": 3,
+        "mealReductionPct": 70
+      },
+      {
+        "id": "2/3",
+        "minMinutes": 721,
+        "maxMinutes": 1080,
+        "numerator": 2,
+        "denominator": 3,
+        "mealReductionPct": 35
+      },
+      {
+        "id": "1/1",
+        "minMinutes": 1081,
+        "maxMinutes": null,
+        "numerator": 1,
+        "denominator": 1,
+        "mealReductionPct": 25
+      }
     ],
     "mealReductionBase": "TIER_AMOUNT",
     "pocketMoneyMaxPct": 40,
     "rates": {
-      "AT": { "name": "Rakousko", "currency": "EUR", "amount": 4500, "verified": true },
-      "DE": { "name": "Německo", "currency": "EUR", "amount": 5000, "verified": true },
-      "FR": { "name": "Francie", "currency": "EUR", "amount": 5000, "verified": true },
-      "IT": { "name": "Itálie", "currency": "EUR", "amount": 5500, "verified": true },
-      "PL": { "name": "Polsko", "currency": "EUR", "amount": 5000, "verified": true },
-      "SK": { "name": "Slovensko", "currency": "EUR", "amount": 4000, "verified": true },
-      "HU": { "name": "Maďarsko", "currency": "EUR", "amount": 5000, "verified": false },
-      "GB": { "name": "Spojené království", "currency": "GBP", "amount": 4500, "verified": false }
+      "AD": {
+        "name": "Andorra",
+        "currency": "EUR",
+        "amount": 5000,
+        "verified": true
+      },
+      "AE": {
+        "name": "Spojené arabské emiráty",
+        "currency": "USD",
+        "amount": 5500,
+        "verified": true
+      },
+      "AF": {
+        "name": "Afghánistán",
+        "currency": "EUR",
+        "amount": 4500,
+        "verified": true
+      },
+      "AG": {
+        "name": "Antigua a Barbuda",
+        "currency": "USD",
+        "amount": 6000,
+        "verified": true
+      },
+      "AI": {
+        "name": "Anguilla",
+        "currency": "USD",
+        "amount": 6000,
+        "verified": true
+      },
+      "AL": {
+        "name": "Albánie",
+        "currency": "EUR",
+        "amount": 4000,
+        "verified": true
+      },
+      "AM": {
+        "name": "Arménie",
+        "currency": "EUR",
+        "amount": 5000,
+        "verified": true
+      },
+      "AO": {
+        "name": "Angola",
+        "currency": "EUR",
+        "amount": 6000,
+        "verified": true
+      },
+      "AR": {
+        "name": "Argentina",
+        "currency": "USD",
+        "amount": 5500,
+        "verified": true
+      },
+      "AS": {
+        "name": "Americká Samoa",
+        "currency": "USD",
+        "amount": 7000,
+        "verified": true
+      },
+      "AT": {
+        "name": "Rakousko",
+        "currency": "EUR",
+        "amount": 4500,
+        "verified": true
+      },
+      "AW": {
+        "name": "Aruba",
+        "currency": "USD",
+        "amount": 6000,
+        "verified": true
+      },
+      "AZ": {
+        "name": "Ázerbájdžán",
+        "currency": "EUR",
+        "amount": 4000,
+        "verified": true
+      },
+      "BA": {
+        "name": "Bosna a Hercegovina",
+        "currency": "EUR",
+        "amount": 4000,
+        "verified": true
+      },
+      "BB": {
+        "name": "Barbados",
+        "currency": "USD",
+        "amount": 6000,
+        "verified": true
+      },
+      "BD": {
+        "name": "Bangladéš",
+        "currency": "USD",
+        "amount": 5000,
+        "verified": true
+      },
+      "BE": {
+        "name": "Belgie",
+        "currency": "EUR",
+        "amount": 5000,
+        "verified": true
+      },
+      "BG": {
+        "name": "Bulharsko",
+        "currency": "EUR",
+        "amount": 4500,
+        "verified": true
+      },
+      "BH": {
+        "name": "Bahrajn",
+        "currency": "EUR",
+        "amount": 4500,
+        "verified": true
+      },
+      "BI": {
+        "name": "Burundi",
+        "currency": "USD",
+        "amount": 5500,
+        "verified": true
+      },
+      "BL": {
+        "name": "Svatý Bartoloměj",
+        "currency": "EUR",
+        "amount": 5000,
+        "verified": true
+      },
+      "BM": {
+        "name": "Bermudy",
+        "currency": "USD",
+        "amount": 5000,
+        "verified": true
+      },
+      "BN": {
+        "name": "Brunej",
+        "currency": "USD",
+        "amount": 4000,
+        "verified": true
+      },
+      "BO": {
+        "name": "Bolívie",
+        "currency": "USD",
+        "amount": 5000,
+        "verified": true
+      },
+      "BR": {
+        "name": "Brazílie",
+        "currency": "USD",
+        "amount": 6000,
+        "verified": true
+      },
+      "BS": {
+        "name": "Bahamy",
+        "currency": "USD",
+        "amount": 6000,
+        "verified": true
+      },
+      "BT": {
+        "name": "Bhútán",
+        "currency": "USD",
+        "amount": 5000,
+        "verified": true
+      },
+      "BW": {
+        "name": "Botswana",
+        "currency": "EUR",
+        "amount": 5000,
+        "verified": true
+      },
+      "BY": {
+        "name": "Bělorusko",
+        "currency": "EUR",
+        "amount": 4500,
+        "verified": true
+      },
+      "BZ": {
+        "name": "Belize",
+        "currency": "USD",
+        "amount": 5500,
+        "verified": true
+      },
+      "CA": {
+        "name": "Kanada",
+        "currency": "USD",
+        "amount": 5000,
+        "verified": true
+      },
+      "CC": {
+        "name": "Kokosové ostrovy",
+        "currency": "USD",
+        "amount": 7000,
+        "verified": true
+      },
+      "CD": {
+        "name": "Konžská demokratická republika",
+        "currency": "USD",
+        "amount": 6500,
+        "verified": true
+      },
+      "CF": {
+        "name": "Středoafrická republika",
+        "currency": "USD",
+        "amount": 5000,
+        "verified": true
+      },
+      "CG": {
+        "name": "Konžská republika",
+        "currency": "USD",
+        "amount": 6000,
+        "verified": true
+      },
+      "CH": {
+        "name": "Švýcarsko",
+        "currency": "CHF",
+        "amount": 7500,
+        "verified": true
+      },
+      "CI": {
+        "name": "Pobřeží Slonoviny",
+        "currency": "EUR",
+        "amount": 4500,
+        "verified": true
+      },
+      "CK": {
+        "name": "Cookovy ostrovy",
+        "currency": "USD",
+        "amount": 7000,
+        "verified": true
+      },
+      "CL": {
+        "name": "Chile",
+        "currency": "USD",
+        "amount": 5500,
+        "verified": true
+      },
+      "CM": {
+        "name": "Kamerun",
+        "currency": "EUR",
+        "amount": 5000,
+        "verified": true
+      },
+      "CN": {
+        "name": "Čína",
+        "currency": "EUR",
+        "amount": 5000,
+        "verified": true
+      },
+      "CO": {
+        "name": "Kolumbie",
+        "currency": "USD",
+        "amount": 4500,
+        "verified": true
+      },
+      "CR": {
+        "name": "Kostarika",
+        "currency": "USD",
+        "amount": 5000,
+        "verified": true
+      },
+      "CU": {
+        "name": "Kuba",
+        "currency": "EUR",
+        "amount": 6000,
+        "verified": true
+      },
+      "CV": {
+        "name": "Kapverdy",
+        "currency": "EUR",
+        "amount": 4000,
+        "verified": true
+      },
+      "CW": {
+        "name": "Curaçao",
+        "currency": "USD",
+        "amount": 6000,
+        "verified": true
+      },
+      "CY": {
+        "name": "Kypr",
+        "currency": "EUR",
+        "amount": 4500,
+        "verified": true
+      },
+      "DE": {
+        "name": "Německo",
+        "currency": "EUR",
+        "amount": 5000,
+        "verified": true
+      },
+      "DJ": {
+        "name": "Džibutsko",
+        "currency": "USD",
+        "amount": 6500,
+        "verified": true
+      },
+      "DK": {
+        "name": "Dánsko",
+        "currency": "EUR",
+        "amount": 6500,
+        "verified": true
+      },
+      "DM": {
+        "name": "Dominika",
+        "currency": "USD",
+        "amount": 6000,
+        "verified": true
+      },
+      "DO": {
+        "name": "Dominikánská republika",
+        "currency": "USD",
+        "amount": 6000,
+        "verified": true
+      },
+      "DY": {
+        "name": "Benin",
+        "currency": "EUR",
+        "amount": 4500,
+        "verified": true
+      },
+      "DZ": {
+        "name": "Alžírsko",
+        "currency": "EUR",
+        "amount": 5000,
+        "verified": true
+      },
+      "EC": {
+        "name": "Ekvádor",
+        "currency": "USD",
+        "amount": 5000,
+        "verified": true
+      },
+      "EE": {
+        "name": "Estonsko",
+        "currency": "EUR",
+        "amount": 4500,
+        "verified": true
+      },
+      "EG": {
+        "name": "Egypt",
+        "currency": "EUR",
+        "amount": 5000,
+        "verified": true
+      },
+      "ER": {
+        "name": "Eritrea",
+        "currency": "USD",
+        "amount": 5000,
+        "verified": true
+      },
+      "ES": {
+        "name": "Španělsko",
+        "currency": "EUR",
+        "amount": 5000,
+        "verified": true
+      },
+      "ET": {
+        "name": "Etiopie",
+        "currency": "EUR",
+        "amount": 5000,
+        "verified": true
+      },
+      "FI": {
+        "name": "Finsko",
+        "currency": "EUR",
+        "amount": 6500,
+        "verified": true
+      },
+      "FJ": {
+        "name": "Fidži",
+        "currency": "USD",
+        "amount": 7000,
+        "verified": true
+      },
+      "FM": {
+        "name": "Mikronésie",
+        "currency": "USD",
+        "amount": 7000,
+        "verified": true
+      },
+      "FR": {
+        "name": "Francie",
+        "currency": "EUR",
+        "amount": 5000,
+        "verified": true
+      },
+      "GA": {
+        "name": "Gabon",
+        "currency": "EUR",
+        "amount": 5000,
+        "verified": true
+      },
+      "GB": {
+        "name": "Velká Británie",
+        "currency": "GBP",
+        "amount": 4500,
+        "verified": true
+      },
+      "GD": {
+        "name": "Grenada",
+        "currency": "USD",
+        "amount": 6000,
+        "verified": true
+      },
+      "GE": {
+        "name": "Gruzie",
+        "currency": "EUR",
+        "amount": 5000,
+        "verified": true
+      },
+      "GF": {
+        "name": "Francouzská Guyana",
+        "currency": "EUR",
+        "amount": 5000,
+        "verified": true
+      },
+      "GH": {
+        "name": "Ghana",
+        "currency": "EUR",
+        "amount": 5500,
+        "verified": true
+      },
+      "GI": {
+        "name": "Gibraltar",
+        "currency": "EUR",
+        "amount": 4000,
+        "verified": true
+      },
+      "GM": {
+        "name": "Gambie",
+        "currency": "EUR",
+        "amount": 4500,
+        "verified": true
+      },
+      "GN": {
+        "name": "Guinea",
+        "currency": "EUR",
+        "amount": 5000,
+        "verified": true
+      },
+      "GP": {
+        "name": "Guadeloupe",
+        "currency": "EUR",
+        "amount": 5000,
+        "verified": true
+      },
+      "GQ": {
+        "name": "Rovníková Guinea",
+        "currency": "EUR",
+        "amount": 5000,
+        "verified": true
+      },
+      "GR": {
+        "name": "Řecko",
+        "currency": "EUR",
+        "amount": 4000,
+        "verified": true
+      },
+      "GT": {
+        "name": "Guatemala",
+        "currency": "USD",
+        "amount": 4500,
+        "verified": true
+      },
+      "GU": {
+        "name": "Guam",
+        "currency": "USD",
+        "amount": 7000,
+        "verified": true
+      },
+      "GW": {
+        "name": "Guinea-Bissau",
+        "currency": "EUR",
+        "amount": 4500,
+        "verified": true
+      },
+      "GY": {
+        "name": "Guyana",
+        "currency": "USD",
+        "amount": 5000,
+        "verified": true
+      },
+      "HK": {
+        "name": "Hongkong",
+        "currency": "EUR",
+        "amount": 5000,
+        "verified": true
+      },
+      "HN": {
+        "name": "Honduras",
+        "currency": "USD",
+        "amount": 4500,
+        "verified": true
+      },
+      "HR": {
+        "name": "Chorvatsko",
+        "currency": "EUR",
+        "amount": 5000,
+        "verified": true
+      },
+      "HT": {
+        "name": "Haiti",
+        "currency": "USD",
+        "amount": 6000,
+        "verified": true
+      },
+      "HU": {
+        "name": "Maďarsko",
+        "currency": "EUR",
+        "amount": 5000,
+        "verified": true
+      },
+      "HV": {
+        "name": "Burkina Faso",
+        "currency": "EUR",
+        "amount": 4000,
+        "verified": true
+      },
+      "ID": {
+        "name": "Indonésie",
+        "currency": "EUR",
+        "amount": 4000,
+        "verified": true
+      },
+      "IE": {
+        "name": "Irsko",
+        "currency": "EUR",
+        "amount": 5500,
+        "verified": true
+      },
+      "IL": {
+        "name": "Izrael",
+        "currency": "USD",
+        "amount": 6500,
+        "verified": true
+      },
+      "IN": {
+        "name": "Indie",
+        "currency": "EUR",
+        "amount": 4500,
+        "verified": true
+      },
+      "IQ": {
+        "name": "Irák",
+        "currency": "EUR",
+        "amount": 5500,
+        "verified": true
+      },
+      "IR": {
+        "name": "Írán",
+        "currency": "EUR",
+        "amount": 4000,
+        "verified": true
+      },
+      "IS": {
+        "name": "Island",
+        "currency": "EUR",
+        "amount": 6500,
+        "verified": true
+      },
+      "IT": {
+        "name": "Itálie",
+        "currency": "EUR",
+        "amount": 5500,
+        "verified": true
+      },
+      "JM": {
+        "name": "Jamajka",
+        "currency": "USD",
+        "amount": 6000,
+        "verified": true
+      },
+      "JO": {
+        "name": "Jordánsko",
+        "currency": "EUR",
+        "amount": 5000,
+        "verified": true
+      },
+      "JP": {
+        "name": "Japonsko",
+        "currency": "USD",
+        "amount": 6500,
+        "verified": true
+      },
+      "KE": {
+        "name": "Keňa",
+        "currency": "USD",
+        "amount": 5500,
+        "verified": true
+      },
+      "KG": {
+        "name": "Kyrgyzstán",
+        "currency": "EUR",
+        "amount": 4000,
+        "verified": true
+      },
+      "KH": {
+        "name": "Kambodža",
+        "currency": "USD",
+        "amount": 4500,
+        "verified": true
+      },
+      "KI": {
+        "name": "Kiribati",
+        "currency": "USD",
+        "amount": 7000,
+        "verified": true
+      },
+      "KM": {
+        "name": "Komory",
+        "currency": "USD",
+        "amount": 5500,
+        "verified": true
+      },
+      "KN": {
+        "name": "Svatý Kryštof a Nevis",
+        "currency": "USD",
+        "amount": 6000,
+        "verified": true
+      },
+      "KP": {
+        "name": "Korejská lidově demokratická republika",
+        "currency": "EUR",
+        "amount": 4500,
+        "verified": true
+      },
+      "KR": {
+        "name": "Korejská republika",
+        "currency": "EUR",
+        "amount": 6000,
+        "verified": true
+      },
+      "KW": {
+        "name": "Kuvajt",
+        "currency": "EUR",
+        "amount": 4500,
+        "verified": true
+      },
+      "KY": {
+        "name": "Kajmanské ostrovy",
+        "currency": "USD",
+        "amount": 6000,
+        "verified": true
+      },
+      "KZ": {
+        "name": "Kazachstán",
+        "currency": "EUR",
+        "amount": 4500,
+        "verified": true
+      },
+      "LA": {
+        "name": "Laos",
+        "currency": "USD",
+        "amount": 4500,
+        "verified": true
+      },
+      "LB": {
+        "name": "Libanon",
+        "currency": "USD",
+        "amount": 6000,
+        "verified": true
+      },
+      "LC": {
+        "name": "Svatá Lucie",
+        "currency": "USD",
+        "amount": 6000,
+        "verified": true
+      },
+      "LI": {
+        "name": "Lichtenštejnsko",
+        "currency": "CHF",
+        "amount": 7500,
+        "verified": true
+      },
+      "LK": {
+        "name": "Srí Lanka",
+        "currency": "USD",
+        "amount": 5000,
+        "verified": true
+      },
+      "LR": {
+        "name": "Libérie",
+        "currency": "EUR",
+        "amount": 5000,
+        "verified": true
+      },
+      "LS": {
+        "name": "Lesotho",
+        "currency": "EUR",
+        "amount": 4500,
+        "verified": true
+      },
+      "LT": {
+        "name": "Litva",
+        "currency": "EUR",
+        "amount": 4500,
+        "verified": true
+      },
+      "LU": {
+        "name": "Lucembursko",
+        "currency": "EUR",
+        "amount": 5500,
+        "verified": true
+      },
+      "LV": {
+        "name": "Lotyšsko",
+        "currency": "EUR",
+        "amount": 4500,
+        "verified": true
+      },
+      "LY": {
+        "name": "Libye",
+        "currency": "EUR",
+        "amount": 5000,
+        "verified": true
+      },
+      "MA": {
+        "name": "Maroko",
+        "currency": "EUR",
+        "amount": 5000,
+        "verified": true
+      },
+      "MC": {
+        "name": "Monako",
+        "currency": "EUR",
+        "amount": 4500,
+        "verified": true
+      },
+      "MD": {
+        "name": "Moldavsko",
+        "currency": "EUR",
+        "amount": 4500,
+        "verified": true
+      },
+      "ME": {
+        "name": "Černá Hora",
+        "currency": "EUR",
+        "amount": 4500,
+        "verified": true
+      },
+      "MF": {
+        "name": "Svatý Martin",
+        "currency": "EUR",
+        "amount": 5000,
+        "verified": true
+      },
+      "MG": {
+        "name": "Madagaskar",
+        "currency": "EUR",
+        "amount": 4500,
+        "verified": true
+      },
+      "MH": {
+        "name": "Marshallovy ostrovy",
+        "currency": "USD",
+        "amount": 7000,
+        "verified": true
+      },
+      "MK": {
+        "name": "Severní Makedonie",
+        "currency": "EUR",
+        "amount": 4000,
+        "verified": true
+      },
+      "ML": {
+        "name": "Mali",
+        "currency": "EUR",
+        "amount": 5000,
+        "verified": true
+      },
+      "MM": {
+        "name": "Myanmar",
+        "currency": "USD",
+        "amount": 5500,
+        "verified": true
+      },
+      "MN": {
+        "name": "Mongolsko",
+        "currency": "EUR",
+        "amount": 4500,
+        "verified": true
+      },
+      "MO": {
+        "name": "Macao",
+        "currency": "EUR",
+        "amount": 4500,
+        "verified": true
+      },
+      "MP": {
+        "name": "Společenství Severních Marian",
+        "currency": "USD",
+        "amount": 7000,
+        "verified": true
+      },
+      "MQ": {
+        "name": "Martinik",
+        "currency": "EUR",
+        "amount": 5000,
+        "verified": true
+      },
+      "MR": {
+        "name": "Mauretánie",
+        "currency": "EUR",
+        "amount": 5000,
+        "verified": true
+      },
+      "MS": {
+        "name": "Montserrat",
+        "currency": "USD",
+        "amount": 6000,
+        "verified": true
+      },
+      "MT": {
+        "name": "Malta",
+        "currency": "EUR",
+        "amount": 5000,
+        "verified": true
+      },
+      "MU": {
+        "name": "Mauricius",
+        "currency": "EUR",
+        "amount": 5500,
+        "verified": true
+      },
+      "MV": {
+        "name": "Maledivy",
+        "currency": "USD",
+        "amount": 6000,
+        "verified": true
+      },
+      "MW": {
+        "name": "Malawi",
+        "currency": "USD",
+        "amount": 4500,
+        "verified": true
+      },
+      "MX": {
+        "name": "Mexiko",
+        "currency": "USD",
+        "amount": 5000,
+        "verified": true
+      },
+      "MY": {
+        "name": "Malajsie",
+        "currency": "USD",
+        "amount": 4500,
+        "verified": true
+      },
+      "MZ": {
+        "name": "Mosambik",
+        "currency": "EUR",
+        "amount": 5500,
+        "verified": true
+      },
+      "NA": {
+        "name": "Namibie",
+        "currency": "EUR",
+        "amount": 5000,
+        "verified": true
+      },
+      "NC": {
+        "name": "Nová Kaledonie",
+        "currency": "EUR",
+        "amount": 5000,
+        "verified": true
+      },
+      "NE": {
+        "name": "Niger",
+        "currency": "EUR",
+        "amount": 5000,
+        "verified": true
+      },
+      "NF": {
+        "name": "Norfolk",
+        "currency": "USD",
+        "amount": 7000,
+        "verified": true
+      },
+      "NG": {
+        "name": "Nigérie",
+        "currency": "EUR",
+        "amount": 5000,
+        "verified": true
+      },
+      "NI": {
+        "name": "Nikaragua",
+        "currency": "USD",
+        "amount": 4500,
+        "verified": true
+      },
+      "NL": {
+        "name": "Nizozemsko",
+        "currency": "EUR",
+        "amount": 5000,
+        "verified": true
+      },
+      "NO": {
+        "name": "Norsko",
+        "currency": "EUR",
+        "amount": 6500,
+        "verified": true
+      },
+      "NP": {
+        "name": "Nepál",
+        "currency": "USD",
+        "amount": 5000,
+        "verified": true
+      },
+      "NR": {
+        "name": "Nauru",
+        "currency": "USD",
+        "amount": 7000,
+        "verified": true
+      },
+      "NU": {
+        "name": "Niue",
+        "currency": "USD",
+        "amount": 7000,
+        "verified": true
+      },
+      "NZ": {
+        "name": "Nový Zéland",
+        "currency": "USD",
+        "amount": 6500,
+        "verified": true
+      },
+      "OM": {
+        "name": "Omán",
+        "currency": "EUR",
+        "amount": 5000,
+        "verified": true
+      },
+      "PA": {
+        "name": "Panama",
+        "currency": "USD",
+        "amount": 5000,
+        "verified": true
+      },
+      "PE": {
+        "name": "Peru",
+        "currency": "USD",
+        "amount": 5200,
+        "verified": true
+      },
+      "PF": {
+        "name": "Francouzská Polynésie",
+        "currency": "EUR",
+        "amount": 5000,
+        "verified": true
+      },
+      "PG": {
+        "name": "Papua Nová Guinea",
+        "currency": "USD",
+        "amount": 7000,
+        "verified": true
+      },
+      "PH": {
+        "name": "Filipíny",
+        "currency": "EUR",
+        "amount": 4000,
+        "verified": true
+      },
+      "PK": {
+        "name": "Pákistán",
+        "currency": "EUR",
+        "amount": 5000,
+        "verified": true
+      },
+      "PL": {
+        "name": "Polsko",
+        "currency": "EUR",
+        "amount": 5000,
+        "verified": true
+      },
+      "PM": {
+        "name": "Saint Pierre a Miquelon",
+        "currency": "EUR",
+        "amount": 5000,
+        "verified": true
+      },
+      "PN": {
+        "name": "Pitcairnův ostrov",
+        "currency": "USD",
+        "amount": 7000,
+        "verified": true
+      },
+      "PR": {
+        "name": "Portoriko",
+        "currency": "USD",
+        "amount": 6000,
+        "verified": true
+      },
+      "PT": {
+        "name": "Portugalsko",
+        "currency": "EUR",
+        "amount": 4500,
+        "verified": true
+      },
+      "PW": {
+        "name": "Palau",
+        "currency": "USD",
+        "amount": 7000,
+        "verified": true
+      },
+      "PY": {
+        "name": "Paraguay",
+        "currency": "USD",
+        "amount": 5000,
+        "verified": true
+      },
+      "QA": {
+        "name": "Katar",
+        "currency": "USD",
+        "amount": 5000,
+        "verified": true
+      },
+      "RE": {
+        "name": "Réunion",
+        "currency": "EUR",
+        "amount": 5000,
+        "verified": true
+      },
+      "RO": {
+        "name": "Rumunsko",
+        "currency": "EUR",
+        "amount": 4500,
+        "verified": true
+      },
+      "RS": {
+        "name": "Srbsko",
+        "currency": "EUR",
+        "amount": 4000,
+        "verified": true
+      },
+      "RU": {
+        "name": "Rusko",
+        "currency": "EUR",
+        "amount": 4500,
+        "verified": true
+      },
+      "RW": {
+        "name": "Rwanda",
+        "currency": "USD",
+        "amount": 5500,
+        "verified": true
+      },
+      "SA": {
+        "name": "Saúdská Arábie",
+        "currency": "EUR",
+        "amount": 5000,
+        "verified": true
+      },
+      "SB": {
+        "name": "Šalamounovy ostrovy",
+        "currency": "USD",
+        "amount": 7000,
+        "verified": true
+      },
+      "SC": {
+        "name": "Seychely",
+        "currency": "EUR",
+        "amount": 5500,
+        "verified": true
+      },
+      "SD": {
+        "name": "Súdán",
+        "currency": "USD",
+        "amount": 5500,
+        "verified": true
+      },
+      "SE": {
+        "name": "Švédsko",
+        "currency": "EUR",
+        "amount": 6500,
+        "verified": true
+      },
+      "SG": {
+        "name": "Singapur",
+        "currency": "USD",
+        "amount": 6500,
+        "verified": true
+      },
+      "SI": {
+        "name": "Slovinsko",
+        "currency": "EUR",
+        "amount": 4000,
+        "verified": true
+      },
+      "SK": {
+        "name": "Slovensko",
+        "currency": "EUR",
+        "amount": 4000,
+        "verified": true
+      },
+      "SL": {
+        "name": "Sierra Leone",
+        "currency": "EUR",
+        "amount": 4000,
+        "verified": true
+      },
+      "SM": {
+        "name": "San Marino",
+        "currency": "EUR",
+        "amount": 5500,
+        "verified": true
+      },
+      "SN": {
+        "name": "Senegal",
+        "currency": "EUR",
+        "amount": 5500,
+        "verified": true
+      },
+      "SO": {
+        "name": "Somálsko",
+        "currency": "USD",
+        "amount": 5500,
+        "verified": true
+      },
+      "SR": {
+        "name": "Surinam",
+        "currency": "USD",
+        "amount": 5000,
+        "verified": true
+      },
+      "SS": {
+        "name": "Jižní Súdán",
+        "currency": "USD",
+        "amount": 5500,
+        "verified": true
+      },
+      "ST": {
+        "name": "Svatý Tomáš a Princův ostrov",
+        "currency": "EUR",
+        "amount": 4000,
+        "verified": true
+      },
+      "SV": {
+        "name": "Salvador",
+        "currency": "USD",
+        "amount": 4500,
+        "verified": true
+      },
+      "SY": {
+        "name": "Sýrie",
+        "currency": "EUR",
+        "amount": 6000,
+        "verified": true
+      },
+      "SZ": {
+        "name": "Svazijsko",
+        "currency": "EUR",
+        "amount": 5000,
+        "verified": true
+      },
+      "TC": {
+        "name": "Turks a Caicos",
+        "currency": "USD",
+        "amount": 6000,
+        "verified": true
+      },
+      "TD": {
+        "name": "Čad",
+        "currency": "EUR",
+        "amount": 5000,
+        "verified": true
+      },
+      "TG": {
+        "name": "Togo",
+        "currency": "EUR",
+        "amount": 4500,
+        "verified": true
+      },
+      "TH": {
+        "name": "Thajsko",
+        "currency": "EUR",
+        "amount": 4000,
+        "verified": true
+      },
+      "TJ": {
+        "name": "Tádžikistán",
+        "currency": "EUR",
+        "amount": 4000,
+        "verified": true
+      },
+      "TK": {
+        "name": "Tokelau",
+        "currency": "USD",
+        "amount": 7000,
+        "verified": true
+      },
+      "TL": {
+        "name": "Východní Timor",
+        "currency": "USD",
+        "amount": 7000,
+        "verified": true
+      },
+      "TM": {
+        "name": "Turkmenistán",
+        "currency": "EUR",
+        "amount": 4500,
+        "verified": true
+      },
+      "TN": {
+        "name": "Tunisko",
+        "currency": "EUR",
+        "amount": 5000,
+        "verified": true
+      },
+      "TO": {
+        "name": "Tonga",
+        "currency": "USD",
+        "amount": 7000,
+        "verified": true
+      },
+      "TR": {
+        "name": "Turecko",
+        "currency": "EUR",
+        "amount": 5000,
+        "verified": true
+      },
+      "TT": {
+        "name": "Trinidad a Tobago",
+        "currency": "USD",
+        "amount": 6000,
+        "verified": true
+      },
+      "TV": {
+        "name": "Tuvalu",
+        "currency": "USD",
+        "amount": 7000,
+        "verified": true
+      },
+      "TW": {
+        "name": "Tchaj-wan",
+        "currency": "EUR",
+        "amount": 4500,
+        "verified": true
+      },
+      "TZ": {
+        "name": "Tanzanie",
+        "currency": "USD",
+        "amount": 5500,
+        "verified": true
+      },
+      "UA": {
+        "name": "Ukrajina",
+        "currency": "EUR",
+        "amount": 4500,
+        "verified": true
+      },
+      "UG": {
+        "name": "Uganda",
+        "currency": "USD",
+        "amount": 5500,
+        "verified": true
+      },
+      "UM": {
+        "name": "Midwayské ostrovy",
+        "currency": "USD",
+        "amount": 7000,
+        "verified": true
+      },
+      "US": {
+        "name": "Spojené státy americké",
+        "currency": "USD",
+        "amount": 7000,
+        "verified": true
+      },
+      "UY": {
+        "name": "Uruguay",
+        "currency": "USD",
+        "amount": 6000,
+        "verified": true
+      },
+      "UZ": {
+        "name": "Uzbekistán",
+        "currency": "EUR",
+        "amount": 4000,
+        "verified": true
+      },
+      "VA": {
+        "name": "Vatikán",
+        "currency": "EUR",
+        "amount": 5500,
+        "verified": true
+      },
+      "VC": {
+        "name": "Svatý Vincent a Grenadiny",
+        "currency": "USD",
+        "amount": 6000,
+        "verified": true
+      },
+      "VE": {
+        "name": "Venezuela",
+        "currency": "USD",
+        "amount": 6500,
+        "verified": true
+      },
+      "VG": {
+        "name": "Britské panenské ostrovy",
+        "currency": "USD",
+        "amount": 6000,
+        "verified": true
+      },
+      "VN": {
+        "name": "Vietnam",
+        "currency": "EUR",
+        "amount": 4000,
+        "verified": true
+      },
+      "VU": {
+        "name": "Vanuatu",
+        "currency": "USD",
+        "amount": 7000,
+        "verified": true
+      },
+      "WF": {
+        "name": "Wallis a Futuna",
+        "currency": "EUR",
+        "amount": 5000,
+        "verified": true
+      },
+      "WS": {
+        "name": "Západní Samoa",
+        "currency": "USD",
+        "amount": 7000,
+        "verified": true
+      },
+      "XK": {
+        "name": "Kosovo",
+        "currency": "EUR",
+        "amount": 5000,
+        "verified": true
+      },
+      "YE": {
+        "name": "Jemen",
+        "currency": "EUR",
+        "amount": 3500,
+        "verified": true
+      },
+      "YT": {
+        "name": "Mayotte",
+        "currency": "EUR",
+        "amount": 5000,
+        "verified": true
+      },
+      "ZA": {
+        "name": "Jihoafrická republika",
+        "currency": "EUR",
+        "amount": 5000,
+        "verified": true
+      },
+      "ZM": {
+        "name": "Zambie",
+        "currency": "USD",
+        "amount": 5500,
+        "verified": true
+      },
+      "ZW": {
+        "name": "Zimbabwe",
+        "currency": "USD",
+        "amount": 5000,
+        "verified": true
+      }
+    },
+    "otherCountries": {
+      "currency": "EUR",
+      "amount": 3500
     }
   },
   "vehicle": {
     "source": "573/2025",
     "ratesPerKm": {
-      "car": { "amount": 590 },
-      "motorcycle": { "amount": 160 }
+      "car": {
+        "amount": 590
+      },
+      "motorcycle": {
+        "amount": 160
+      }
     },
     "averagePrices": [
-      { "fuel": "petrol95", "unit": "l", "amount": 3470, "validFrom": "2026-01-01", "validTo": "2026-09-30", "source": "573/2025" },
-      { "fuel": "petrol95", "unit": "l", "amount": 4180, "validFrom": "2026-10-01", "validTo": "2026-12-31", "source": "175/2026" },
-      { "fuel": "petrol98", "unit": "l", "amount": 3900, "validFrom": "2026-01-01", "validTo": "2026-12-31", "source": "573/2025" },
-      { "fuel": "diesel", "unit": "l", "amount": 3410, "validFrom": "2026-01-01", "validTo": "2026-05-31", "source": "573/2025" },
-      { "fuel": "diesel", "unit": "l", "amount": 4450, "validFrom": "2026-06-01", "validTo": "2026-12-31", "source": "78/2026" },
-      { "fuel": "electricity", "unit": "kWh", "amount": 720, "validFrom": "2026-01-01", "validTo": "2026-12-31", "source": "573/2025" }
+      {
+        "fuel": "petrol95",
+        "unit": "l",
+        "amount": 3470,
+        "validFrom": "2026-01-01",
+        "validTo": "2026-09-30",
+        "source": "573/2025"
+      },
+      {
+        "fuel": "petrol95",
+        "unit": "l",
+        "amount": 4180,
+        "validFrom": "2026-10-01",
+        "validTo": "2026-12-31",
+        "source": "175/2026"
+      },
+      {
+        "fuel": "petrol98",
+        "unit": "l",
+        "amount": 3900,
+        "validFrom": "2026-01-01",
+        "validTo": "2026-12-31",
+        "source": "573/2025"
+      },
+      {
+        "fuel": "diesel",
+        "unit": "l",
+        "amount": 3410,
+        "validFrom": "2026-01-01",
+        "validTo": "2026-05-31",
+        "source": "573/2025"
+      },
+      {
+        "fuel": "diesel",
+        "unit": "l",
+        "amount": 4450,
+        "validFrom": "2026-06-01",
+        "validTo": "2026-12-31",
+        "source": "78/2026"
+      },
+      {
+        "fuel": "electricity",
+        "unit": "kWh",
+        "amount": 720,
+        "validFrom": "2026-01-01",
+        "validTo": "2026-12-31",
+        "source": "573/2025"
+      }
     ]
   },
   "rounding": {
@@ -61,10 +1538,25 @@
     "payout": "HALF_UP_UNIT"
   },
   "assumptions": [
-    { "code": "U-4", "text": "Rozhodující stát: stát, ve kterém zaměstnanec strávil v kalendářním dni nejvíce času." },
-    { "code": "U-5", "text": "Tuzemské stravné se posuzuje zvlášť za každý kalendářní den podle doby strávené v ČR." },
-    { "code": "U-8", "text": "Stravné za den zaokrouhleno na celé jednotky měny nahoru, výsledná částka k výplatě na celé Kč." },
-    { "code": "U-9", "text": "Všechny časy jsou v českém místním čase (Europe/Prague)." },
-    { "code": "U-17", "text": "Krácení zahraničního stravného se počítá z částky stravného pro dané pásmo (1/3, 2/3, plná sazba)." }
+    {
+      "code": "U-4",
+      "text": "Rozhodující stát: stát, ve kterém zaměstnanec strávil v kalendářním dni nejvíce času."
+    },
+    {
+      "code": "U-5",
+      "text": "Tuzemské stravné se posuzuje zvlášť za každý kalendářní den podle doby strávené v ČR."
+    },
+    {
+      "code": "U-8",
+      "text": "Stravné za den zaokrouhleno na celé jednotky měny nahoru, výsledná částka k výplatě na celé Kč."
+    },
+    {
+      "code": "U-9",
+      "text": "Všechny časy jsou v českém místním čase (Europe/Prague)."
+    },
+    {
+      "code": "U-17",
+      "text": "Krácení zahraničního stravného se počítá z částky stravného pro dané pásmo (1/3, 2/3, plná sazba)."
+    }
   ]
 }

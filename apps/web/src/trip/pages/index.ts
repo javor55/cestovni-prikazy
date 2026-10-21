@@ -2,6 +2,7 @@ import type { ComponentType } from 'react';
 import type { StepSlug } from '../steps.js';
 import { StepCesta } from './StepCesta.js';
 import { StepJidla } from './StepJidla.js';
+import { StepExport } from './StepExport.js';
 import { StepKdo } from './StepKdo.js';
 import { StepKompletni } from './StepKompletni.js';
 import { StepKontrola } from './StepKontrola.js';
@@ -24,4 +25,5 @@ export const StepPages: Record<StepSlug, ComponentType> = {
   pdf: StepPdf,
   podpis: StepPodpis,
   kompletni: StepKompletni,
+  export: StepExport,
 };

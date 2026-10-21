@@ -14,9 +14,9 @@ export interface Snapshot {
   model: DocModel;
 }
 
-/** Otisk údajů cesty, které ovlivňují dokument (bez časových razítek uložení a otevření). */
+/** Otisk údajů cesty, které ovlivňují dokument (bez id a časových razítek – po importu projektu se nemění). */
 export async function inputHash(trip: TripDoc, docCounts: DocCounts): Promise<string> {
-  const { updatedAt: _u, lastOpenedAt: _l, ...rest } = trip;
+  const { id: _i, updatedAt: _u, lastOpenedAt: _l, ...rest } = trip;
   const data = new TextEncoder().encode(JSON.stringify([rest, docCounts]));
   const hash = await crypto.subtle.digest('SHA-256', data);
   return [...new Uint8Array(hash)].map((x) => x.toString(16).padStart(2, '0')).join('');

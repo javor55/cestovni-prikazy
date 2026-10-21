@@ -13,6 +13,7 @@ export const steps = [
   { slug: 'pdf', title: 'PDF k podpisu' },
   { slug: 'podpis', title: 'Podpis' },
   { slug: 'kompletni', title: 'Kompletní PDF' },
+  { slug: 'export', title: 'Exporty' },
 ] as const;
 
 export type StepSlug = (typeof steps)[number]['slug'];
@@ -46,5 +47,5 @@ export function stepState(slug: StepSlug, trip: TripDoc, issues: Issue[]): StepS
   };
   if (filled[slug] === false) return 'todo';
   if (mine.some((i) => i.severity === 'warning')) return 'warning';
-  return slug === 'pdf' || slug === 'podpis' || slug === 'kompletni' ? 'todo' : 'done';
+  return slug === 'pdf' || slug === 'podpis' || slug === 'kompletni' || slug === 'export' ? 'todo' : 'done';
 }

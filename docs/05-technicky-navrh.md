@@ -13,7 +13,7 @@ Navazuje na schválenou [analýzu](01-analyza.md) (lokální architektura, R10).
 | Lokální úložiště | IndexedDB přes Dexie |
 | PDF | `@react-pdf/renderer` (šablony), `pdf-lib` (slučování, číslování, záložky, podpis), `pdf.js` (náhledy) |
 | Obrázky | canvas API, `heic2any`, `exifr` |
-| Exporty | ExcelJS (XLSX), vlastní CSV, `fflate` (ZIP) |
+| Exporty | vlastní zápis XLSX (SpreadsheetML) a CSV, `fflate` (ZIP); ExcelJS jen v testech ke kontrole souboru |
 | Testy | Vitest (jádro, dokumenty), Playwright (E2E, mobilní viewporty, WebKit) |
 | Server | Node.js + Hono: statické soubory a `/api/kurzy` |
 | Nasazení | Docker (multi-stage), Docker Compose, Caddy (HTTPS) |
@@ -145,6 +145,21 @@ CP-2026-0042_projekt.zip
 
 Import: limit počtu souborů (500) a rozbalené velikosti (500 MB), přijetí jen souborů z manifestu, kontrola SHA-256, validace `project.json` schématem a migrace starších verzí schématu. Cesty v ZIP se nikdy nepoužijí jako cesty na disku. Při chybě se zobrazí srozumitelná česká hláška a nic se neuloží.
 
+Implementace (`apps/web/src/exports`):
+
+- `project.json` obsahuje `format`, `projectVersion` (verze obálky), `schemaVersion` (verze dat cesty), `applicationVersion`, `exportedAt`, cestu, metadata příloh s cestou k souboru a snímky PDF. Obrázky ani PDF v JSON nejsou.
+- Import rozbalí jen `project.json`, `manifest.json` a soubory `attachments/<id>.<pdf|jpg|png|heic>`. Ostatní soubory (včetně cest s `..`) se nerozbalí. Ověří se SHA-256 a velikost každého souboru, skutečný formát přílohy podle obsahu, vazba přílohy na existující výdaj a data cesty schématem (zod) po migraci. Projekt z novější verze aplikace se odmítne.
+- Projekt se vždy načte jako **nová cesta** s novými id, takže nikdy nepřepíše existující data. Odvozené varianty příloh (otočení, ořez, zmenšení, náhled) se znovu vytvoří z originálů. Snímky PDF se načtou také. Otisk údajů nezahrnuje id cesty, proto kompletní PDF po importu navazuje bez upozornění na změnu.
+- Vše se uloží v jedné transakci IndexedDB, až když projde celá kontrola.
+
+## 8a. Exporty pro účetní
+
+- **XLSX** (`packages/documents/src/tabular.ts`): listy Souhrn, Useky, Stravne, Vydaje, Vozidlo podle zadání § 20 a navíc Kontroly (chyby a varování výpočtu). Částky jsou čísla s formátem `#,##0.00` a měna je v samostatném sloupci. Data a časy jsou skutečné hodnoty data. Texty se ukládají jako text, nikdy jako vzorec, a sešit neobsahuje makra.
+- **CSV**: ZIP s `souhrn.csv`, `useky.csv`, `stravne.csv`, `vydaje.csv`, `vozidlo.csv` a `kontroly.csv`. Kódování UTF-8 s BOM, oddělovač středník, řádky CRLF, data ISO 8601, částky s desetinnou tečkou bez symbolu měny. Text začínající `= + - @` dostane apostrof (ochrana proti CSV injection).
+- **JSON**: úplná data cesty, verze schématu, metadata příloh (bez obsahu souborů) a výsledek výpočtu.
+- **Originály dokladů**: ZIP s nezměněnými soubory ve složkách podle výdajů (`01_Ubytovani/01_ucetni-doklad_uctenka.jpg`), názvy bez diakritiky.
+- Knihovny pro exporty a import se načítají až při použití, takže hlavní balík aplikace nenarostl.
+
 ## 9. Bezpečnost
 
 - Přísná CSP: `default-src 'self'; script-src 'self'; img-src 'self' blob: data:; connect-src 'self'; frame-ancestors 'none'`.
@@ -187,5 +202,5 @@ Import: limit počtu souborů (500) a rozbalené velikosti (500 MB), přijetí j
 | 3 | **Přílohy (focení, HEIC, ořez, otočení), kurzy ČNB – hotovo**; úplná tabulka zahraničních sazeb čeká na text přílohy vyhlášky (nástroj pro import je hotový) |
 | 4 | **PDF k podpisu (obě šablony) ze snímku výpočtu – hotovo** |
 | 5 | **Podepsaný dokument, PNG podpis, kompletní PDF – hotovo** |
-| 6 | Exporty XLSX, CSV, JSON a export/import projektu |
+| 6 | **Exporty XLSX, CSV, JSON, ZIP originálů a export/import projektu – hotovo** |
 | 7 | Zabezpečení, PWA manifest, Docker, dokumentace, testovací nasazení |

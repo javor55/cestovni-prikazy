@@ -205,4 +205,5 @@ export const icons = {
   upload: 'M12 15V3M7 8l5-5 5 5M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4',
   chevronDown: 'M6 9l6 6 6-6',
   chevronUp: 'M6 15l6-6 6 6',
+  download: 'M12 3v12M7 10l5 5 5-5M4 19h16',
 };

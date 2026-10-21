@@ -101,7 +101,13 @@ export function StepKompletni() {
           </div>
           <p className="text-[13px] text-subtle">{result.name}</p>
           <iframe title="Náhled kompletního PDF" src={result.url} className="hidden h-[75vh] w-full rounded-lg border border-line md:block" />
-          <p className="text-[13px] text-subtle">Originály dokladů zůstávají uložené v aplikaci. Stažení originálů v ZIP a exporty dat přibudou v další verzi.</p>
+          <p className="text-[13px] text-subtle">
+            Originály dokladů v ZIP, tabulky XLSX/CSV a pracovní projekt najdete v kroku{' '}
+            <Link to={`/cesta/${trip.id}/export`} className="font-semibold text-accent underline">
+              Exporty
+            </Link>
+            .
+          </p>
         </Card>
       )}
     </>

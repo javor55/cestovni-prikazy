@@ -38,7 +38,7 @@ async function domesticTrip(page: Page) {
   await page.getByLabel('Místo vystavení příkazu').fill('Praha');
   await page.getByLabel('Datum vystavení příkazu').fill('2026-03-09');
   await go(page, `${base}/prubeh`);
-  await page.getByRole('button', { name: 'Přidat úsek' }).click();
+  await page.getByRole('button', { name: 'Zadat úseky ručně' }).click();
   const s1 = page.getByRole('region', { name: 'Úsek 1' });
   await s1.getByLabel('Kam').fill('Brno');
   await s1.getByLabel('Odjezd').fill('2026-03-10T07:00');

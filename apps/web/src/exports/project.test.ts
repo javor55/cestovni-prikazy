@@ -69,7 +69,7 @@ describe('export projektu', () => {
     const files = unzipSync(await exportProject(trip.id, now, d));
     expect(Object.keys(files).filter((f) => f.startsWith('attachments/'))).toHaveLength(4);
     const project = json(files['project.json']!);
-    expect(project).toMatchObject({ format: 'cestovni-prikazy-projekt', projectVersion: 1, schemaVersion: 4, applicationVersion: '0.6.0', exportedAt: now.toISOString() });
+    expect(project).toMatchObject({ format: 'cestovni-prikazy-projekt', projectVersion: 1, schemaVersion: 5, applicationVersion: '0.6.0', exportedAt: now.toISOString() });
     expect(project.trip.number).toBe('CP-2026-0042');
     expect(project.attachments.find((a: { mime: string }) => a.mime === 'image/jpeg')).toMatchObject({ originalName: 'účtenka hotel.jpg', expenseId: 'h', kind: 'accounting', mime: 'image/jpeg' });
     expect(project.attachments[0].tripId).toBeUndefined();

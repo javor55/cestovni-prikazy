@@ -1,9 +1,13 @@
-import { currencyOptions } from '../../model/countries.js';
+import { countryName, countryOptions, currencyOptions } from '../../model/countries.js';
 import { CnbButton } from '../../rates/CnbButton.js';
-import { newId, suggestNumber } from '../../model/trip.js';
+import { newId, suggestNumber, transportLabels, type TransportKind } from '../../model/trip.js';
 import { Button, Card, H2, Icon, icons, NumberField, RadioCards, SelectField, TextArea, TextField } from '../../ui/controls.js';
 import { useTrip } from '../context.js';
 import { StepIssues } from '../IssueList.js';
+
+const transportOptions: [TransportKind | '', string][] = [['', 'Vyberte'], ...(Object.entries(transportLabels) as [TransportKind, string][])];
+const destinationOptions: [string, string][] = [['', 'Vyberte stát'], ...countryOptions.filter(([c]) => c !== 'CZ')];
+const transitAdd: [string, string][] = [['', 'Přidat stát…'], ...countryOptions.filter(([c]) => c !== 'CZ')];
 
 export function StepCesta() {
   const { trip, update } = useTrip();
@@ -41,8 +45,48 @@ export function StepCesta() {
           <TextField label="Plánovaný začátek" type="datetime-local" value={trip.plannedStart} onChange={set('plannedStart')} />
           <TextField label="Plánovaný konec" type="datetime-local" value={trip.plannedEnd} onChange={set('plannedEnd')} min={trip.plannedStart} />
           <TextField label="Cílová místa" value={trip.destinations} onChange={set('destinations')} placeholder="Vídeň" />
+          {trip.kind === 'foreign' ? (
+            <SelectField label="Stát cíle" value={trip.destinationCountry} options={destinationOptions} onChange={(v) => update((d) => void (d.destinationCountry = v))} />
+          ) : (
+            <span className="hidden sm:block" />
+          )}
+          {trip.kind === 'foreign' && (
+            <div className="flex flex-col gap-2 sm:col-span-2">
+              <SelectField
+                label="Státy po cestě"
+                optional
+                value=""
+                options={transitAdd}
+                onChange={(v) => v && update((d) => void d.transitCountries.push(v))}
+                hint="Státy, kterými pojedete, v pořadí cesty tam (např. Rakousko, Slovinsko). Předvyplní se z nich přechody hranic v průběhu cesty."
+              />
+              {trip.transitCountries.length > 0 && (
+                <ol className="flex flex-wrap gap-2" aria-label="Vybrané státy po cestě">
+                  {trip.transitCountries.map((c, i) => (
+                    <li key={`${c}-${i}`} className="flex items-center gap-1 rounded-full border border-line-strong bg-white py-1 pr-1 pl-3 text-sm">
+                      {i + 1}. {countryName(c)}
+                      <button
+                        type="button"
+                        className="flex size-8 items-center justify-center rounded-full text-danger hover:bg-danger-soft"
+                        aria-label={`Odebrat ${countryName(c)}`}
+                        onClick={() => update((d) => void d.transitCountries.splice(i, 1))}
+                      >
+                        <Icon d="M6 6l12 12M18 6L6 18" className="size-4" />
+                      </button>
+                    </li>
+                  ))}
+                </ol>
+              )}
+            </div>
+          )}
           <TextField label="Průjezdní místa" optional value={trip.via} onChange={set('via')} />
-          <TextField label="Dopravní prostředek" value={trip.plannedTransport} onChange={set('plannedTransport')} placeholder="vlak, soukromé auto…" className="sm:col-span-2" />
+          <SelectField
+            label="Dopravní prostředek"
+            value={trip.plannedTransportKind}
+            options={transportOptions}
+            onChange={(v) => update((d) => void (d.plannedTransportKind = v))}
+          />
+          <TextField label="Upřesnění dopravy" optional value={trip.plannedTransport} onChange={set('plannedTransport')} placeholder="např. Railjet, vlastní vůz" />
           <TextField label="Místo vystavení příkazu" optional value={trip.issuedPlace} onChange={set('issuedPlace')} placeholder="Praha" />
           <TextField label="Datum vystavení příkazu" optional type="date" value={trip.issuedOn} onChange={set('issuedOn')} hint="Obvykle den před cestou. Prázdné pole zůstane v PDF k ručnímu doplnění." />
         </div>

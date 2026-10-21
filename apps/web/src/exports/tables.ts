@@ -6,7 +6,7 @@ import type { Cell, Table } from '@cp/documents/tabular';
 import { countryName } from '../model/countries.js';
 import { normalizeDecimal } from '../model/format.js';
 import { payerOf, type DocCounts, type Mapped } from '../model/toInput.js';
-import { fuelLabels, paymentLabels, rateSourceLabels, transportLabels, type TripDoc } from '../model/trip.js';
+import { crossingsText, fuelLabels, paymentLabels, rateSourceLabels, transportLabels, type TripDoc } from '../model/trip.js';
 
 const units = (minor: number, currency = 'CZK') => minor / minorPerUnit(currency);
 const yesNo = (b: boolean) => (b ? 'ano' : 'ne');
@@ -90,17 +90,14 @@ function segments({ trip }: TablesInput): Table {
       { header: 'Dopravní prostředek', type: 'text', width: 18 },
       { header: 'Dopravce', type: 'text', width: 16 },
       { header: 'Kilometry', type: 'number', width: 10 },
-      { header: 'Přechod hranice', type: 'text', width: 10 },
-      { header: 'Čas přechodu hranice', type: 'datetime', width: 16 },
+      { header: 'Přechody hranic', type: 'text', width: 34 },
       { header: 'Soukromá část', type: 'text', width: 10 },
       { header: 'Poznámka', type: 'text', width: 24 },
     ],
     rows: [...trip.segments]
       .sort((a, b) => a.departure.localeCompare(b.departure))
-      .map((s, i) => {
-        const border = s.fromCountry !== s.toCountry;
-        return [i + 1, s.fromPlace, s.fromCountry, s.toPlace, s.toCountry, s.departure, s.arrival, transportLabels[s.transport], s.carrier, num(s.km), border ? `${s.fromCountry}–${s.toCountry}` : '', border ? s.crossingAt : '', yesNo(s.private), s.note];
-      }),
+      // Přechody hranic s časem v ISO tvaru, např. „CZ–AT 2026-10-14T09:45, AT–SI čas nezadán“.
+      .map((s, i) => [i + 1, s.fromPlace, s.fromCountry, s.toPlace, s.toCountry, s.departure, s.arrival, transportLabels[s.transport], s.carrier, num(s.km), crossingsText(s, (t) => t), yesNo(s.private), s.note]),
   };
 }
 

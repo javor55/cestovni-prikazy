@@ -9,7 +9,7 @@ const CODES = [
 
 const names = new Intl.DisplayNames(['cs'], { type: 'region' });
 
-export const countryName = (code: string) => names.of(code) ?? code;
+export const countryName = (code: string) => (/^[A-Z]{2}$/.test(code) ? (names.of(code) ?? code) : code);
 
 export const countryOptions: [string, string][] = [
   ['CZ', 'Česko'],

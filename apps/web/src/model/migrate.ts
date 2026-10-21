@@ -21,6 +21,11 @@ export function migrateTrip(raw: unknown): TripDoc {
       if (typeof v === 'string') doc.perDiemRates[cur] = { rate: v, unit: '1', rateDate: '' };
     }
   }
+  if (version < 3) {
+    // v3: místo a datum vystavení cestovního příkazu.
+    t.issuedPlace ??= '';
+    t.issuedOn ??= '';
+  }
   t.schemaVersion = SCHEMA_VERSION;
   return t as unknown as TripDoc;
 }

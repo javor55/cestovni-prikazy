@@ -1,0 +1,75 @@
+import type { DocModel } from '../src/model.js';
+
+export function sample(): DocModel {
+  return {
+    version: 1,
+    number: 'CP-2026-0042',
+    createdAt: '21. 10. 2026 14:05',
+    ruleSet: 'CZ-2026 v1.0.0',
+    issued: { place: 'Praha', date: '12. 10. 2026' },
+    employer: { name: 'Ukázková firma s.r.o.', ico: '00000000', seat: 'Ukázková 12, Praha 1', unit: '', costCenter: 'NS-210', project: 'Z-2026-117', sector: 'Podnikatelská sféra' },
+    employee: { name: 'Jana Ukázková', personalNumber: '1042', position: 'Nákupní specialistka', department: 'Nákup', regularWorkplace: 'Praha, Ukázková 12', address: '' },
+    trip: {
+      kind: 'Zahraniční',
+      purpose: 'Jednání s dodavatelem o technických podmínkách dodávky',
+      startPlace: 'Praha',
+      endPlace: 'Praha',
+      plannedStart: '14. 10. 2026 6:30',
+      plannedEnd: '16. 10. 2026 19:00',
+      destinations: 'Vídeň',
+      via: 'Brno, Mikulov',
+      transport: 'Soukromé auto',
+      advances: ['100,00 EUR (12. 10. 2026)'],
+      note: '',
+    },
+    actual: { start: '14. 10. 2026 6:30', end: '16. 10. 2026 18:30', km: '686 km' },
+    segments: [
+      { n: '1', from: 'Praha (CZ)', to: 'Vídeň (AT)', departure: '14. 10. 6:30', arrival: '14. 10. 11:00', transport: 'Soukromé auto', km: '343', border: 'CZ–AT 14. 10. 9:45' },
+      { n: '2', from: 'Vídeň (AT)', to: 'Praha (CZ)', departure: '16. 10. 14:00', arrival: '16. 10. 18:30', transport: 'Soukromé auto', km: '343', border: 'AT–CZ 16. 10. 15:15' },
+    ],
+    perDiem: {
+      days: [
+        { date: 'st 14. 10. 2026', domesticTime: '3 h 15 min', foreignTime: '14 h 15 min', domestic: '', domesticAmount: '', country: 'Rakousko', tier: '2/3', base: '45,00 EUR', tierAmount: '30,00 EUR', meals: '', reduction: '', amount: '30,00 EUR', pocketMoney: '' },
+        { date: 'čt 15. 10. 2026', domesticTime: '0 h', foreignTime: '24 h', domestic: '', domesticAmount: '', country: 'Rakousko', tier: '1/1', base: '45,00 EUR', tierAmount: '45,00 EUR', meals: 'S + O', reduction: '2 × 25 % = −22,50 EUR', amount: '23,00 EUR', pocketMoney: '' },
+        { date: 'pá 16. 10. 2026', domesticTime: '3 h 15 min', foreignTime: '15 h 15 min', domestic: '', domesticAmount: '', country: 'Rakousko', tier: '2/3', base: '45,00 EUR', tierAmount: '30,00 EUR', meals: 'S', reduction: '1 × 35 % = −10,50 EUR', amount: '20,00 EUR', pocketMoney: '' },
+      ],
+      domesticTotal: '0,00 Kč',
+      foreignTotal: '73,00 EUR',
+      reductionTotal: '−33,00 EUR',
+      note: 'S/O/V = bezplatná snídaně/oběd/večeře. Stravné za den zaokrouhleno na celé jednotky měny nahoru.',
+      hasForeign: true,
+    },
+    expenses: [
+      { n: '1', date: '16. 10. 2026', category: 'Ubytování', description: '2 noci', supplier: 'Hotel Ukázka', amount: '238,00 EUR', rate: '24,422 · potvrzení banky', czk: '5 812,44', payment: 'Soukromá karta', docs: '1+1', note: '' },
+    ],
+    expensesNote: 'Dokl. = počet účetních dokladů + dokladů o zaplacení.',
+    vehicle: {
+      vehicle: 'Škoda Octavia, 1AB 2345',
+      owner: 'Jana Ukázková',
+      fuel: 'Benzin 95',
+      consumption: '5,60 l/100 km',
+      km: '686 km',
+      basic: '4 047,40',
+      basicCalc: '686 km × 5,90 Kč',
+      fuelComp: '1 494,38',
+      fuelCalc: '38,42 l × 38,90 Kč',
+      fuelPriceSource: 'cena z dokladu',
+      total: '5 541,78',
+      requested: 'ano',
+    },
+    settlement: {
+      rows: [
+        { label: 'Zahraniční stravné', foreign: '73,00 EUR', czk: '' },
+        { label: 'Výdaje uhrazené zaměstnancem', foreign: '', czk: '5 812,44' },
+        { label: 'Náhrada za soukromé vozidlo', foreign: '', czk: '5 541,78' },
+        { label: 'Záloha 12. 10. 2026', foreign: '−100,00 EUR', czk: '' },
+        { label: 'Přeplatek EUR × 24,35', foreign: '−27,00 EUR', czk: '−657,45' },
+      ],
+      payoutLabel: 'K výplatě zaměstnanci',
+      payout: '10 697,00 Kč',
+      headline: [{ label: 'Nárok v Kč', value: '11 354,22 Kč' }],
+    },
+    documentCount: '2',
+    declaration: 'Prohlašuji, že jsem pracovní cestu vykonal(a) podle uvedených údajů, že všechny údaje jsou pravdivé a úplné a že předložené doklady se vztahují k této pracovní cestě.',
+  };
+}

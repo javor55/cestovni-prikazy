@@ -1,0 +1,101 @@
+import { renderToBuffer } from '@react-pdf/renderer';
+import { getDocument } from 'pdfjs-dist/legacy/build/pdf.mjs';
+import { beforeAll, describe, expect, it } from 'vitest';
+import { documentElement, fileName, registerFonts, type DocModel, type DocPart, type Layout } from '../src/index.js';
+import { sample } from './sample.js';
+
+const font = (f: string) => new URL(`../fonts/${f}`, import.meta.url).pathname;
+
+beforeAll(() => registerFonts({ regular: font('NotoSans-Regular.ttf'), bold: font('NotoSans-Bold.ttf'), serifBold: font('NotoSerif-Bold.ttf') }));
+
+/** Vyrenderuje PDF a vrátí text jednotlivých stran. */
+async function pages(m: DocModel, layout: Layout, part: DocPart): Promise<string[]> {
+  const buf = await renderToBuffer(documentElement(m, layout, part) as Parameters<typeof renderToBuffer>[0]);
+  expect(buf.subarray(0, 5).toString()).toBe('%PDF-');
+  const task = getDocument({ data: new Uint8Array(buf), useSystemFonts: false });
+  const doc = await task.promise;
+  const out: string[] = [];
+  for (let i = 1; i <= doc.numPages; i++) {
+    const c = await (await doc.getPage(i)).getTextContent();
+    out.push(c.items.map((x) => ('str' in x ? x.str : '')).join(' ').replace(/\s+/g, ' '));
+  }
+  await task.destroy();
+  return out;
+}
+
+describe.each(['modern', 'conservative'] as const)('šablona %s', (layout) => {
+  it('celý dokument: části A i B, číslo příkazu a číslování na každé straně', async () => {
+    const p = await pages(sample(), layout, 'full');
+    expect(p.length).toBeGreaterThanOrEqual(2);
+    p.forEach((text, i) => {
+      expect(text).toContain('CP-2026-0042');
+      expect(text).toMatch(layout === 'modern' ? new RegExp(`strana ${i + 1}/${p.length}`) : new RegExp(`Strana ${i + 1} z ${p.length}`));
+    });
+    const all = p.join(' ');
+    expect(all).toMatch(/cestovní příkaz/i);
+    expect(all).toMatch(/vyúčtování pracovní cesty/i);
+    expect(all).toContain('Jana Ukázková');
+    expect(all).toContain('Účel');
+    expect(all).toContain('10 697,00 Kč');
+    expect(all).toContain('24,422');
+    expect(all).toContain('CZ-2026 v1.0.0');
+  });
+
+  it('jen část A má jednu stranu bez vyúčtování', async () => {
+    const p = await pages(sample(), layout, 'A');
+    expect(p).toHaveLength(1);
+    expect(p[0]).not.toMatch(/vyúčtování pracovní cesty/i);
+  });
+
+  it('dlouhé texty, cizí znaky a mnoho úseků se zalomí na více stran a číslování sedí', async () => {
+    const m = sample();
+    m.trip.purpose = 'Jednání ' + 'o dlouhodobé spolupráci a technických podmínkách dodávky '.repeat(12);
+    m.employee.name = 'Žofie Šťastná-Øster Großmann';
+    m.segments = Array.from({ length: 40 }, (_, i) => ({ ...m.segments[0]!, n: String(i + 1), to: i % 2 ? 'Łódź (PL)' : 'Győr (HU)' }));
+    const p = await pages(m, layout, 'full');
+    expect(p.length).toBeGreaterThanOrEqual(3);
+    expect(p.join(' ')).toContain('Žofie Šťastná-Øster Großmann');
+    expect(p.join(' ')).toContain('Łódź');
+    expect(p.join(' ')).toContain('Győr');
+    p.forEach((text) => expect(text).toContain('CP-2026-0042'));
+  });
+
+  it('tuzemská cesta bez vozidla a výdajů', async () => {
+    const m = sample();
+    m.trip.kind = 'Tuzemská';
+    m.perDiem = {
+      days: [{ date: 'út 10. 3. 2026', domesticTime: '8 h 30 min', foreignTime: '0 h', domestic: '5–12 h: 155,00 Kč − 1 × 70 %', domesticAmount: '47,00 Kč', country: '', tier: '', base: '', tierAmount: '', meals: 'O', reduction: '', amount: '', pocketMoney: '' }],
+      domesticTotal: '47,00 Kč',
+      foreignTotal: '',
+      reductionTotal: '',
+      note: '',
+      hasForeign: false,
+    };
+    m.expenses = [];
+    delete m.vehicle;
+    const all = (await pages(m, layout, 'full')).join(' ');
+    expect(all).toContain('47,00 Kč');
+    expect(all).not.toContain('Soukromé vozidlo ·');
+  });
+});
+
+describe('název souboru', () => {
+  it('podle zadání a bez nebezpečných znaků', () => {
+    expect(fileName({ number: 'CP-2026-0042' }, 'full')).toBe('CP-2026-0042_Cestovni-prikaz-a-zadost-o-vyplaceni.pdf');
+    expect(fileName({ number: 'CP-2026-0042' }, 'A')).toBe('CP-2026-0042_Cestovni-prikaz.pdf');
+    expect(fileName({ number: '../a/b c' }, 'A')).toBe('a-b-c_Cestovni-prikaz.pdf');
+    expect(fileName({ number: '' }, 'full')).toBe('CP_Cestovni-prikaz-a-zadost-o-vyplaceni.pdf');
+  });
+});
+
+describe('konzervativní šablona', () => {
+  it('čísluje oddíly průběžně, i když výdaje a vozidlo chybí', async () => {
+    const m = sample();
+    m.expenses = [];
+    delete m.vehicle;
+    const all = (await pages(m, 'conservative', 'full')).join(' ');
+    expect(all).toContain('7. Souhrn vyúčtování');
+    expect(all).toContain('8. Prohlášení zaměstnance');
+    expect(all).not.toContain('9.');
+  });
+});

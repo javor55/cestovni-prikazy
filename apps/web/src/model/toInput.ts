@@ -33,7 +33,10 @@ export function actualTimes(doc: TripDoc): { start: string; end: string } {
   };
 }
 
-export function toInput(doc: TripDoc): Mapped {
+/** Počty dokladů k výdajům podle id výdaje. Bez nich se kontrola dokladů nespouští (např. v testech). */
+export type DocCounts = Record<string, { accounting: number; payment: number }>;
+
+export function toInput(doc: TripDoc, docs?: DocCounts): Mapped {
   const issues: Issue[] = [];
   const err = (code: string, message: string, ref?: Record<string, string>) => issues.push({ severity: 'error', code, message, ...(ref && { ref }) });
   const { start, end } = actualTimes(doc);
@@ -59,7 +62,13 @@ export function toInput(doc: TripDoc): Mapped {
       } else {
         const rate = normalizeDecimal(e.rate);
         const unit = Number(normalizeDecimal(e.rateUnit) ?? '1') || 1;
-        conversion = { source: e.rateSource, ...(rate && { rate }), unit, ...(e.rateSource === 'MANUAL' && e.note && { manualReason: e.note }) };
+        conversion = {
+          source: e.rateSource,
+          ...(rate && { rate }),
+          unit,
+          ...(e.rateDate && { rateDate: e.rateDate }),
+          ...(e.rateSource === 'MANUAL' && e.note && { manualReason: e.note }),
+        };
       }
     }
     expenses.push({
@@ -75,6 +84,7 @@ export function toInput(doc: TripDoc): Mapped {
       paymentMethod: e.paymentMethod,
       payer: payerOf(e.paymentMethod),
       reimbursable: e.reimbursable,
+      ...(docs && { attachments: docs[e.id] ?? { accounting: 0, payment: 0 } }),
     });
   });
 
@@ -91,7 +101,7 @@ export function toInput(doc: TripDoc): Mapped {
       id: a.id,
       amount: { amount, currency },
       providedOn: a.providedOn,
-      ...(currency !== 'CZK' && rate && { conversion: { source: 'CNB', rate } }),
+      ...(currency !== 'CZK' && rate && { conversion: { source: 'CNB', rate, unit: Number(normalizeDecimal(a.rateUnit) ?? '1') || 1, ...(a.rateDate && { rateDate: a.rateDate }) } }),
     });
   });
 
@@ -135,9 +145,9 @@ export function toInput(doc: TripDoc): Mapped {
   const pocket = doc.employerRates.pocketMoneyPct ? Number(normalizeDecimal(doc.employerRates.pocketMoneyPct)) : 0;
 
   const perDiemRates: TripInput['perDiemRates'] = {};
-  for (const [cur, text] of Object.entries(doc.perDiemRates)) {
-    const rate = normalizeDecimal(text);
-    if (rate) perDiemRates[cur] = { source: 'CNB', rate };
+  for (const [cur, r] of Object.entries(doc.perDiemRates)) {
+    const rate = normalizeDecimal(r.rate);
+    if (rate) perDiemRates[cur] = { source: 'CNB', rate, unit: Number(normalizeDecimal(r.unit) ?? '1') || 1, ...(r.rateDate && { rateDate: r.rateDate }) };
   }
 
   const input: TripInput = {

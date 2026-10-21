@@ -11,7 +11,7 @@ function viennaTrip(): TripDoc {
   const back = { ...emptySegment(out), toPlace: 'Praha', toCountry: 'CZ', departure: '2026-10-16T14:00', arrival: '2026-10-16T18:30', crossingAt: '2026-10-16T15:15' };
   t.segments = [out, back];
   t.meals = { '2026-10-15': { breakfast: true, lunch: true, dinner: false }, '2026-10-16': { breakfast: true, lunch: false, dinner: false } };
-  t.advances = [{ id: 'a', amount: '100', currency: 'EUR', providedOn: '2026-10-12', rate: '24,35' }];
+  t.advances = [{ id: 'a', amount: '100', currency: 'EUR', providedOn: '2026-10-12', rate: '24,35', rateUnit: '1', rateDate: '2026-10-12' }];
   t.expenses = [
     { ...emptyExpense('2026-10-16'), category: 'Ubytování', amount: '238', currency: 'EUR', rateSource: 'BANK_CONFIRMATION', czkAmount: '5 812,44' },
     { ...emptyExpense('2026-10-16'), category: 'Parkovné', amount: '36', currency: 'EUR', paymentMethod: 'ADVANCE' },

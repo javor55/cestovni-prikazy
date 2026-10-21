@@ -2,13 +2,14 @@
 
 Webová aplikace pro přípravu cestovního příkazu, výpočet cestovních náhrad podle českého zákoníku práce a sestavení kompletní dokumentace (PDF, XLSX, CSV, JSON) k odevzdání účetní.
 
-Hotové je výpočetní jádro (`packages/core`) se sazbami pro rok 2026 (`packages/rules`) a webová aplikace s průvodcem vyplněním cesty (`apps/web`). Data se ukládají jen v prohlížeči. PDF, přílohy, kurzy ČNB a exporty přibudou v dalších milnících. Dokumentace je v adresáři [`docs/`](docs/).
+Hotové je výpočetní jádro (`packages/core`) se sazbami pro rok 2026 (`packages/rules`), webová aplikace s průvodcem vyplněním cesty a přílohami dokladů (`apps/web`) a server s kurzy ČNB (`apps/server`). Data i doklady se ukládají jen v prohlížeči. PDF a exporty přibudou v dalších milnících. Dokumentace je v adresáři [`docs/`](docs/).
 
 ```
 pnpm install
-pnpm --filter @cp/web dev   # vývojový server na http://localhost:5173
-pnpm check                  # kontrola typů + jednotkové testy
-pnpm e2e                    # testy v prohlížeči (mobil 320 px, mobil, desktop)
+pnpm --filter @cp/server dev   # server s kurzy ČNB na http://localhost:8787
+pnpm --filter @cp/web dev      # aplikace na http://localhost:5173 (/api přesměruje na server)
+pnpm check                     # kontrola typů + jednotkové testy
+pnpm e2e                       # testy v prohlížeči (mobil 320 px, mobil, desktop)
 ```
 
 
@@ -19,3 +20,4 @@ pnpm e2e                    # testy v prohlížeči (mobil 320 px, mobil, deskto
 | [03 – Návrh dokumentů](docs/03-navrh-dokumentu.md) | Dva návrhy PDF s ukázkami |
 | [04 – UX návrh](docs/04-ux-navrh.md) | Klikací prototyp obrazovek |
 | [05 – Technický návrh](docs/05-technicky-navrh.md) | Architektura, výpočetní jádro, PDF, bezpečnost, nasazení |
+| [06 – Aktualizace sazeb](docs/06-aktualizace-sazeb.md) | Nový rok, změna cen paliv, zahraniční stravné, měny a státy, kurzy ČNB |

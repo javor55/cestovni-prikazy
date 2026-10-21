@@ -24,6 +24,9 @@
 
 html {
   -webkit-text-size-adjust: 100%;
+  /* Prvek, na který se posune fokus, nesmí zůstat pod přichycenou hlavičkou ani patičkou. */
+  scroll-padding-top: 8rem;
+  scroll-padding-bottom: 6rem;
 }
 body {
   @apply bg-ground text-ink font-sans antialiased;

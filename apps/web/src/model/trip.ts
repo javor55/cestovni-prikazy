@@ -4,7 +4,7 @@
 import type { EmployerSector, PaymentMethod } from '@cp/core';
 import type { FuelType, VehicleType } from '@cp/rules';
 
-export const SCHEMA_VERSION = 1;
+export const SCHEMA_VERSION = 2;
 
 export type TransportKind = 'soukrome-auto' | 'firemni-auto' | 'vlak' | 'autobus' | 'letadlo' | 'mhd' | 'taxi' | 'jine';
 
@@ -45,6 +45,8 @@ export interface ExpenseDoc {
   rateSource: RateSource;
   rate: string;
   rateUnit: string;
+  /** Datum kurzovního lístku ČNB, ze kterého je kurz. */
+  rateDate: string;
   /** Stržená částka v Kč podle potvrzení banky. */
   czkAmount: string;
   documentNumber: string;
@@ -59,6 +61,8 @@ export interface AdvanceDoc {
   currency: string;
   providedOn: string;
   rate: string;
+  rateUnit: string;
+  rateDate: string;
 }
 
 export interface VehicleDoc {
@@ -110,9 +114,15 @@ export interface TripDoc {
   advances: AdvanceDoc[];
   vehicle: VehicleDoc;
   employerRates: { domestic: Record<string, string>; pocketMoneyPct: string; foreignBase: Record<string, { amount: string; currency: string }> };
-  /** Kurz pro přepočet zahraničního stravného v měně bez zálohy (kurz ČNB, zatím zadaný ručně). */
-  perDiemRates: Record<string, string>;
+  /** Kurz pro přepočet zahraničního stravného v měně, ve které nebyla záloha. */
+  perDiemRates: Record<string, RateDoc>;
   combineShortDomesticDays: boolean;
+}
+
+export interface RateDoc {
+  rate: string;
+  unit: string;
+  rateDate: string;
 }
 
 export const newId = () => crypto.randomUUID();
@@ -148,6 +158,7 @@ export function emptyExpense(date = ''): ExpenseDoc {
     rateSource: 'CNB',
     rate: '',
     rateUnit: '1',
+    rateDate: '',
     czkAmount: '',
     documentNumber: '',
     reimbursable: true,

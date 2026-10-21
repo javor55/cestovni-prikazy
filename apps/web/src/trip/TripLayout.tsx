@@ -1,9 +1,10 @@
 import { calculate } from '@cp/core';
+import { useLiveQuery } from 'dexie-react-hooks';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router';
-import { toInput } from '../model/toInput.js';
+import { toInput, type DocCounts } from '../model/toInput.js';
 import type { TripDoc } from '../model/trip.js';
-import { deleteTrip, getTrip, saveTrip, touchTrip } from '../storage/db.js';
+import { db, deleteTrip, getTrip, saveTrip, touchTrip } from '../storage/db.js';
 import { ConfirmDialog } from '../ui/ConfirmDialog.js';
 import { Icon, icons, LinkButton } from '../ui/controls.js';
 import { TripContext, type TripCtx } from './context.js';
@@ -77,7 +78,18 @@ export function TripLayout() {
     setSaved(false);
   }, []);
 
-  const mapped = useMemo(() => (trip ? toInput(trip) : undefined), [trip]);
+  const attachments = useLiveQuery(() => db.attachments.where('tripId').equals(id).toArray(), [id]);
+  const docCounts = useMemo(() => {
+    const counts: DocCounts = {};
+    for (const a of attachments ?? []) {
+      if (!a.expenseId) continue;
+      const c = (counts[a.expenseId] ??= { accounting: 0, payment: 0 });
+      if (a.kind === 'accounting') c.accounting++;
+      if (a.kind === 'payment') c.payment++;
+    }
+    return counts;
+  }, [attachments]);
+  const mapped = useMemo(() => (trip ? toInput(trip, attachments ? docCounts : undefined) : undefined), [trip, attachments, docCounts]);
   const result = useMemo(() => (mapped?.input ? calculate(mapped.input) : undefined), [mapped]);
 
   if (trip === undefined) return <p className="p-6 text-muted">Načítám…</p>;

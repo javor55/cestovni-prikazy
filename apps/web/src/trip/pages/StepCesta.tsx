@@ -1,4 +1,5 @@
 import { currencyOptions } from '../../model/countries.js';
+import { CnbButton } from '../../rates/CnbButton.js';
 import { newId, suggestNumber } from '../../model/trip.js';
 import { Button, Card, H2, Icon, icons, NumberField, RadioCards, SelectField, TextArea, TextField } from '../../ui/controls.js';
 import { useTrip } from '../context.js';
@@ -54,15 +55,28 @@ export function StepCesta() {
             <NumberField label="Částka" value={a.amount} onChange={(v) => update((d) => void (d.advances[i]!.amount = v))} />
             <SelectField label="Měna" value={a.currency} options={currencyOptions} onChange={(v) => update((d) => void (d.advances[i]!.currency = v))} />
             <TextField label="Vyplaceno dne" type="date" value={a.providedOn} onChange={(v) => update((d) => void (d.advances[i]!.providedOn = v))} />
-            {a.currency !== 'CZK' ? (
-              <NumberField
-                label={`Kurz Kč za 1 ${a.currency}`}
-                value={a.rate}
-                onChange={(v) => update((d) => void (d.advances[i]!.rate = v))}
-                hint="Kurz ČNB ze dne vyplacení zálohy."
-              />
-            ) : (
-              <div />
+            {a.currency !== 'CZK' && (
+              <div className="flex flex-col gap-2 sm:col-span-4">
+                <NumberField
+                  label={`Kurz Kč za ${a.rateUnit || 1} ${a.currency}`}
+                  value={a.rate}
+                  onChange={(v) => update((d) => void (d.advances[i]!.rate = v))}
+                  hint="Kurz ČNB ze dne vyplacení zálohy. Tímto kurzem se přepočte doplatek nebo přeplatek."
+                />
+                <CnbButton
+                  date={a.providedOn}
+                  currency={a.currency}
+                  rateDate={a.rateDate}
+                  onRate={(r) =>
+                    update((d) => {
+                      const x = d.advances[i]!;
+                      x.rate = r.rate.replace('.', ',');
+                      x.rateUnit = String(r.amount);
+                      x.rateDate = r.rateDate;
+                    })
+                  }
+                />
+              </div>
             )}
             <Button variant="danger" className="sm:col-span-4 sm:justify-self-start" onClick={() => update((d) => void d.advances.splice(i, 1))}>
               <Icon d={icons.trash} /> Odebrat zálohu
@@ -72,7 +86,7 @@ export function StepCesta() {
         <Button
           variant="secondary"
           className="self-start"
-          onClick={() => update((d) => void d.advances.push({ id: newId(), amount: '', currency: d.kind === 'foreign' ? 'EUR' : 'CZK', providedOn: '', rate: '' }))}
+          onClick={() => update((d) => void d.advances.push({ id: newId(), amount: '', currency: d.kind === 'foreign' ? 'EUR' : 'CZK', providedOn: '', rate: '', rateUnit: '1', rateDate: '' }))}
         >
           <Icon d={icons.plus} /> Přidat zálohu
         </Button>

@@ -183,7 +183,7 @@ Import: limit počtu souborů (500) a rozbalené velikosti (500 MB), přijetí j
 | Milník | Obsah |
 |---|---|
 | 1 | **Výpočetní jádro a sady pravidel – hotovo** |
-| 2 | Kostra webové aplikace, průvodce formuláři, lokální ukládání, validace v UI, napojení na jádro |
+| 2 | **Kostra webové aplikace, průvodce formuláři, lokální ukládání, validace v UI, napojení na jádro – hotovo** |
 | 3 | Přílohy (focení, HEIC, ořez, otočení), kurzy ČNB, úplná tabulka zahraničních sazeb |
 | 4 | PDF k podpisu (obě šablony) ze snímku výpočtu |
 | 5 | Podepsaný dokument, PNG podpis, kompletní PDF |

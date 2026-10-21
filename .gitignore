@@ -1,2 +1,5 @@
 node_modules/
 design/pdf-ukazky/out/
+apps/web/dist/
+apps/web/test-results/
+apps/web/playwright-report/

@@ -5,7 +5,9 @@
   "packageManager": "pnpm@10.28.0",
   "scripts": {
     "test": "vitest run",
-    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p apps/web/tsconfig.json --noEmit",
+    "build": "pnpm --filter @cp/web build",
+    "e2e": "pnpm --filter @cp/web e2e",
     "check": "pnpm typecheck && pnpm test"
   },
   "devDependencies": {

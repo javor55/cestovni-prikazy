@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<title>Souhrn – desktop</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#1F4FA8}a:hover{color:#163B7E}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;border-radius:10px;font-weight:600;font-size:15px;text-decoration:none;box-sizing:border-box;padding:0 16px}
+.btn-primary{background:#1F4FA8;color:#fff}.btn-primary:hover{color:#fff;background:#163B7E}
+.btn-secondary{background:#fff;color:#1A1D21;border:1px solid #C9CDD3}.btn-secondary:hover{color:#1A1D21}
+.step{display:flex;align-items:center;gap:10px;min-height:44px;padding:0 12px;border-radius:8px;text-decoration:none;color:#1A1D21;font-size:15px}
+.step:hover{color:#1A1D21;background:#EEF0F3}
+.st{font-size:12px;font-weight:600;margin-left:auto}
+.card{display:flex;flex-direction:column;gap:2px;padding:14px 16px;background:#fff;border:1px solid #E3E6EA;border-radius:12px}
+.card span{font-size:13px;color:#4A5260}.card strong{font-size:20px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{text-align:left;font-size:12px;font-weight:600;color:#4A5260;padding:10px 12px;border-bottom:1px solid #C9CDD3;white-space:nowrap}
+td{padding:10px 12px;border-bottom:1px solid #EEF0F3;white-space:nowrap}
+.num{text-align:right;font-variant-numeric:tabular-nums}
+</style>
+</helmet>
+<div style="box-sizing: border-box; min-height: 900px; background: #F6F7F9; color: #1A1D21; font-family: Inter, system-ui, sans-serif">
+  <header style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 12px 24px; background: #fff; border-bottom: 1px solid #E3E6EA">
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#1F4FA8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"></rect><path d="M8 8h8M8 12h8M8 16h5"></path></svg>
+    <div style="display: flex; flex-direction: column; flex-grow: 1">
+      <strong style="font-size: 16px">Vídeň – jednání s dodavatelem</strong>
+      <span style="font-size: 13px; color: #5B6472">CP-2026-0042 · 14.–16. 10. 2026 · uloženo v prohlížeči 10:42</span>
+    </div>
+    <a class="btn btn-secondary" href="#">Stáhnout projekt</a>
+    <a class="btn btn-secondary" href="#" style="color: #A3201A; border-color: #D9A3A0">Smazat data</a>
+  </header>
+
+  <div style="display: flex; flex-wrap: wrap; gap: 24px; padding: 24px; max-width: 1360px; box-sizing: border-box; margin: 0 auto">
+    <nav aria-label="Kroky" style="flex: 1 1 240px; max-width: 280px; display: flex; flex-direction: column; gap: 2px">
+      <a class="step" href="#">1 Kdo cestuje<span class="st" style="color: #1E6B3A">✓ hotovo</span></a>
+      <a class="step" href="#">2 Údaje o cestě<span class="st" style="color: #1E6B3A">✓ hotovo</span></a>
+      <a class="step" href="#">3 Průběh cesty<span class="st" style="color: #8A5300">! 1 varování</span></a>
+      <a class="step" href="#">4 Bezplatná jídla<span class="st" style="color: #1E6B3A">✓ hotovo</span></a>
+      <a class="step" href="#">5 Výdaje<span class="st" style="color: #8A5300">! 1 varování</span></a>
+      <a class="step" href="#">6 Vozidlo<span class="st" style="color: #1E6B3A">✓ hotovo</span></a>
+      <a class="step" href="#" aria-current="step" style="background: #EAF1FC; font-weight: 600">7 Souhrn</a>
+      <a class="step" href="#">8 Kontrola</a>
+      <a class="step" href="#">9 PDF k podpisu</a>
+    </nav>
+
+    <main style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column; gap: 20px">
+      <div style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px">
+        <div>
+          <span style="font-size: 14px; color: #4A5260">K výplatě zaměstnanci</span>
+          <div style="font-size: 40px; font-weight: 700; letter-spacing: -0.01em">11 958 Kč</div>
+        </div>
+        <a class="btn btn-primary" href="#">Zkontrolovat a vytvořit PDF</a>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px">
+        <div class="card"><span>Stravné</span><strong>68,00 EUR</strong><span>tuzemské 0 Kč</span></div>
+        <div class="card"><span>Výdaje zaměstnance</span><strong>6 123,67 Kč</strong><span>ze zálohy 44 EUR</span></div>
+        <div class="card"><span>Soukromé vozidlo</span><strong>5 541,94 Kč</strong><span>686 km</span></div>
+        <div class="card"><span>Záloha</span><strong>100,00 EUR</strong><span>doplatek 12 EUR = 292,20 Kč</span></div>
+      </div>
+
+      <section style="background: #fff; border: 1px solid #E3E6EA; border-radius: 12px; padding: 16px">
+        <h2 style="margin: 0 0 8px; font-size: 17px">Stravné po dnech</h2>
+        <div style="overflow-x: auto">
+          <table>
+            <thead><tr><th>Den</th><th>V ČR</th><th>V zahraničí</th><th>Stát</th><th class="num">Základní sazba</th><th>Pásmo</th><th>Bezplatná jídla</th><th class="num">Krácení</th><th class="num">Stravné</th></tr></thead>
+            <tbody>
+              <tr><td>St 14. 10.</td><td>3 h 15 min</td><td>14 h 15 min</td><td>Rakousko</td><td class="num">45,00 EUR</td><td>12–18 h · 2/3</td><td>–</td><td class="num">–</td><td class="num">30,00 EUR</td></tr>
+              <tr><td>Čt 15. 10.</td><td>0 h</td><td>24 h</td><td>Rakousko</td><td class="num">45,00 EUR</td><td>nad 18 h · 1/1</td><td>snídaně, oběd</td><td class="num">−22,50</td><td class="num">23,00 EUR</td></tr>
+              <tr><td>Pá 16. 10.</td><td>3 h 15 min</td><td>15 h 15 min</td><td>Rakousko</td><td class="num">45,00 EUR</td><td>12–18 h · 2/3</td><td>snídaně</td><td class="num">−15,75</td><td class="num">15,00 EUR</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p style="margin: 10px 0 0; font-size: 13px; color: #5B6472">Ilustrativní sazby · krácení ze základní sazby · zaokrouhlení na celé EUR nahoru · <a href="#">Pravidla CZ-2026</a></p>
+      </section>
+
+      <section style="background: #fff; border: 1px solid #E3E6EA; border-radius: 12px; padding: 16px">
+        <h2 style="margin: 0 0 8px; font-size: 17px">Výdaje</h2>
+        <div style="overflow-x: auto">
+          <table>
+            <thead><tr><th>#</th><th>Výdaj</th><th class="num">Částka</th><th>Kurz</th><th class="num">Kč</th><th>Úhrada</th><th>Doklady</th></tr></thead>
+            <tbody>
+              <tr><td>1</td><td>Ubytování · Hotel Ukázka</td><td class="num">238,00 EUR</td><td>24,422 · banka</td><td class="num">5 812,44</td><td>Soukromá karta</td><td>✓ faktura, ✓ platba</td></tr>
+              <tr><td>2</td><td>Parkovné · hotelová garáž</td><td class="num">36,00 EUR</td><td>24,35 · záloha</td><td class="num">876,60</td><td>Ze zálohy</td><td>✓ účtenka</td></tr>
+              <tr><td>3</td><td>Dálniční známka AT</td><td class="num">12,80 EUR</td><td>24,315 · ČNB</td><td class="num">311,23</td><td>Soukromá karta</td><td style="color: #8A5300; font-weight: 600">! chybí platba</td></tr>
+              <tr><td>4</td><td>MHD · jízdenka 24 h</td><td class="num">8,00 EUR</td><td>24,35 · záloha</td><td class="num">194,80</td><td>Ze zálohy</td><td>✓ jízdenka</td></tr>
+              <tr><td>5</td><td>Pohonné hmoty (cena PHM)</td><td class="num">1 758,28 Kč</td><td>–</td><td class="num">–</td><td>Soukromá karta</td><td>✓ účtenka</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

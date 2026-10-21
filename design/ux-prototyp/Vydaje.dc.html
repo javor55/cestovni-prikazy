@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<title>Výdaje</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#1F4FA8}a:hover{color:#163B7E}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;min-height:48px;border-radius:10px;font-weight:600;font-size:16px;text-decoration:none;box-sizing:border-box;padding:0 18px}
+.btn-primary{background:#1F4FA8;color:#fff}.btn-primary:hover{color:#fff;background:#163B7E}
+.btn-secondary{background:#fff;color:#1A1D21;border:1px solid #C9CDD3}.btn-secondary:hover{color:#1A1D21}
+.exp{display:flex;flex-direction:column;gap:4px;padding:11px 14px;background:#fff;border:1px solid #E3E6EA;border-radius:12px;text-decoration:none;color:#1A1D21}
+.row{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.meta{font-size:13px;color:#4A5260}
+.ok{font-size:12px;font-weight:600;color:#1E6B3A}
+.warn{font-size:12px;font-weight:600;color:#8A5300}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #F6F7F9; color: #1A1D21; font-family: Inter, system-ui, sans-serif; display: flex; flex-direction: column">
+  <header style="display: flex; flex-direction: column; gap: 10px; padding: 12px 16px; background: #fff; border-bottom: 1px solid #E3E6EA">
+    <div style="display: flex; align-items: center; gap: 8px">
+      <a href="Jidla.dc.html" aria-label="Zpět" style="display: flex; width: 44px; height: 44px; align-items: center; justify-content: center; color: #1A1D21"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"></path></svg></a>
+      <div style="display: flex; flex-direction: column; flex-grow: 1">
+        <span style="font-size: 12px; color: #5B6472">CP-2026-0042 · Vídeň</span>
+        <strong style="font-size: 17px">Výdaje</strong>
+      </div>
+      <span style="font-size: 13px; color: #4A5260">Krok 5 z 9</span>
+    </div>
+    <div style="height: 4px; background: #E3E6EA; border-radius: 2px"><div style="width: 55%; height: 4px; background: #1F4FA8; border-radius: 2px"></div></div>
+  </header>
+
+  <main style="flex-grow: 1; padding: 16px; display: flex; flex-direction: column; gap: 10px; overflow: hidden">
+    <div class="row" style="font-size: 14px"><span>5 výdajů · 6 dokladů</span><strong>7 195,07 Kč</strong></div>
+
+    <a class="exp" href="#">
+      <div class="row"><strong style="font-size: 15px">Ubytování · Hotel Ukázka</strong><strong style="font-size: 15px">238,00 EUR</strong></div>
+      <div class="row"><span class="meta">16. 10. · soukromá karta</span><span class="meta">5 812,44 Kč</span></div>
+      <span class="ok">✓ Faktura · ✓ Potvrzení banky (kurz 24,422)</span>
+    </a>
+    <a class="exp" href="#">
+      <div class="row"><strong style="font-size: 15px">Parkovné · hotelová garáž</strong><strong style="font-size: 15px">36,00 EUR</strong></div>
+      <div class="row"><span class="meta">16. 10. · hotovost ze zálohy</span><span class="meta">876,60 Kč</span></div>
+      <span class="ok">✓ Účtenka</span>
+    </a>
+    <a class="exp" href="#" style="border-color: #E8A23A; background: #FFF8EC">
+      <div class="row"><strong style="font-size: 15px">Dálniční známka AT</strong><strong style="font-size: 15px">12,80 EUR</strong></div>
+      <div class="row"><span class="meta">13. 10. · soukromá karta</span><span class="meta">311,23 Kč</span></div>
+      <span class="warn">! Chybí doklad o zaplacení – doporučeno u soukromé karty</span>
+    </a>
+    <a class="exp" href="#">
+      <div class="row"><strong style="font-size: 15px">MHD · jízdenka 24 h</strong><strong style="font-size: 15px">8,00 EUR</strong></div>
+      <div class="row"><span class="meta">15. 10. · hotovost ze zálohy</span><span class="meta">194,80 Kč</span></div>
+      <span class="ok">✓ Jízdenka</span>
+    </a>
+    <a class="exp" href="#">
+      <div class="row"><strong style="font-size: 15px">Pohonné hmoty · Mikulov</strong><strong style="font-size: 15px">1 758,28 Kč</strong></div>
+      <span class="meta">16. 10. · slouží k určení ceny PHM, neproplácí se zvlášť</span>
+      <span class="ok">✓ Účtenka</span>
+    </a>
+  </main>
+
+  <div style="display: flex; gap: 10px; padding: 0 16px 12px">
+    <a class="btn btn-primary" href="Doklad.dc.html" style="flex-grow: 1">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"></path><circle cx="12" cy="13" r="3.5"></circle></svg>
+      Vyfotit doklad
+    </a>
+    <a class="btn btn-secondary" href="#">+ Ručně</a>
+  </div>
+  <footer style="display: flex; gap: 10px; padding: 12px 16px; background: #fff; border-top: 1px solid #E3E6EA">
+    <a class="btn btn-secondary" href="Jidla.dc.html">Zpět</a>
+    <a class="btn btn-primary" href="Souhrn.dc.html" style="flex-grow: 1">Pokračovat</a>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

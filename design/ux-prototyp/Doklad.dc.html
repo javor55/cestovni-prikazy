@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<title>Nahrání dokladu</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#1F4FA8}a:hover{color:#163B7E}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;min-height:48px;border-radius:10px;font-weight:600;font-size:16px;text-decoration:none;box-sizing:border-box;padding:0 18px}
+.btn-primary{background:#1F4FA8;color:#fff}.btn-primary:hover{color:#fff;background:#163B7E}
+.btn-secondary{background:#fff;color:#1A1D21;border:1px solid #C9CDD3}.btn-secondary:hover{color:#1A1D21}
+.tool{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;flex:1 1 0;min-height:56px;border:0;background:transparent;color:#E8EAED;font:inherit;font-size:12px;cursor:pointer}
+.seg{flex:1 1 0;min-height:44px;border-radius:8px;font:inherit;font-size:13px;font-weight:600;cursor:pointer;padding:0 6px}
+.seg-off{background:#fff;border:1px solid #C9CDD3;color:#2F3A4C}
+.seg-on{background:#1F4FA8;border:1px solid #1F4FA8;color:#fff}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #F6F7F9; color: #1A1D21; font-family: Inter, system-ui, sans-serif; display: flex; flex-direction: column">
+  <header style="display: flex; align-items: center; gap: 8px; padding: 12px 16px; background: #fff; border-bottom: 1px solid #E3E6EA">
+    <a href="Vydaje.dc.html" aria-label="Zavřít" style="display: flex; width: 44px; height: 44px; align-items: center; justify-content: center; color: #1A1D21"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></a>
+    <strong style="font-size: 17px; flex-grow: 1">Nový doklad</strong>
+    <span style="font-size: 13px; color: #4A5260">Strana {{page}} z 2</span>
+  </header>
+
+  <section style="background: #22262B; display: flex; flex-direction: column">
+    <div style="height: 300px; display: flex; align-items: center; justify-content: center">
+      <div style="{{paperStyle}}">
+        <div style="height: 10px; width: 60%; background: #C9CDD3; border-radius: 2px; align-self: center"></div>
+        <div style="height: 6px; width: 40%; background: #DDE0E4; border-radius: 2px; align-self: center"></div>
+        <div style="height: 1px; background: #DDE0E4; margin: 6px 0"></div>
+        <div style="display: flex; justify-content: space-between"><div style="height: 6px; width: 50%; background: #DDE0E4"></div><div style="height: 6px; width: 20%; background: #DDE0E4"></div></div>
+        <div style="display: flex; justify-content: space-between"><div style="height: 6px; width: 40%; background: #DDE0E4"></div><div style="height: 6px; width: 20%; background: #DDE0E4"></div></div>
+        <div style="display: flex; justify-content: space-between"><div style="height: 6px; width: 55%; background: #DDE0E4"></div><div style="height: 6px; width: 20%; background: #DDE0E4"></div></div>
+        <div style="height: 1px; background: #DDE0E4; margin: 6px 0"></div>
+        <div style="display: flex; justify-content: space-between"><div style="height: 8px; width: 30%; background: #9AA1AB"></div><div style="height: 8px; width: 28%; background: #9AA1AB"></div></div>
+      </div>
+    </div>
+    <div style="display: flex; border-top: 1px solid #3A3F46">
+      <button type="button" class="tool" onClick="{{rotate}}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 5.7"></path><path d="M20 4v7h-7"></path></svg>Otočit</button>
+      <button type="button" class="tool"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6 2v16h16M2 6h16v16"></path></svg>Oříznout</button>
+      <button type="button" class="tool" onClick="{{nextPage}}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"></rect><path d="M12 9v6M9 12h6"></path></svg>Další strana</button>
+      <button type="button" class="tool"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"></path></svg>Smazat stranu</button>
+    </div>
+  </section>
+
+  <main style="flex-grow: 1; padding: 16px; display: flex; flex-direction: column; gap: 14px; overflow: hidden">
+    <fieldset style="border: 0; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px">
+      <legend style="font-size: 14px; font-weight: 600; padding: 0; margin-bottom: 8px">Co je na fotce</legend>
+      <div style="display: flex; gap: 6px">
+        <sc-for list="{{kinds}}" as="k" hint-placeholder-count="3">
+          <button type="button" class="{{k.cls}}" aria-pressed="{{k.on}}" onClick="{{k.pick}}">{{k.label}}</button>
+        </sc-for>
+      </div>
+    </fieldset>
+    <div style="display: flex; flex-direction: column; gap: 6px">
+      <label for="vy" style="font-size: 14px; font-weight: 600">Patří k výdaji</label>
+      <select id="vy" style="min-height: 46px; border: 1px solid #AEB4BD; border-radius: 8px; padding: 0 10px; font: inherit; font-size: 16px; background: #fff; color: #1A1D21"><option>3 · Dálniční známka AT · 12,80 EUR</option><option>Nový výdaj z tohoto dokladu</option></select>
+    </div>
+    <sc-if value="{{isPayment}}" hint-placeholder-val="{{ true }}">
+      <p style="margin: 0; padding: 10px 12px; background: #EAF1FC; border-radius: 8px; font-size: 13px; line-height: 1.45; color: #2F3A4C">Z výpisu nahrajte jen řádek s touto platbou – ostatní části můžete oříznout. Pokud je platba v cizí měně, zadáte strženou částku v Kč a použije se kurz banky.</p>
+    </sc-if>
+  </main>
+
+  <footer style="display: flex; gap: 10px; padding: 12px 16px; background: #fff; border-top: 1px solid #E3E6EA">
+    <a class="btn btn-secondary" href="Vydaje.dc.html">Zrušit</a>
+    <a class="btn btn-primary" href="Vydaje.dc.html" style="flex-grow: 1">Uložit doklad</a>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { kind: 'payment', rot: 0, page: 1 };
+  }
+  renderVals() {
+    var self = this;
+    var defs = [['accounting', 'Účetní doklad'], ['payment', 'Potvrzení platby'], ['other', 'Jiné']];
+    var kinds = defs.map(function (d) {
+      var on = self.state.kind === d[0];
+      return { label: d[1], on: String(on), cls: 'seg ' + (on ? 'seg-on' : 'seg-off'), pick: function () { self.setState({ kind: d[0] }); } };
+    });
+    var paperStyle = 'width: 170px; height: 250px; background: #fff; padding: 16px 14px; box-sizing: border-box; display: flex; flex-direction: column; gap: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.4); transform: rotate(' + this.state.rot + 'deg); transition: transform 0.2s';
+    return {
+      kinds: kinds,
+      isPayment: this.state.kind === 'payment',
+      paperStyle: paperStyle,
+      page: this.state.page,
+      rotate: function () { self.setState({ rot: (self.state.rot + 90) % 360 }); },
+      nextPage: function () { self.setState({ page: self.state.page === 1 ? 2 : 1 }); }
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<title>Časová osa cesty</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#1F4FA8}a:hover{color:#163B7E}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;min-height:48px;border-radius:10px;font-weight:600;font-size:16px;text-decoration:none;box-sizing:border-box;padding:0 18px}
+.btn-primary{background:#1F4FA8;color:#fff}.btn-primary:hover{color:#fff;background:#163B7E}
+.btn-secondary{background:#fff;color:#1A1D21;border:1px solid #C9CDD3}.btn-secondary:hover{color:#1A1D21}
+.seg{display:flex;flex-direction:column;gap:6px;padding:12px 14px;background:#fff;border:1px solid #E3E6EA;border-radius:12px;text-decoration:none;color:#1A1D21}
+.meta{font-size:13px;color:#4A5260}
+.chip{display:inline-flex;align-items:center;gap:6px;align-self:flex-start;padding:4px 8px;border-radius:6px;font-size:12px;font-weight:600;background:#EEF0F3;color:#2F3A4C}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #F6F7F9; color: #1A1D21; font-family: Inter, system-ui, sans-serif; display: flex; flex-direction: column">
+  <header style="display: flex; flex-direction: column; gap: 10px; padding: 12px 16px; background: #fff; border-bottom: 1px solid #E3E6EA">
+    <div style="display: flex; align-items: center; gap: 8px">
+      <a href="Zalozeni.dc.html" aria-label="Zpět" style="display: flex; width: 44px; height: 44px; align-items: center; justify-content: center; color: #1A1D21"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"></path></svg></a>
+      <div style="display: flex; flex-direction: column; flex-grow: 1">
+        <span style="font-size: 12px; color: #5B6472">CP-2026-0042 · Vídeň</span>
+        <strong style="font-size: 17px">Průběh cesty</strong>
+      </div>
+      <span style="font-size: 13px; color: #4A5260">Krok 3 z 9</span>
+    </div>
+    <div style="height: 4px; background: #E3E6EA; border-radius: 2px"><div style="width: 33%; height: 4px; background: #1F4FA8; border-radius: 2px"></div></div>
+  </header>
+
+  <main style="flex-grow: 1; padding: 16px; display: flex; flex-direction: column; gap: 12px; overflow: hidden">
+    <div style="display: flex; justify-content: space-between; align-items: baseline">
+      <span style="font-size: 15px"><strong>14. 10. 06:30</strong> – <strong>16. 10. 18:30</strong></span>
+      <span class="meta">2 dny 12 h · 686 km</span>
+    </div>
+
+    <a class="seg" href="#">
+      <div style="display: flex; justify-content: space-between"><strong style="font-size: 15px">1 · Praha → Vídeň</strong><span class="meta">334 km</span></div>
+      <span class="meta">St 14. 10. 06:30 – 11:00 · soukromé auto</span>
+      <span class="chip"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 21V4M4 4h12l-2 4 2 4H4"></path></svg>Hranice CZ → AT · 09:45 Mikulov</span>
+    </a>
+
+    <div style="display: flex; gap: 10px; align-items: center; padding: 0 14px; font-size: 13px; color: #4A5260">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>
+      Pobyt ve Vídni do 15. 10. 08:00
+    </div>
+
+    <a class="seg" href="#">
+      <div style="display: flex; justify-content: space-between"><strong style="font-size: 15px">2 · Vídeň – místní jízdy</strong><span class="meta">18 km</span></div>
+      <span class="meta">Čt 15. 10. 08:00 – 18:00 · auto, MHD</span>
+    </a>
+
+    <a class="seg" href="#" style="border-color: #E8A23A; background: #FFF8EC">
+      <div style="display: flex; justify-content: space-between"><strong style="font-size: 15px">3 · Vídeň → Praha</strong><span class="meta">334 km</span></div>
+      <span class="meta">Pá 16. 10. 14:00 – 18:30 · soukromé auto</span>
+      <span style="display: flex; gap: 6px; align-items: flex-start; font-size: 13px; color: #7A4A00; font-weight: 500">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" style="flex-shrink: 0; margin-top: 1px"><path d="M12 3l10 18H2L12 3z"></path><path d="M12 10v4M12 17.5v.5"></path></svg>
+        Varování: chybí čas přechodu hranice AT → CZ. Doplňte ho, jinak nelze přesně spočítat stravné.
+      </span>
+    </a>
+
+    <div style="display: flex; gap: 8px">
+      <a class="btn btn-secondary" href="#" style="flex-grow: 1; font-size: 15px">+ Přidat úsek</a>
+      <a class="btn btn-secondary" href="#" style="flex-grow: 1; font-size: 15px">Zpáteční cesta</a>
+    </div>
+    <p style="margin: 0; font-size: 13px; line-height: 1.45; color: #5B6472">Časy zadávejte v českém čase. U letu zadejte odlet a přílet – přechod hranice se doplní podle letiště.</p>
+  </main>
+
+  <footer style="display: flex; gap: 10px; padding: 12px 16px; background: #fff; border-top: 1px solid #E3E6EA">
+    <a class="btn btn-secondary" href="Zalozeni.dc.html">Zpět</a>
+    <a class="btn btn-primary" href="Jidla.dc.html" style="flex-grow: 1">Pokračovat</a>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

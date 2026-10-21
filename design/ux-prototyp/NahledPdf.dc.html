@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<title>Náhled PDF</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#1F4FA8}a:hover{color:#163B7E}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;min-height:48px;border-radius:10px;font-weight:600;font-size:16px;text-decoration:none;box-sizing:border-box;padding:0 18px}
+.btn-primary{background:#1F4FA8;color:#fff}.btn-primary:hover{color:#fff;background:#163B7E}
+.btn-secondary{background:#fff;color:#1A1D21;border:1px solid #C9CDD3}.btn-secondary:hover{color:#1A1D21}
+.seg{flex:1 1 0;min-height:44px;border-radius:8px;font:inherit;font-size:14px;font-weight:600;cursor:pointer}
+.seg-off{background:#fff;border:1px solid #C9CDD3;color:#2F3A4C}
+.seg-on{background:#1A1D21;border:1px solid #1A1D21;color:#fff}
+.bar{height:5px;background:#D5D9DE;border-radius:1px}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #F6F7F9; color: #1A1D21; font-family: Inter, system-ui, sans-serif; display: flex; flex-direction: column">
+  <header style="display: flex; flex-direction: column; gap: 10px; padding: 12px 16px; background: #fff; border-bottom: 1px solid #E3E6EA">
+    <div style="display: flex; align-items: center; gap: 8px">
+      <a href="Kontrola.dc.html" aria-label="Zpět" style="display: flex; width: 44px; height: 44px; align-items: center; justify-content: center; color: #1A1D21"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"></path></svg></a>
+      <div style="display: flex; flex-direction: column; flex-grow: 1">
+        <span style="font-size: 12px; color: #5B6472">CP-2026-0042 · Vídeň</span>
+        <strong style="font-size: 17px">PDF k podpisu</strong>
+      </div>
+      <span style="font-size: 13px; color: #4A5260">Krok 9 z 9</span>
+    </div>
+    <div style="height: 4px; background: #E3E6EA; border-radius: 2px"><div style="width: 100%; height: 4px; background: #1F4FA8; border-radius: 2px"></div></div>
+  </header>
+
+  <main style="flex-grow: 1; padding: 16px; display: flex; flex-direction: column; gap: 12px; overflow: hidden">
+    <div style="display: flex; gap: 8px" role="group" aria-label="Vzhled dokumentu">
+      <button type="button" class="{{modCls}}" aria-pressed="{{modOn}}" onClick="{{pickMod}}">Moderní</button>
+      <button type="button" class="{{konCls}}" aria-pressed="{{konOn}}" onClick="{{pickKon}}">Konzervativní</button>
+    </div>
+
+    <div style="display: flex; justify-content: center; padding: 14px; background: #E3E6EA; border-radius: 12px">
+      <div style="width: 210px; height: 297px; background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.15); padding: 14px 12px; box-sizing: border-box; display: flex; flex-direction: column; gap: 6px">
+        <div style="display: flex; justify-content: space-between; border-bottom: 1.5px solid #1A1D21; padding-bottom: 3px; font-size: 6px"><span>Ukázková firma s.r.o.</span><strong>CP-2026-0042</strong></div>
+        <sc-if value="{{isMod}}" hint-placeholder-val="{{ true }}">
+          <strong style="font-size: 10px">Vyúčtování pracovní cesty</strong>
+          <div style="border: 1.5px solid #1A1D21; padding: 5px; display: flex; flex-direction: column"><span style="font-size: 5px; color: #5B6472">K výplatě zaměstnanci</span><strong style="font-size: 12px">11 958,00 Kč</strong></div>
+          <div style="display: flex; gap: 3px"><div style="flex: 1; height: 22px; background: #EFEFEF"></div><div style="flex: 1; height: 22px; background: #EFEFEF"></div><div style="flex: 1; height: 22px; background: #EFEFEF"></div><div style="flex: 1; height: 22px; background: #EFEFEF"></div></div>
+        </sc-if>
+        <sc-if value="{{isKon}}" hint-placeholder-val="{{ false }}">
+          <strong style="font-size: 10px; text-align: center; font-family: Georgia, serif">VYÚČTOVÁNÍ PRACOVNÍ CESTY</strong>
+          <div style="border: 1px solid #1A1D21"><div style="background: #E6E6E6; height: 8px; border-bottom: 1px solid #1A1D21"></div><div style="height: 26px"></div></div>
+          <div style="border: 1px solid #1A1D21"><div style="background: #E6E6E6; height: 8px; border-bottom: 1px solid #1A1D21"></div><div style="height: 20px"></div></div>
+        </sc-if>
+        <div class="bar" style="width: 90%"></div><div class="bar" style="width: 75%"></div><div class="bar" style="width: 85%"></div><div class="bar" style="width: 60%"></div>
+        <div class="bar" style="width: 88%"></div><div class="bar" style="width: 70%"></div>
+        <div style="margin-top: auto; display: flex; justify-content: space-between; font-size: 5px; color: #5B6472"><span>Pravidla CZ-2026</span><span>strana 2/4</span></div>
+      </div>
+    </div>
+    <span style="font-size: 13px; color: #4A5260; text-align: center">4 strany · 52 kB · <a href="#">Zobrazit celé</a></span>
+
+    <a class="btn btn-primary" href="#">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M4 19h16"></path></svg>
+      Stáhnout PDF k podpisu
+    </a>
+    <a class="btn btn-secondary" href="#" style="font-size: 15px">Jen cestovní příkaz (část A) k podpisu předem</a>
+
+    <section style="display: flex; flex-direction: column; gap: 8px; padding: 12px 14px; background: #EAF1FC; border: 1px solid #BFD3F2; border-radius: 12px; font-size: 14px; line-height: 1.45">
+      <strong>Uložte si pracovní projekt</strong>
+      <span style="color: #2F3A4C">Až budete mít podepsáno, budete potřebovat cestu i doklady. Projekt (ZIP) je záloha pro jiné zařízení.</span>
+      <a href="#" style="font-weight: 600">Stáhnout projekt (4,3 MB)</a>
+    </section>
+  </main>
+
+  <footer style="display: flex; gap: 10px; padding: 12px 16px; background: #fff; border-top: 1px solid #E3E6EA">
+    <a class="btn btn-primary" href="Podepsany.dc.html" style="flex-grow: 1">Mám podepsáno – pokračovat</a>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { look: 'mod' };
+  }
+  renderVals() {
+    var self = this;
+    var mod = this.state.look === 'mod';
+    return {
+      isMod: mod,
+      isKon: !mod,
+      modOn: String(mod),
+      konOn: String(!mod),
+      modCls: 'seg ' + (mod ? 'seg-on' : 'seg-off'),
+      konCls: 'seg ' + (!mod ? 'seg-on' : 'seg-off'),
+      pickMod: function () { self.setState({ look: 'mod' }); },
+      pickKon: function () { self.setState({ look: 'kon' }); }
+    };
+  }
+}
+</script>
+</body>
+</html>

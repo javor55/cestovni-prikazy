@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<title>Podepsaný dokument</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#1F4FA8}a:hover{color:#163B7E}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;min-height:48px;border-radius:10px;font-weight:600;font-size:16px;text-decoration:none;box-sizing:border-box;padding:0 18px}
+.btn-primary{background:#1F4FA8;color:#fff}.btn-primary:hover{color:#fff;background:#163B7E}
+.btn-secondary{background:#fff;color:#1A1D21;border:1px solid #C9CDD3}.btn-secondary:hover{color:#1A1D21}
+.seg{flex:1 1 0;min-height:44px;border-radius:8px;font:inherit;font-size:14px;font-weight:600;cursor:pointer}
+.seg-off{background:#fff;border:1px solid #C9CDD3;color:#2F3A4C}
+.seg-on{background:#1A1D21;border:1px solid #1A1D21;color:#fff}
+.pg{display:flex;align-items:center;gap:10px;padding:8px 10px;background:#fff;border:1px solid #E3E6EA;border-radius:10px}
+.thumb{width:34px;height:48px;background:#F0F2F5;border:1px solid #C9CDD3;flex-shrink:0}
+.ib{display:flex;align-items:center;justify-content:center;width:44px;height:44px;border:0;background:transparent;color:#2F3A4C;border-radius:8px;cursor:pointer}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #F6F7F9; color: #1A1D21; font-family: Inter, system-ui, sans-serif; display: flex; flex-direction: column">
+  <header style="display: flex; align-items: center; gap: 8px; padding: 12px 16px; background: #fff; border-bottom: 1px solid #E3E6EA">
+    <a href="NahledPdf.dc.html" aria-label="Zpět" style="display: flex; width: 44px; height: 44px; align-items: center; justify-content: center; color: #1A1D21"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"></path></svg></a>
+    <div style="display: flex; flex-direction: column; flex-grow: 1">
+      <span style="font-size: 12px; color: #5B6472">CP-2026-0042 · Vídeň</span>
+      <strong style="font-size: 17px">Podepsaný dokument</strong>
+    </div>
+  </header>
+
+  <main style="flex-grow: 1; padding: 16px; display: flex; flex-direction: column; gap: 12px; overflow: hidden">
+    <div style="display: flex; gap: 8px" role="group" aria-label="Způsob podpisu">
+      <button type="button" class="{{scanCls}}" aria-pressed="{{scanOn}}" onClick="{{pickScan}}">Sken / fotky</button>
+      <button type="button" class="{{sigCls}}" aria-pressed="{{sigOn}}" onClick="{{pickSig}}">Obrázek podpisu</button>
+    </div>
+
+    <sc-if value="{{isScan}}" hint-placeholder-val="{{ true }}">
+      <p style="margin: 0; font-size: 14px; line-height: 1.45; color: #4A5260">Nahrajte podepsané PDF nebo vyfoťte jednotlivé strany. Pořadí můžete upravit.</p>
+      <div style="display: flex; flex-direction: column; gap: 8px">
+        <sc-for list="{{pages}}" as="p" hint-placeholder-count="4">
+          <div class="pg">
+            <div class="thumb"></div>
+            <div style="display: flex; flex-direction: column; flex-grow: 1; font-size: 14px"><strong>Strana {{p.n}}</strong><span style="font-size: 12px; color: #5B6472">{{p.label}}</span></div>
+            <button type="button" class="ib" aria-label="Posunout nahoru"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 15l6-6 6 6"></path></svg></button>
+            <button type="button" class="ib" aria-label="Otočit"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 5.7"></path><path d="M20 4v7h-7"></path></svg></button>
+            <button type="button" class="ib" aria-label="Odstranit stranu"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"></path></svg></button>
+          </div>
+        </sc-for>
+      </div>
+      <a class="btn btn-secondary" href="#" style="font-size: 15px">+ Vyfotit nebo přidat stranu</a>
+      <span style="font-size: 13px; color: #1E6B3A; font-weight: 600">✓ 4 strany – odpovídá vygenerovanému PDF</span>
+    </sc-if>
+
+    <sc-if value="{{isSig}}" hint-placeholder-val="{{ false }}">
+      <div style="display: flex; flex-direction: column; gap: 6px; padding: 12px; background: #fff; border: 1px solid #E3E6EA; border-radius: 12px">
+        <span style="font-size: 12px; font-weight: 700">Zaměstnanec – datum a podpis</span>
+        <div style="height: 70px; border: 1.5px dashed #AEB4BD; border-radius: 6px; display: flex; align-items: center; justify-content: center">
+          <svg width="{{sigW}}" height="44" viewBox="0 0 140 44" fill="none" stroke="#1A1D21" stroke-width="2" stroke-linecap="round" aria-label="Náhled podpisu" role="img"><path d="M6 30c10-22 18-22 16 0s10-18 18-10 6 14 14 2 12-16 18 0 10 8 18-4 14-4 20 6 14 4 20-6"></path></svg>
+        </div>
+      </div>
+      <label for="vel" style="font-size: 14px; font-weight: 600">Velikost podpisu</label>
+      <input id="vel" type="range" min="60" max="140" value="{{sigW}}" onInput="{{resize}}" style="accent-color: #1F4FA8; min-height: 44px">
+      <a class="btn btn-secondary" href="#" style="font-size: 15px">Nahrát PNG podpisu</a>
+      <p style="margin: 0; padding: 10px 12px; background: #FFF8EC; border: 1px solid #E8A23A; border-radius: 8px; font-size: 13px; line-height: 1.45; color: #5A3700">Vložený obrázek podpisu představuje pouze vizuální podobu podpisu. Aplikace neověřuje totožnost podepisující osoby a nejde o kvalifikovaný elektronický podpis.</p>
+    </sc-if>
+  </main>
+
+  <footer style="display: flex; gap: 10px; padding: 12px 16px; background: #fff; border-top: 1px solid #E3E6EA">
+    <a class="btn btn-primary" href="Export.dc.html" style="flex-grow: 1">Vytvořit kompletní PDF</a>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { mode: 'scan', sigW: 110 };
+  }
+  renderVals() {
+    var self = this;
+    var scan = this.state.mode === 'scan';
+    return {
+      isScan: scan,
+      isSig: !scan,
+      scanOn: String(scan),
+      sigOn: String(!scan),
+      scanCls: 'seg ' + (scan ? 'seg-on' : 'seg-off'),
+      sigCls: 'seg ' + (!scan ? 'seg-on' : 'seg-off'),
+      pickScan: function () { self.setState({ mode: 'scan' }); },
+      pickSig: function () { self.setState({ mode: 'sig' }); },
+      sigW: this.state.sigW,
+      resize: function (e) { self.setState({ sigW: Number(e.target.value) }); },
+      pages: [
+        { n: 1, label: 'Cestovní příkaz · foto, otočeno' },
+        { n: 2, label: 'Vyúčtování 1/2 · foto' },
+        { n: 3, label: 'Vyúčtování 2/2 · podpisy' },
+        { n: 4, label: 'Identifikace výdajů · foto' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

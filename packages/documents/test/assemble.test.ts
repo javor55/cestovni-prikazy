@@ -116,6 +116,20 @@ describe('kompletní dokumentace', () => {
     expect((await texts(none.bytes))[0]).toContain('NEPODEPSÁNO');
   });
 
+  it('doklady k vozidlu mají vlastní oddíl za doklady o zaplacení', async () => {
+    const tp = { name: 'technicky-prukaz.jpg', kind: 'vehicle' as const, type: 'jpeg' as const, bytes: await fixture('uctenka.jpg') };
+    const { bytes, stats } = await assemble(await input({ vehicle: [tp] }));
+    const p = await texts(bytes);
+    expect(stats.vehicleDocs).toBe(1);
+    expect(p[0]).toContain('Doklady k vozidlu: 1');
+    const pay = p.findIndex((t, i) => i > 1 && t.includes('Doklad o zaplacení · vypis.pdf'));
+    const veh = p.findIndex((t, i) => i > 1 && t.includes('Doklad k vozidlu · technicky-prukaz.jpg'));
+    const sup = p.findIndex((t, i) => i > 1 && t.includes('Doplňující dokument · program.jpg'));
+    expect(pay).toBeGreaterThan(0);
+    expect(veh).toBeGreaterThan(pay);
+    expect(sup).toBeGreaterThan(veh);
+  });
+
   it('velikost zůstane rozumná', async () => {
     const { stats } = await assemble(await input());
     expect(stats.size).toBeLessThan(1_500_000);

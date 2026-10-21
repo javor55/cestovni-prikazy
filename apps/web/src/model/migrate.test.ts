@@ -26,7 +26,7 @@ describe('migrace uložené cesty', () => {
     const t = migrateTrip(v4);
     expect(t.segments.map((s) => s.crossings.map((c) => [c.to, c.at]))).toEqual([[['AT', '2026-10-14T09:45']], [], [['CZ', '']]]);
     expect(t.segments[0]).not.toHaveProperty('crossingAt');
-    expect(t).toMatchObject({ destinationCountry: 'AT', transitCountries: [], plannedTransportKind: '' });
+    expect(t).toMatchObject({ destinationCountry: 'AT', route: [], plannedTransportKinds: [] });
   });
 
   it('aktuální verzi nechá beze změny a novější odmítne', () => {

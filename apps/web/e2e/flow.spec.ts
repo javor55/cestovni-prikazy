@@ -79,6 +79,7 @@ test('celá zahraniční cesta: vyplnění, výpočet, uložení a smazání', a
   await page.getByText('Na cestě jsem použil(a) osobní vozidlo').click();
   await page.getByLabel(/Spotřeba podle technického průkazu/).fill('5,6');
   await page.getByRole('button', { name: /Použít 686 km/ }).click();
+  await page.getByText('Cena z jednoho dokladu', { exact: true }).click();
   await page.getByLabel(/Cena za 1 l z dokladu/).fill('38,90');
   await expect(page.getByRole('region', { name: 'Výpočet náhrady' })).toContainText('5 541,78 Kč');
   await next(page);

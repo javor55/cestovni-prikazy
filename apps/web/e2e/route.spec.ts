@@ -11,10 +11,13 @@ test('cesta autem do Záhřebu: plán se státy po cestě, převzetí do průbě
   await page.getByLabel('Místo nástupu').fill('Ústí nad Labem');
   await page.getByLabel('Cílová místa').fill('Záhřeb');
   await page.getByLabel('Stát cíle').selectOption('HR');
-  await page.getByLabel(/Státy po cestě/).selectOption('AT');
-  await page.getByLabel(/Státy po cestě/).selectOption('SI');
-  await expect(page.getByRole('list', { name: 'Vybrané státy po cestě' })).toContainText('1. Rakousko');
-  await page.getByLabel('Dopravní prostředek').selectOption('soukrome-auto');
+  // Trasa: stát po cestě bez místa stačí.
+  const route = page.getByRole('list', { name: 'Trasa' });
+  await page.getByRole('button', { name: 'Místo nebo stát po cestě' }).click();
+  await route.getByLabel('Stát').nth(0).selectOption('AT');
+  await page.getByRole('button', { name: 'Místo nebo stát po cestě' }).click();
+  await route.getByLabel('Stát').nth(1).selectOption('SI');
+  await page.getByText('Soukromé auto', { exact: true }).click();
   await page.getByLabel('Plánovaný začátek').fill('2026-10-14T05:00');
   await page.getByLabel('Plánovaný konec').fill('2026-10-15T22:00');
 

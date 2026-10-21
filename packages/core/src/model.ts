@@ -93,6 +93,8 @@ export interface Expense {
   reimbursable?: boolean;
   documentNumber?: string;
   attachments?: { accounting: number; payment: number };
+  /** U dokladu o tankování nebo nabíjení množství v l / kWh (desetinné číslo jako text). */
+  fuelQuantity?: string;
 }
 
 export interface Advance {
@@ -113,6 +115,11 @@ export interface Vehicle {
   km: string;
   /** Cena PHM z dokladu za 1 l / 1 kWh v haléřích. Bez ní se použije průměrná cena z vyhlášky. */
   receiptPrice?: { amount: number; date: IsoDate };
+  /**
+   * Cena PHM jako vážený průměr z dokladů o tankování mezi výdaji (výdaje s množstvím `fuelQuantity`):
+   * cena všech tankování v Kč / celkové množství (Ú-26). Má přednost před `receiptPrice`.
+   */
+  fuelPriceFromExpenses?: boolean;
   /** Datum pro výběr průměrné ceny; výchozí je den začátku cesty. */
   date?: IsoDate;
   requestedByEmployer: boolean;

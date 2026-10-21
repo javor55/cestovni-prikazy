@@ -93,6 +93,7 @@ export interface CoverInfo {
   accountingDocs: number;
   paymentDocs: number;
   supportingDocs: number;
+  vehicleDocs: number;
   expensesWithoutDocs: number;
   problems: string[];
 }
@@ -123,6 +124,7 @@ export function CoverAndToc({ m, toc, info }: { m: DocModel; toc: TocEntry[]; in
           <Text>Účetní doklady: {info.accountingDocs}</Text>
           <Text>Doklady o zaplacení: {info.paymentDocs}</Text>
           <Text>Doplňující dokumenty: {info.supportingDocs}</Text>
+          {info.vehicleDocs > 0 && <Text>Doklady k vozidlu: {info.vehicleDocs}</Text>}
           <Text>Výdaje bez přiloženého dokladu: {info.expensesWithoutDocs}</Text>
         </View>
         {info.problems.length > 0 && (

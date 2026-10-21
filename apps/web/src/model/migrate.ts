@@ -38,9 +38,21 @@ export function migrateTrip(raw: unknown): TripDoc {
       delete s.crossingAt;
       s.crossings = s.fromCountry !== s.toCountry ? [{ id: newId(), to: s.toCountry, at }] : [];
     }
-    doc.plannedTransportKind ??= '';
-    doc.transitCountries ??= [];
+    const plan = t as { plannedTransportKind?: string; transitCountries?: string[] };
+    plan.plannedTransportKind ??= '';
+    plan.transitCountries ??= [];
     doc.destinationCountry ??= doc.segments.find((s) => s.toCountry !== 'CZ')?.toCountry ?? '';
+  }
+  if (version < 6) {
+    // v6: více dopravních prostředků v plánu, trasa s místy a zastávkami, množství paliva u výdajů,
+    // způsob určení ceny paliva.
+    const doc = t as unknown as TripDoc & { plannedTransportKind?: TripDoc['plannedTransportKinds'][number] | ''; transitCountries?: string[] };
+    doc.plannedTransportKinds ??= doc.plannedTransportKind ? [doc.plannedTransportKind] : [];
+    delete doc.plannedTransportKind;
+    doc.route ??= (doc.transitCountries ?? []).map((country) => ({ id: newId(), place: '', country, stop: false }));
+    delete doc.transitCountries;
+    for (const e of doc.expenses) e.fuelQuantity ??= '';
+    doc.vehicle.fuelPriceMode ??= doc.vehicle.receiptPrice ? 'receipt' : 'average';
   }
   t.schemaVersion = SCHEMA_VERSION;
   return t as unknown as TripDoc;

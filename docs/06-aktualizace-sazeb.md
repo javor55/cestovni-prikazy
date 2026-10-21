@@ -19,17 +19,21 @@ MPSV při změně ceny o 20 % a více vydá novelu (v roce 2026 se tak změnila 
 
 ## Zahraniční stravné z přílohy vyhlášky MF
 
-1. Otevřete PDF vyhlášky na webu MF a zkopírujte text přílohy (řádky „Stát Měna Sazba“) do textového souboru, např. `priloha.txt`.
+1. Stáhněte PDF vyhlášky z webu MF a převeďte ho na text se zachováním sloupců: `pdftotext -layout vyhlaska.pdf priloha.txt`. Zalomené názvy měn („americký / dolar“) nevadí. U zalomeného názvu státu (např. „Korejská lidově demokratická / republika“) spojte řádky ručně.
 2. Spusťte:
 
    ```
    pnpm --filter @cp/rules exec tsx scripts/foreign-import.ts ../../priloha.txt data/cz-2027.json
    ```
 
-3. Nástroj převede české názvy států na kódy ISO. Pokud název nezná (vyhláška občas používá jiný název než běžný), skončí s výpisem neznámých názvů. Doplňte je do `ALIASES` v [`scripts/foreign-import.ts`](../packages/rules/scripts/foreign-import.ts) a spusťte znovu.
-4. Zkontrolujte rozdíl v gitu: počet států, měny a několik namátkových sazeb proti PDF.
+3. Nástroj převede české názvy států na kódy ISO:
+   - **Skupiny území** s odkazem na poznámku pod čarou (např. „Karibik – ostrovní státy³⁾“) rozepíše na jednotlivá území podle poznámky. Poznámky proto musí být v textu také.
+   - Řádek **„Ostatní země neuvedené v příloze“** uloží jako `foreign.otherCountries`. Stát, který v příloze není, pak dostane tuto sazbu a aplikace na to upozorní.
+   - Pokud název nezná, skončí s výpisem neznámých názvů. Doplňte je do `ALIASES` v [`scripts/foreign-import.ts`](../packages/rules/scripts/foreign-import.ts) a spusťte znovu.
+4. Zkontrolujte rozdíl v gitu: počet států, měny a několik namátkových sazeb proti PDF. Test v `rules.test.ts` kontroluje vzorek sazeb – pro nový rok ho upravte.
+5. Do `sources` doplňte číslo vyhlášky a `url` s odkazem na úplné znění. Aplikace odkazy ukazuje v Souhrnu u pravidel výpočtu.
 
-> **Stav pro rok 2026:** úplná příloha vyhlášky č. 489/2025 Sb. zatím v aplikaci není. Oficiální text nebyl z vývojového prostředí dostupný. Aplikace obsahuje 8 nejčastějších států. U ostatních si uživatel sazbu zadá ručně v kroku Souhrn a aplikace na to upozorní. Po vložení textu přílohy stačí spustit nástroj výše.
+> **Stav pro rok 2026:** úplná příloha vyhlášky č. 489/2025 Sb. je v aplikaci (227 států a území, ostatní země 35 EUR), převzatá z PDF Ministerstva financí. Austrálie není v příloze uvedena jmenovitě (skupina „Austrálie a Oceánie – ostrovní státy“ podle poznámky zahrnuje jen ostrovní státy), proto pro ni aplikace použije sazbu pro ostatní země a upozorní (otázka Ú-28 pro účetní).
 
 ## Nová měna
 

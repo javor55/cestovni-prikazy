@@ -2,6 +2,7 @@ import type { FuelType, RuleSet } from '@cp/rules';
 import { Fraction } from './fraction.js';
 import type { IssueList } from './issues.js';
 import type { TripInput } from './model.js';
+import type { ExpenseResult } from './settlement.js';
 import { datePart } from './time.js';
 
 export interface VehicleResult {
@@ -15,7 +16,8 @@ export interface VehicleResult {
   quantity: string;
   unit: 'l' | 'kWh';
   fuelPrice: number;
-  fuelPriceSource: 'RECEIPT' | 'AVERAGE';
+  /** RECEIPT = cena z jednoho dokladu, RECEIPTS = vážený průměr z dokladů o tankování, AVERAGE = vyhláška. */
+  fuelPriceSource: 'RECEIPT' | 'RECEIPTS' | 'AVERAGE';
   fuelPriceRef: string;
   fuelCompensation: number;
   total: number;
@@ -23,7 +25,7 @@ export interface VehicleResult {
 
 const fuelUnit = (fuel: FuelType) => (fuel === 'electricity' ? 'kWh' : 'l');
 
-export function computeVehicle(trip: TripInput, rules: RuleSet, issues: IssueList): VehicleResult | undefined {
+export function computeVehicle(trip: TripInput, rules: RuleSet, issues: IssueList, expenses: ExpenseResult[] = []): VehicleResult | undefined {
   const v = trip.vehicle;
   if (!v) return undefined;
   if (v.ownership === 'company') {
@@ -61,14 +63,42 @@ export function computeVehicle(trip: TripInput, rules: RuleSet, issues: IssueLis
   }
 
   const date = v.date ?? datePart(trip.start);
-  let price: number;
-  let source: VehicleResult['fuelPriceSource'];
-  let ref: string;
-  if (v.receiptPrice) {
+  let price = 0;
+  let source: VehicleResult['fuelPriceSource'] | undefined;
+  let ref = '';
+  if (v.fuelPriceFromExpenses) {
+    // Vážený průměr: celková cena tankování v Kč / celkové množství, zaokrouhleno na haléře.
+    let czk = 0;
+    let qty = Fraction.of(0);
+    let count = 0;
+    for (const e of trip.expenses) {
+      if (!e.fuelQuantity) continue;
+      const r = expenses.find((x) => x.id === e.id);
+      let q: Fraction;
+      try {
+        q = Fraction.parse(e.fuelQuantity);
+      } catch {
+        continue;
+      }
+      if (!r || q.cmp(Fraction.of(0)) <= 0) continue;
+      czk += r.czk;
+      qty = qty.add(q);
+      count++;
+    }
+    if (count === 0) {
+      issues.warning('FUEL_RECEIPTS_MISSING', 'Cena paliva má být podle dokladů o tankování, ale žádný výdaj za pohonné hmoty nemá vyplněné množství. Použita průměrná cena podle vyhlášky.');
+    } else {
+      price = Fraction.of(czk).div(qty).toInt();
+      source = 'RECEIPTS';
+      const unit = fuelUnit(v.fuel);
+      ref = `vážený průměr z ${count} ${count === 1 ? 'dokladu' : 'dokladů'}: ${(czk / 100).toFixed(2).replace('.', ',')} Kč / ${(qty.mul(100).toInt() / 100).toFixed(2).replace('.', ',')} ${unit}`;
+    }
+  }
+  if (!source && v.receiptPrice) {
     price = v.receiptPrice.amount;
     source = 'RECEIPT';
     ref = `doklad ze dne ${v.receiptPrice.date}`;
-  } else {
+  } else if (!source) {
     const avg = rules.vehicle.averagePrices.find((p) => p.fuel === v.fuel && p.validFrom <= date && date <= p.validTo);
     if (!avg) {
       issues.error('FUEL_PRICE_MISSING', `Pro datum ${date} není v sadě pravidel průměrná cena pro zvolený druh paliva. Přiložte doklad o tankování s cenou.`);

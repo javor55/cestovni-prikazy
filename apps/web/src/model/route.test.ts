@@ -1,6 +1,6 @@
 import { calculate } from '@cp/core';
 import { describe, expect, it } from 'vitest';
-import { addTransit, BORDER_TABLE, missingTransit, normalizeCrossings, pathOf, returnSegment, segmentsFromPlan } from './route.js';
+import { addTransit, BORDER_TABLE, mainTransport, missingTransit, normalizeCrossings, pathOf, returnSegment, segmentsFromPlan } from './route.js';
 import { toInput } from './toInput.js';
 import { emptySegment, newTrip, type SegmentDoc, type TripDoc } from './trip.js';
 
@@ -14,10 +14,13 @@ function zagreb(): TripDoc {
     startPlace: 'Ústí nad Labem',
     destinations: 'Záhřeb',
     destinationCountry: 'HR',
-    transitCountries: ['AT', 'SI'],
+    route: [
+      { id: 'r1', place: '', country: 'AT', stop: false },
+      { id: 'r2', place: '', country: 'SI', stop: false },
+    ],
     plannedStart: '2026-10-14T05:00',
     plannedEnd: '2026-10-15T22:00',
-    plannedTransportKind: 'soukrome-auto',
+    plannedTransportKinds: ['soukrome-auto'],
   });
   return t;
 }
@@ -46,6 +49,26 @@ describe('trasa úseku', () => {
     expect(back).toMatchObject({ fromPlace: 'Záhřeb', toPlace: 'Ústí nad Labem', toCountry: 'CZ', arrival: '2026-10-15T22:00' });
     expect(pathOf(back!)).toEqual(['HR', 'SI', 'AT', 'CZ']);
     expect(there!.crossings.every((c) => c.at === '')).toBe(true);
+  });
+
+  it('zastávka na trase rozdělí cestu tam na dva úseky; místo bez státu leží ve státě předchozího bodu', () => {
+    const t = zagreb();
+    t.route = [
+      { id: 'a', place: 'Linec', country: 'AT', stop: false },
+      { id: 'b', place: 'Štýrský Hradec', country: '', stop: true },
+      { id: 'c', place: '', country: 'SI', stop: false },
+    ];
+    const segs = segmentsFromPlan(t);
+    expect(segs.map((s) => `${s.fromPlace} → ${s.toPlace}`)).toEqual(['Ústí nad Labem → Štýrský Hradec', 'Štýrský Hradec → Záhřeb', 'Záhřeb → Ústí nad Labem']);
+    expect(segs.map(pathOf)).toEqual([['CZ', 'AT'], ['AT', 'SI', 'HR'], ['HR', 'SI', 'AT', 'CZ']]);
+    expect(segs[0]!.departure).toBe('2026-10-14T05:00');
+    expect(segs[1]!.departure).toBe('');
+  });
+
+  it('hlavní dopravní prostředek z plánu: ten, kterým se jede nejdál', () => {
+    expect(mainTransport(['taxi', 'letadlo', 'mhd'])).toBe('letadlo');
+    expect(mainTransport(['pujcene-auto', 'lod'])).toBe('lod');
+    expect(mainTransport([])).toBe('vlak');
   });
 
   it('tuzemský plán dá úseky bez přechodů', () => {

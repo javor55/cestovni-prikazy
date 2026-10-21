@@ -29,26 +29,61 @@ export function addTransit(s: SegmentDoc, country = ''): void {
   s.crossings.splice(s.crossings.length - 1, 0, { id: newId(), to: country, at: '' });
 }
 
+/** Pořadí, podle kterého se z plánovaných dopravních prostředků vybere hlavní (jímž se jede nejdál). */
+const MAIN_TRANSPORT: TransportKind[] = ['letadlo', 'vlak', 'autobus', 'lod', 'soukrome-auto', 'pujcene-auto', 'pronajate-auto', 'firemni-auto', 'taxi', 'mhd', 'jine'];
+
+export function mainTransport(kinds: readonly TransportKind[]): TransportKind {
+  return MAIN_TRANSPORT.find((k) => kinds.includes(k)) ?? 'vlak';
+}
+
+interface Point {
+  place: string;
+  country: string;
+}
+
+/** Státy v pořadí bez opakování po sobě jdoucích. */
+const dedupe = (countries: string[]) => countries.filter((c, i, a) => c && (i === 0 || c !== a[i - 1]));
+
 /**
- * Úseky podle plánu cesty: cesta tam (odjezd = plánovaný začátek) a zpět (příjezd = plánovaný konec)
- * se státy po cestě. Časy přechodů hranic a zbylé časy doplní uživatel.
+ * Úseky podle plánu cesty: cesta tam (rozdělená na zastávkách trasy) a zpět, se státy po cestě
+ * jako přechody hranic. Odjezd tam = plánovaný začátek, příjezd zpět = plánovaný konec; zbylé časy
+ * a časy přechodů doplní uživatel.
  */
 export function segmentsFromPlan(t: TripDoc): SegmentDoc[] {
   const home = 'CZ';
-  const dest = t.kind === 'foreign' ? t.destinationCountry || home : home;
-  const path = [home, ...t.transitCountries.filter((c) => c && c !== home && c !== dest), dest];
-  const outPath = dest === home ? [home] : path;
-  const transport = t.plannedTransportKind || 'vlak';
-  const there: SegmentDoc = {
-    ...emptySegment(),
-    fromPlace: t.startPlace,
-    fromCountry: home,
-    toPlace: t.destinations,
-    toCountry: dest,
-    departure: t.plannedStart,
-    transport,
-    crossings: crossingsFor(outPath),
-  };
+  const foreign = t.kind === 'foreign';
+  const dest = foreign ? t.destinationCountry || home : home;
+  const transport = mainTransport(t.plannedTransportKinds);
+
+  // Body trasy; místo bez státu leží ve státě předchozího bodu.
+  const points: (Point & { stop: boolean })[] = [{ place: t.startPlace, country: home, stop: true }];
+  for (const r of t.route) points.push({ place: r.place, country: (foreign && r.country) || points.at(-1)!.country, stop: r.stop && Boolean(r.place) });
+  points.push({ place: t.destinations, country: dest, stop: true });
+
+  const legs: (typeof points)[] = [];
+  let leg: typeof points = [];
+  for (const p of points) {
+    leg.push(p);
+    if (p.stop && leg.length > 1) {
+      legs.push(leg);
+      leg = [p];
+    }
+  }
+
+  const there = legs.map((l, i): SegmentDoc => {
+    const from = l[0]!;
+    const to = l.at(-1)!;
+    return {
+      ...emptySegment(),
+      fromPlace: from.place,
+      fromCountry: from.country,
+      toPlace: to.place,
+      toCountry: to.country,
+      departure: i === 0 ? t.plannedStart : '',
+      transport,
+      crossings: crossingsFor(dedupe(l.map((p) => p.country))),
+    };
+  });
   const back: SegmentDoc = {
     ...emptySegment(),
     fromPlace: t.destinations,
@@ -57,9 +92,9 @@ export function segmentsFromPlan(t: TripDoc): SegmentDoc[] {
     toCountry: home,
     arrival: t.plannedEnd,
     transport,
-    crossings: crossingsFor([...outPath].reverse()),
+    crossings: crossingsFor(dedupe(points.map((p) => p.country)).reverse()),
   };
-  return [there, back];
+  return [...there, back];
 }
 
 /** Zpáteční úsek: z cíle posledního úseku zpět na začátek cesty, státy po cestě v obráceném pořadí. */
@@ -80,7 +115,7 @@ export function returnSegment(t: TripDoc): SegmentDoc | undefined {
   };
 }
 
-const LAND: ReadonlySet<TransportKind> = new Set(['soukrome-auto', 'firemni-auto', 'vlak', 'autobus', 'taxi']);
+const LAND: ReadonlySet<TransportKind> = new Set(['soukrome-auto', 'pujcene-auto', 'pronajate-auto', 'firemni-auto', 'vlak', 'autobus', 'taxi']);
 
 /** Pozemní hranice evropských států (a spojení tunelem či mostem: GB–FR, DK–SE), které aplikace nabízí. */
 const BORDERS: Record<string, string[]> = {

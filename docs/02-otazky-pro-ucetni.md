@@ -138,6 +138,18 @@ Cesta trvající přesně 12 hodin patří do pásma 5–12 h a přesně 18 hodi
 Při cestě po zemi (např. autem z Ústí nad Labem do Záhřebu přes Rakousko a Slovinsko) zapisujete čas vjezdu do každého státu, kterým zaměstnanec projíždí, a stravné za den určujete podle státu, ve kterém strávil nejvíc času? Nebo stačí čas přechodu české hranice a celá doba v zahraničí se počítá cílovému státu?
 *Návrh:* zapisovat vjezd do každého státu. Aplikace u pozemní cesty mezi státy, které spolu nesousedí, upozorní na chybějící stát po cestě (varování, ne chyba). Při chybějícím čase započte dobu k sousednímu státu a upozorní.
 
+**Ú-26 – Cena paliva při více tankováních**
+Zaměstnanec během cesty tankoval víckrát za různé ceny. Jakou cenu použít pro náhradu za spotřebované palivo?
+*Návrh:* vážený průměr – cena všech tankování ÷ celkové množství (např. 1 500 Kč / 40 l a 1 170,60 Kč / 30,5 l → 37,88 Kč/l). Aplikace umožňuje i cenu z jednoho dokladu nebo průměrnou cenu podle vyhlášky.
+
+**Ú-27 – Půjčené auto a auto z autopůjčovny**
+Auto půjčené od rodiny nebo známého posuzujeme jako vozidlo zaměstnance (náhrada za km a palivo podle § 157 odst. 4 ZP – nejde o vozidlo zaměstnavatele). U auta z autopůjčovny proplácíte nájemné a palivo jako výdaje a náhradu za km neposkytujete?
+*Návrh:* ano. Aplikace u půjčeného auta chce vlastníka a smlouvu o výpůjčce, u autopůjčovny na postup upozorní.
+
+**Ú-28 – Austrálie ve vyhlášce 489/2025 Sb.**
+Příloha uvádí „Austrálie a Oceánie – ostrovní státy“ (70 USD), ale poznámka vyjmenovává jen ostrovní státy. Austrálie sama jmenovitě uvedena není. Použít pro ni sazbu „Ostatní země neuvedené v příloze“ (35 EUR)?
+*Návrh:* ano, podle doslovného znění. Aplikace na to upozorní a sazbu jde u cesty přepsat ručně.
+
 ## Vzorové příklady
 
 Prosíme o 3–5 skutečných vyúčtování (stačí anonymizovaná), ideálně:

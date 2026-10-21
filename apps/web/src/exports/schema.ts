@@ -15,7 +15,7 @@ const isoTime = z.string().max(40);
 const strMap = <T extends z.ZodTypeAny>(v: T) => z.record(z.string().max(64), v).refine((r) => Object.keys(r).length <= 1000, 'Příliš mnoho položek.');
 
 const paymentMethods = ['PRIVATE_CARD', 'COMPANY_CARD', 'PRIVATE_CASH', 'COMPANY_CASH', 'EMPLOYEE_TRANSFER', 'EMPLOYER_TRANSFER', 'ADVANCE', 'OTHER'] as const;
-const transports = ['soukrome-auto', 'firemni-auto', 'vlak', 'autobus', 'letadlo', 'mhd', 'taxi', 'jine'] as const;
+const transports = ['soukrome-auto', 'pujcene-auto', 'pronajate-auto', 'firemni-auto', 'vlak', 'autobus', 'letadlo', 'lod', 'mhd', 'taxi', 'jine'] as const;
 
 const segment = z.object({
   id,
@@ -49,6 +49,7 @@ const expense = z.object({
   czkAmount: short,
   documentNumber: short,
   reimbursable: z.boolean(),
+  fuelQuantity: short,
   note: text,
 });
 
@@ -72,10 +73,10 @@ export const tripSchema = z.object({
   via: text,
   plannedStart: short,
   plannedEnd: short,
-  plannedTransportKind: z.union([z.enum(transports), z.literal('')]),
+  plannedTransportKinds: z.array(z.enum(transports)).max(20),
   plannedTransport: short,
   destinationCountry: short,
-  transitCountries: z.array(short).max(50),
+  route: z.array(z.object({ id, place: short, country: short, stop: z.boolean() })).max(50),
   issuedPlace: short,
   issuedOn: short,
   actualStart: short,
@@ -97,6 +98,7 @@ export const tripSchema = z.object({
     km: short,
     receiptPrice: short,
     receiptDate: short,
+    fuelPriceMode: z.enum(['receipts', 'receipt', 'average']),
     requestedByEmployer: z.boolean(),
     note: text,
   }),
@@ -110,7 +112,7 @@ export const tripSchema = z.object({
 export const attachmentSchema = z.object({
   id,
   expenseId: id.nullable(),
-  kind: z.enum(['accounting', 'payment', 'supporting', 'signed', 'signature']),
+  kind: z.enum(['accounting', 'payment', 'supporting', 'vehicle', 'signed', 'signature']),
   subtype: short,
   originalName: short,
   mime: z.enum(['application/pdf', 'image/jpeg', 'image/png', 'image/heic']),

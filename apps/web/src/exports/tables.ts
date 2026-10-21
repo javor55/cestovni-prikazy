@@ -5,7 +5,7 @@ import { minorPerUnit, type CalculationResult, type ExpensePayer } from '@cp/cor
 import type { Cell, Table } from '@cp/documents/tabular';
 import { countryName } from '../model/countries.js';
 import { normalizeDecimal } from '../model/format.js';
-import { payerOf, type DocCounts, type Mapped } from '../model/toInput.js';
+import { FUEL_CATEGORIES, payerOf, type DocCounts, type Mapped } from '../model/toInput.js';
 import { crossingsText, fuelLabels, paymentLabels, rateSourceLabels, transportLabels, type TripDoc } from '../model/trip.js';
 
 const units = (minor: number, currency = 'CZK') => minor / minorPerUnit(currency);
@@ -169,6 +169,7 @@ function expenses({ trip, result, docCounts }: TablesInput): Table {
       { header: 'Proplácí se', type: 'text', width: 9 },
       { header: 'Účetních dokladů', type: 'integer', width: 9 },
       { header: 'Dokladů o zaplacení', type: 'integer', width: 9 },
+      { header: 'Množství paliva (l/kWh)', type: 'number', width: 10 },
       { header: 'Poznámka', type: 'text', width: 24 },
     ],
     rows: trip.expenses.map((e, i) => {
@@ -196,6 +197,7 @@ function expenses({ trip, result, docCounts }: TablesInput): Table {
         yesNo(e.reimbursable),
         c.accounting,
         c.payment,
+        FUEL_CATEGORIES.has(e.category) ? num(e.fuelQuantity) : null,
         e.note,
       ];
     }),
@@ -239,7 +241,7 @@ function vehicle({ trip, result }: TablesInput): Table {
               Number(r.km),
               units(r.ratePerKm),
               units(r.fuelPrice),
-              r.fuelPriceSource === 'RECEIPT' ? 'doklad o nákupu' : `průměrná cena (${r.fuelPriceRef})`,
+              r.fuelPriceSource === 'RECEIPT' ? 'doklad o nákupu' : r.fuelPriceSource === 'RECEIPTS' ? `doklady o tankování (${r.fuelPriceRef})` : `průměrná cena (${r.fuelPriceRef})`,
               Number(r.quantity),
               units(r.basic),
               units(r.fuelCompensation),

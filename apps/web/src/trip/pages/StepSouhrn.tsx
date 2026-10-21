@@ -175,7 +175,20 @@ export function StepSouhrn() {
                 <li key={a.code}>{a.text}</li>
               ))}
             </ul>
-            <p>Zdroje: {ruleSets[0]!.sources.map((x) => x.title).join('; ')}</p>
+            <p>Předpisy, ze kterých sazby pocházejí:</p>
+            <ul className="list-disc pl-5">
+              {(ruleSets.find((x) => x.id === result.ruleSet!.id)?.sources ?? []).map((x) => (
+                <li key={x.id}>
+                  {x.url ? (
+                    <a href={x.url} target="_blank" rel="noopener noreferrer" className="text-accent underline">
+                      {x.title}
+                    </a>
+                  ) : (
+                    x.title
+                  )}
+                </li>
+              ))}
+            </ul>
           </div>
         </details>
       )}

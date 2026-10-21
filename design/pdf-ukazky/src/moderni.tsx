@@ -212,7 +212,7 @@ export const Moderni = () => (
         foot={['Celkem', '', '', '', '', '', '', `−${num(summary.mealReductionEur)}`, `${num(summary.foreignPerDiemEur)} EUR`]}
       />
       <Text style={s.note}>
-        S/O/V = bezplatně poskytnutá snídaně/oběd/večeře. Krácení ze základní sazby, stravné za den zaokrouhleno na celé EUR nahoru. Doba v ČR je v obou dnech kratší než 5 h, tuzemské stravné nenáleží.
+        S/O/V = bezplatně poskytnutá snídaně/oběd/večeře. Krácení z částky pásma, stravné za den zaokrouhleno na celé EUR nahoru. Doba v ČR je v obou dnech kratší než 5 h, tuzemské stravné nenáleží.
       </Text>
 
       <Text style={s.h2}>Výdaje</Text>

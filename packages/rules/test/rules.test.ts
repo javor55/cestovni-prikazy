@@ -45,4 +45,21 @@ describe('sada pravidel CZ-2026', () => {
       expect(ids.has(src)).toBe(true);
     }
   });
+
+  it('každý zdroj má odkaz na úplné znění', () => {
+    for (const s of r.sources) expect(s.url, s.id).toMatch(/^https:\/\//);
+  });
+
+  it('zahraniční stravné podle úplné přílohy vyhlášky 489/2025 Sb.', () => {
+    const rate = (c: string) => `${r.foreign.rates[c]!.currency} ${r.foreign.rates[c]!.amount / 100}`;
+    // Kontrolní vzorek přímo z PDF přílohy.
+    expect(Object.keys(r.foreign.rates)).toHaveLength(227);
+    expect(['AT', 'DE', 'FR', 'IT', 'PL', 'SK', 'HU', 'HR', 'SI', 'RS', 'GB', 'CH', 'US', 'JP', 'PE'].map(rate)).toEqual([
+      'EUR 45', 'EUR 50', 'EUR 50', 'EUR 55', 'EUR 50', 'EUR 40', 'EUR 50', 'EUR 50', 'EUR 40', 'EUR 40', 'GBP 45', 'CHF 75', 'USD 70', 'USD 65', 'USD 52',
+    ]);
+    // Území ze skupin (poznámky pod čarou) a sazba pro ostatní země.
+    expect(['FJ', 'GP', 'JM'].map(rate)).toEqual(['USD 70', 'EUR 50', 'USD 60']);
+    expect(r.foreign.otherCountries).toEqual({ currency: 'EUR', amount: 3500 });
+    expect(Object.values(r.foreign.rates).every((x) => x.verified)).toBe(true);
+  });
 });

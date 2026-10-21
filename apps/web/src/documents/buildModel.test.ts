@@ -16,7 +16,7 @@ function build(t: TripDoc) {
 describe('model dokumentu', () => {
   it('ukázková cesta do Vídně: hlavička, stravné, výdaje, vozidlo, vyrovnání', () => {
     const m = build(vienna());
-    expect(m).toMatchObject({ number: 'CP-2026-0042', ruleSet: 'CZ-2026 v1.0.0', issued: { place: 'Praha', date: '12. 10. 2026' }, createdAt: '21. 10. 2026 14:05' });
+    expect(m).toMatchObject({ number: 'CP-2026-0042', ruleSet: 'CZ-2026 v1.1.0', issued: { place: 'Praha', date: '12. 10. 2026' }, createdAt: '21. 10. 2026 14:05' });
     expect(m.trip.advances).toEqual(['100 EUR (12. 10. 2026)']);
     expect(m.actual).toEqual({ start: '14. 10. 2026 6:30', end: '16. 10. 2026 18:30', km: '686 km' });
     expect(m.segments[0]!.border).toBe('CZ–AT 14. 10. 2026 9:45');

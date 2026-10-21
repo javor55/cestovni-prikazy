@@ -23,7 +23,8 @@ export interface ForeignDay {
   countryName: string;
   currency: string;
   baseRate: number;
-  baseRateSource: 'RULES' | 'EMPLOYER';
+  /** RULES = sazba státu z vyhlášky, OTHER = sazba pro státy v příloze neuvedené, EMPLOYER = vlastní sazba. */
+  baseRateSource: 'RULES' | 'OTHER' | 'EMPLOYER';
   tierId: string;
   /** Poměrná část základní sazby pro pásmo, zaokrouhlená na nejmenší jednotky (jen pro zobrazení). */
   tierAmount: number;
@@ -179,7 +180,16 @@ export function computePerDiem(trip: TripInput, tl: Timeline, rules: RuleSet, is
       for (const c of d.order) if ((d.foreign.get(c) ?? 0) >= (d.foreign.get(country) ?? 0)) country = c;
       const ruleRate = rules.foreign.rates[country];
       const own = trip.employerRates?.foreignBase?.[country];
-      const base = own ?? (ruleRate && { amount: ruleRate.amount, currency: ruleRate.currency });
+      const other = !own && !ruleRate ? rules.foreign.otherCountries : undefined;
+      const base = own ?? (ruleRate && { amount: ruleRate.amount, currency: ruleRate.currency }) ?? other;
+      if (other && !reportedCountries.has(country)) {
+        issues.warning(
+          'FOREIGN_RATE_OTHER',
+          `Stát ${country} není v příloze vyhlášky ${rules.foreign.source} uveden jmenovitě – použita sazba pro ostatní země ${formatMoney(other)}. Ověřte, že stát není v příloze pod jiným názvem nebo ve skupině území.`,
+          { country },
+        );
+        reportedCountries.add(country);
+      }
       if (!base) {
         if (!reportedCountries.has(country)) {
           issues.error('FOREIGN_RATE_MISSING', `Pro stát ${country} není v sadě pravidel ${rules.id} základní sazba zahraničního stravného. Doplňte sazbu podle vyhlášky MF ručně.`, { country });
@@ -200,7 +210,7 @@ export function computePerDiem(trip: TripInput, tl: Timeline, rules: RuleSet, is
           countryName: ruleRate?.name ?? country,
           currency: base.currency,
           baseRate: base.amount,
-          baseRateSource: own ? 'EMPLOYER' : 'RULES',
+          baseRateSource: own ? 'EMPLOYER' : other ? 'OTHER' : 'RULES',
           tierId: tier.id,
           tierAmount: tierAmount.toInt(),
           freeMeals: meals.foreign,

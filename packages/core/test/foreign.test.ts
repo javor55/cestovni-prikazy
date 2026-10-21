@@ -1,3 +1,4 @@
+import { ruleSets } from '@cp/rules';
 import { describe, expect, it } from 'vitest';
 import { calculate } from '../src/index.js';
 import { cross, m, seg, trip } from './helpers.js';
@@ -181,6 +182,10 @@ describe('zahraniční cesta', () => {
   });
 
   it('stát bez sazby v pravidlech je blokující chyba, vlastní sazba ji vyřeší', () => {
+    // Sada pravidel bez USA a bez sazby pro ostatní země.
+    const { US: _us, ...rest } = ruleSets[0]!.foreign.rates;
+    const { otherCountries: _o, ...foreign } = ruleSets[0]!.foreign;
+    const sets = [{ ...ruleSets[0]!, foreign: { ...foreign, rates: rest } }];
     const base = trip({
       kind: 'foreign',
       start: '2026-06-01T06:00',
@@ -191,17 +196,37 @@ describe('zahraniční cesta', () => {
       ],
       perDiemRates: { USD: { source: 'CNB', rate: '21.50' } },
     });
-    const missing = calculate(base);
+    const missing = calculate(base, sets);
     expect(missing.ok).toBe(false);
     expect(missing.issues.filter((i) => i.code === 'FOREIGN_RATE_MISSING')).toHaveLength(1);
 
-    const own = calculate({ ...base, employerRates: { foreignBase: { US: { amount: m(60), currency: 'USD' } } } });
+    const own = calculate({ ...base, employerRates: { foreignBase: { US: { amount: m(60), currency: 'USD' } } } }, sets);
     expect(own.ok).toBe(true);
     // Den 1: US 16 h → 2/3 × 60 = 40 USD; den 2: US 20 h → 60 USD
     expect(own.perDiem!.foreignTotals).toEqual({ USD: m(100) });
   });
 
-  it('neověřená sazba (Maďarsko) vypočte, ale upozorní', () => {
+  it('stát, který příloha neuvádí, dostane sazbu pro ostatní země s upozorněním', () => {
+    // Austrálie není v příloze vyhlášky 489/2025 jmenovitě (jen „ostrovní státy“ Oceánie).
+    const r = calculate(
+      trip({
+        kind: 'foreign',
+        start: '2026-06-01T06:00',
+        end: '2026-06-02T22:00',
+        segments: [
+          seg('Praha/CZ', 'Sydney/AU', '2026-06-01T06:00', '2026-06-01T18:00', { transport: 'letadlo', borderCrossings: [cross('2026-06-01T08:00', 'CZ', 'AU')] }),
+          seg('Sydney/AU', 'Praha/CZ', '2026-06-02T08:00', '2026-06-02T22:00', { transport: 'letadlo', borderCrossings: [cross('2026-06-02T20:00', 'AU', 'CZ')] }),
+        ],
+        perDiemRates: { EUR: eur },
+      }),
+    );
+    expect(r.ok).toBe(true);
+    expect(r.perDiem!.days[1]!.foreign).toMatchObject({ country: 'AU', currency: 'EUR', baseRate: m(35), baseRateSource: 'OTHER' });
+    expect(r.issues.filter((i) => i.code === 'FOREIGN_RATE_OTHER')).toHaveLength(1);
+  });
+
+  it('neověřená sazba vypočte, ale upozorní', () => {
+    const sets = [{ ...ruleSets[0]!, foreign: { ...ruleSets[0]!.foreign, rates: { ...ruleSets[0]!.foreign.rates, HU: { ...ruleSets[0]!.foreign.rates.HU!, verified: false } } } }];
     const r = calculate(
       trip({
         kind: 'foreign',
@@ -210,6 +235,7 @@ describe('zahraniční cesta', () => {
         segments: [seg('Praha/CZ', 'Győr/HU', '2026-06-01T06:00', '2026-06-01T12:00', { borderCrossings: [cross('2026-06-01T10:00', 'CZ', 'HU')] })],
         perDiemRates: { EUR: eur },
       }),
+      sets,
     );
     expect(r.ok).toBe(true);
     expect(r.issues.map((i) => i.code)).toContain('FOREIGN_RATE_UNVERIFIED');

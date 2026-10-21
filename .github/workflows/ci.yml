@@ -18,6 +18,8 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm typecheck
       - run: pnpm test
+      # Známé zranitelnosti v závislostech (vysoká a kritická závažnost shodí build).
+      - run: pnpm audit --audit-level high
 
   e2e:
     runs-on: ubuntu-latest
@@ -31,3 +33,18 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @cp/web exec playwright install --with-deps chromium
       - run: pnpm e2e
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -t cestovni-prikazy .
+      - name: Kontejner odpovídá a posílá bezpečnostní hlavičky
+        run: |
+          docker run -d --name cp -p 8787:8787 cestovni-prikazy
+          for i in $(seq 1 30); do curl -sf http://localhost:8787/zdravi && break; sleep 1; done
+          curl -sf http://localhost:8787/cesta/x/kdo | grep -q '<div id="root">'
+          curl -sI http://localhost:8787/ | grep -qi "content-security-policy: default-src 'self'"
+          test "$(curl -s -o /dev/null -w '%{http_code}' 'http://localhost:8787/api/kurzy?datum=x')" = 400
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8787/assets/neexistuje.js)" = 404
+          test "$(docker exec cp id -u)" != 0

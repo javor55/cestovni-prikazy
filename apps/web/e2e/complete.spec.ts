@@ -1,4 +1,5 @@
-import { expect, test, type Page } from '@playwright/test';
+import type { Page } from '@playwright/test';
+import { expect, test } from './fixtures.js';
 import { go, image, pdfText, tripWithPdf } from './helpers.js';
 
 async function buildAndDownload(page: Page, base: string) {

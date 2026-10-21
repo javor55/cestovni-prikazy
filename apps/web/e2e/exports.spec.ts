@@ -1,4 +1,5 @@
-import { expect, test, type Download, type Page } from '@playwright/test';
+import type { Download, Page } from '@playwright/test';
+import { expect, test } from './fixtures.js';
 import { strFromU8, unzipSync } from 'fflate';
 import { readFile } from 'node:fs/promises';
 import { go, pdfText, tripWithPdf } from './helpers.js';

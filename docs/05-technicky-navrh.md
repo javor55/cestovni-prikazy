@@ -162,11 +162,12 @@ Implementace (`apps/web/src/exports`):
 
 ## 9. Bezpečnost
 
-- Přísná CSP: `default-src 'self'; script-src 'self'; img-src 'self' blob: data:; connect-src 'self'; frame-ancestors 'none'`.
+- Přísná CSP (`apps/server/src/headers.ts`): vše jen z vlastní domény, `blob:`/`data:` pro náhledy a PDF z prohlížeče, `frame-ancestors 'none'`. Navíc `'wasm-unsafe-eval'`, protože sazba PDF používá WebAssembly (ověřeno: bez něj PDF nevznikne). Stejné hlavičky platí v Dockeru, na Cloudflare (`_headers`) i v náhledu pro E2E testy, kde každé porušení CSP test shodí.
 - Žádné skripty, fonty ani analytika třetích stran. `Referrer-Policy: no-referrer`, `X-Content-Type-Options: nosniff`, HSTS.
-- React escapuje výstup. `dangerouslySetInnerHTML` je zakázané lint pravidlem.
+- React escapuje výstup. `dangerouslySetInnerHTML`, `innerHTML`, `eval` a volání cizích serverů hlídá test `apps/web/src/security.test.ts`.
 - Endpoint kurzů přijímá jen validované datum, volá pevnou adresu (bez SSRF) a má rate limit.
 - Závislosti: lockfile, `pnpm audit` v CI, Dependabot.
+- Provoz a nasazení: [07 – Nasazení a provoz](07-nasazeni.md).
 
 ## 10. Automatické mazání
 
@@ -203,4 +204,4 @@ Implementace (`apps/web/src/exports`):
 | 4 | **PDF k podpisu (obě šablony) ze snímku výpočtu – hotovo** |
 | 5 | **Podepsaný dokument, PNG podpis, kompletní PDF – hotovo** |
 | 6 | **Exporty XLSX, CSV, JSON, ZIP originálů a export/import projektu – hotovo** |
-| 7 | Zabezpečení, PWA manifest, Docker, dokumentace, testovací nasazení |
+| 7 | **Zabezpečení (CSP, hlavičky, limit API, audit), PWA a offline, Docker + Caddy, Cloudflare Workers, dokumentace – hotovo** |

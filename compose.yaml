@@ -1,0 +1,36 @@
+# Aplikace + Caddy (HTTPS s automatickým certifikátem Let's Encrypt).
+# Postup je v docs/07-nasazeni.md. Nastavení je v souboru .env (vzor: deploy/env.example).
+services:
+  app:
+    build: .
+    image: cestovni-prikazy
+    restart: unless-stopped
+    environment:
+      # Server je za Caddy – adresa klienta pro limit požadavků se bere z X-Forwarded-For.
+      TRUST_PROXY: "1"
+      RATE_LIMIT_PER_MINUTE: ${RATE_LIMIT_PER_MINUTE:-60}
+    volumes:
+      - kurzy:/data
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    depends_on: [app]
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      DOMAIN: ${DOMAIN:?Nastavte DOMAIN v souboru .env}
+    volumes:
+      - ./deploy/${CADDYFILE:-Caddyfile}:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+
+volumes:
+  kurzy:
+  caddy_data:
+  caddy_config:

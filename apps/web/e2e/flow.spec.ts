@@ -1,4 +1,5 @@
-import { expect, test, type Page } from '@playwright/test';
+import type { Page } from '@playwright/test';
+import { expect, test } from './fixtures.js';
 
 const shot = (page: Page, name: string) =>
   process.env.SHOTS ? page.screenshot({ path: `${process.env.SHOTS}/${test.info().project.name}-${name}.png`, fullPage: true }) : undefined;

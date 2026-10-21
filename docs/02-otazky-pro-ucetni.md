@@ -48,7 +48,7 @@ Podle sazby kterého státu se počítá zahraniční stravné, pokud zaměstnan
 
 **Ú-17 – Krácení zahraničního stravného za bezplatná jídla**
 Jaká procenta krácení používáte v jednotlivých pásmech a z jakého základu (ze základní sazby, nebo z již poměrně snížené částky)?
-*Návrh:* podle aktuálního znění zákoníku práce, prosíme o potvrzení na příkladu.
+*Návrh:* z částky pro dané pásmo (např. při 2/3 sazby 45 EUR = 30 EUR krátí snídaně 35 % × 30 = 10,50 EUR). Prosíme o potvrzení na příkladu.
 
 **Ú-18 – Krátké cesty**
 Tuzemská cesta kratší než 5 hodin (bez nároku na stravné) a zahraniční cesta s pobytem v zahraničí do 1 hodiny: postupujete podle zákona, nebo poskytujete něco nad rámec?
@@ -111,6 +111,28 @@ Používáte konkrétní tiskopis cestovního příkazu (např. tiskopis SEVT), 
 *Návrh:* vlastní přehledný formát se vším ze zadání. Pokud preferujete známý tiskopis, uděláme konzervativní variantu co nejblíže jemu.
 
 ---
+
+## Doplněno při implementaci výpočtu
+
+**Ú-20 – Nižší krácení v podnikatelské sféře**
+Zákoník práce v podnikatelské sféře uvádí krácení „až o“ 70 / 35 / 25 %. Krátíte vždy o plné procento, nebo máte ve směrnici nižší?
+*Návrh:* vždy plné procento.
+
+**Ú-21 – Zaokrouhlení spotřebovaného paliva**
+Náhrada za PHM = km × spotřeba / 100 × cena. Zaokrouhlujete litry před vynásobením cenou?
+*Návrh:* nezaokrouhlovat litry, zaokrouhlit až výslednou náhradu na haléře (686 km × 5,6 l = 38,416 l × 38,90 Kč = 1 494,38 Kč).
+
+**Ú-22 – Změna průměrné ceny PHM během roku**
+V roce 2026 se průměrná cena nafty změnila od 1. 6. a benzinu 95 od 1. 10. Pokud cesta přes tato data přechází, jakou cenu použít?
+*Návrh:* cenu platnou v den začátku cesty. Aplikace na změnu upozorní.
+
+**Ú-23 – Základ pro kapesné**
+Počítá se kapesné z výsledného zahraničního stravného za den (po krácení za jídla)?
+*Návrh:* ano, z výsledného stravného za den.
+
+**Ú-24 – Hraniční časy pásem**
+Cesta trvající přesně 12 hodin patří do pásma 5–12 h a přesně 18 hodin do pásma 12–18 h. Pobyt v zahraničí přesně 1 hodinu už zakládá nárok na 1/3 zahraničního stravného. Souhlasí?
+*Návrh:* ano.
 
 ## Vzorové příklady
 

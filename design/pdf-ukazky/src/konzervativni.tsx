@@ -169,7 +169,7 @@ export const Konzervativni = () => (
           foot={['Celkem', money(0), '', '', '', '', '', num(summary.mealReductionEur), `${num(summary.foreignPerDiemEur)} EUR`]}
         />
         <Text style={[s.note, { borderTop: B }]}>
-          Krácení se počítá ze základní sazby. Stravné za den je zaokrouhleno na celé EUR nahoru (před zaokrouhlením: {perDiem.map((d) => num(d.beforeRounding)).join(' / ')} EUR). Doba v ČR v jednotlivých dnech je kratší než 5 hodin, tuzemské stravné nenáleží.
+          Krácení se počítá z částky pro dané pásmo. Stravné za den je zaokrouhleno na celé EUR nahoru (před zaokrouhlením: {perDiem.map((d) => num(d.beforeRounding)).join(' / ')} EUR). Doba v ČR v jednotlivých dnech je kratší než 5 hodin, tuzemské stravné nenáleží.
         </Text>
       </Section>
 

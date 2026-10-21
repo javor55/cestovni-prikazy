@@ -51,7 +51,8 @@ export const segments = [
 ];
 
 // Krácení zahraničního stravného za bezplatné jídlo podle délky pobytu v zahraničí
-// (pásmo nad 18 h = 25 %, 12–18 h = 35 %, do 12 h = 70 % základní sazby). K potvrzení: Ú-17.
+// (pásmo nad 18 h = 25 %, 12–18 h = 35 %, do 12 h = 70 % z částky pásma). K potvrzení: Ú-17.
+// Výsledky odpovídají testu výpočetního jádra packages/core/test/foreign.test.ts.
 const foreignBase = 45; // EUR, Rakousko – ILUSTRATIVNÍ
 const days = [
   { date: 'St 14. 10. 2026', czTime: '3 h 15 min', abroadTime: '14 h 15 min', band: '12–18 h = 2/3', share: 2 / 3, cut: 0.35, meals: { b: false, l: false, d: false } },
@@ -62,7 +63,7 @@ const days = [
 export const perDiem = days.map((d) => {
   const base = r2(foreignBase * d.share);
   const freeMeals = [d.meals.b, d.meals.l, d.meals.d].filter(Boolean).length;
-  const reduction = r2(foreignBase * d.cut * freeMeals);
+  const reduction = r2(base * d.cut * freeMeals);
   const beforeRounding = Math.max(0, r2(base - reduction));
   const result = Math.ceil(beforeRounding); // návrh Ú-8: na celé EUR nahoru
   return {
@@ -109,7 +110,8 @@ export const expenses: Expense[] = [
 ];
 
 const kmTotal = segments.reduce((s, x) => s + x.km, 0);
-const fuelLitres = r2((kmTotal * 5.6) / 100);
+const fuelLitresExact = (kmTotal * 5.6) / 100;
+const fuelLitres = r2(fuelLitresExact);
 export const vehicle = {
   label: 'Škoda Octavia',
   plate: '1AB 2345',
@@ -122,7 +124,7 @@ export const vehicle = {
   fuelPriceSource: 'Doklad o tankování (výdaj č. 5)',
   fuelLitres,
   basic: r2(kmTotal * 5.9),
-  fuelComp: r2(fuelLitres * 38.9),
+  fuelComp: r2(fuelLitresExact * 38.9),
   get total() {
     return r2(this.basic + this.fuelComp);
   },

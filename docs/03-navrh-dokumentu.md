@@ -2,7 +2,7 @@
 
 Dva návrhy výsledného PDF „Cestovní příkaz a žádost o vyplacení“. Oba jsou vygenerované knihovnou `@react-pdf/renderer`, kterou má používat aplikace (zdroj: [`design/pdf-ukazky`](../design/pdf-ukazky)). Ukázky tím zároveň ověřují, že knihovna zvládne české znaky, vložené písmo, číslování stran, zápatí na každé stránce a dělení tabulek mezi stránky.
 
-> **Data jsou fiktivní. Sazby (45 EUR za den pro Rakousko, 5,90 Kč/km) a kurzy jsou pouze ilustrativní,** nejsou převzaté z vyhlášek ani z ČNB. Výpočet v ukázce je zjednodušený a uplatňuje navržené výchozí hodnoty z otázek pro účetní (krácení ze základní sazby, zaokrouhlení stravného na celé EUR nahoru, výsledek na celé Kč). Kontrolní součty: nárok 6 123,67 + 5 541,94 = 11 665,61 Kč, doplatek 12 EUR × 24,35 = 292,20 Kč, celkem 11 957,81 → **11 958 Kč**.
+> **Data jsou fiktivní, kurzy jsou ilustrativní.** Sazby (45 EUR za den pro Rakousko, 5,90 Kč/km) odpovídají sadě pravidel CZ-2026 z milníku 1. Částky v ukázce jsou shodné s výsledkem výpočetního jádra pro stejnou cestu (test `packages/core/test/foreign.test.ts`). Uplatňují navržené výchozí hodnoty z otázek pro účetní: krácení z částky pásma, zaokrouhlení stravného na celé EUR nahoru, výsledek na celé Kč. Kontrolní součty: nárok 6 123,67 + 5 541,78 = 11 665,45 Kč, doplatek 17 EUR × 24,35 = 413,95 Kč, celkem 12 079,40 → **12 079 Kč**.
 
 **Ukázková cesta:** Praha – Vídeň – Praha, 14.–16. 10. 2026, soukromé auto, záloha 100 EUR, 5 výdajů ve dvou měnách, hotel placený soukromou kartou s potvrzením z bankovnictví (kurz z potvrzení podle R4), snídaně v ceně hotelu a jeden oběd zdarma.
 

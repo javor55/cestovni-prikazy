@@ -43,7 +43,7 @@ MPSV při změně ceny o 20 % a více vydá novelu (v roce 2026 se tak změnila 
 
 ## Nový stát v nabídce
 
-Státy ve formuláři jsou v `CODES` v [`apps/web/src/model/countries.ts`](../apps/web/src/model/countries.ts). Názvy doplní prohlížeč česky podle kódu ISO. Sazba stravného pro stát se bere ze sady pravidel. Když tam chybí, aplikace požádá o ruční zadání.
+Státy ve formuláři jsou v `CODES` v [`apps/web/src/model/countries.ts`](../apps/web/src/model/countries.ts). Názvy doplní prohlížeč česky podle kódu ISO. Nabídka obsahuje nejčastější státy (asi 60), sazby má sada pravidel pro všech 227 států a území z přílohy. Sazba stravného se bere ze sady pravidel. Stát, který v příloze není, dostane sazbu pro ostatní země a aplikace upozorní. Ruční zadání aplikace nabídne, jen když sada nemá ani sazbu pro ostatní země.
 
 ## Kurzy ČNB na serveru
 

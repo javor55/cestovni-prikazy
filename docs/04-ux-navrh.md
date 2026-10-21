@@ -1,5 +1,7 @@
 # Etapa 2 – UX návrh
 
+> **Poznámka (21. 10. 2026):** prototyp popisuje původní průvodce v 9 krocích. Aplikace má 12 kroků (navíc Podpis, Kompletní PDF a Exporty), krok Vozidlo je vždy a volbou „použil(a) jsem osobní vozidlo“ se zapne. Aktuální podobu obrazovek ukazují screenshoty v [README](../README.md#jak-to-vypadá).
+
 Klikací prototyp: **https://claude.ai/artifact/QQYmeWsMRQ9Q1aqLUPnjx8** (soukromý, otevře ho jen vlastník, sdílet lze z menu Share).
 Zdrojové soubory prototypu jsou v [`design/ux-prototyp/`](../design/ux-prototyp). Jde o formát návrhového plátna, nejsou to soubory budoucí aplikace a samostatně se v prohlížeči neotevřou.
 

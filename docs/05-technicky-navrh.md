@@ -1,6 +1,6 @@
 # Etapa 4 – Technický návrh
 
-Navazuje na schválenou [analýzu](01-analyza.md) (lokální architektura, R10). Výpočetní jádro z milníku 1 je už implementované a tento dokument popisuje jeho skutečnou podobu.
+Navazuje na schválenou [analýzu](01-analyza.md) (lokální architektura, R10). Všechny milníky 1–7 jsou hotové a dokument popisuje skutečný stav aplikace (aktualizováno 21. 10. 2026).
 
 ## 1. Technologie
 
@@ -8,15 +8,15 @@ Navazuje na schválenou [analýzu](01-analyza.md) (lokální architektura, R10).
 |---|---|
 | Jazyk | TypeScript (strict) |
 | Monorepo | pnpm workspaces |
-| UI | React 19 + Vite (SPA), React Router, React Hook Form, zod |
-| Styl | Tailwind CSS, přístupné komponenty Radix UI, písmo Inter (self-hosted) |
+| UI | React 19 + Vite (SPA), React Router, zod (kontrola importovaných dat) |
+| Styl | Tailwind CSS 4, vlastní přístupné komponenty (`apps/web/src/ui`), písmo Inter (self-hosted, `@fontsource`) |
 | Lokální úložiště | IndexedDB přes Dexie |
 | PDF | `@react-pdf/renderer` (šablony), `pdf-lib` (slučování, číslování, záložky, podpis), `pdf.js` (náhledy) |
-| Obrázky | canvas API, `heic2any`, `exifr` |
+| Obrázky | canvas API, `heic2any`, otočení podle EXIF přes `createImageBitmap` |
 | Exporty | vlastní zápis XLSX (SpreadsheetML) a CSV, `fflate` (ZIP); ExcelJS jen v testech ke kontrole souboru |
-| Testy | Vitest (jádro, dokumenty), Playwright (E2E, mobilní viewporty, WebKit) |
-| Server | Node.js + Hono: statické soubory a `/api/kurzy` |
-| Nasazení | Docker (multi-stage), Docker Compose, Caddy (HTTPS) |
+| Testy | Vitest (jádro, pravidla, dokumenty, aplikace, server), Playwright (E2E v Chromiu: 320 px, mobil, desktop; axe-core) |
+| Server | Hono: `/api/kurzy` a bezpečnostní hlavičky – jako server v Node.js (Docker, i statické soubory) nebo jako Cloudflare Worker |
+| Nasazení | Cloudflare Workers (`wrangler.toml`), Docker (multi-stage), Docker Compose, Caddy (HTTPS) |
 
 ### Porovnání s variantou .NET
 
@@ -38,21 +38,21 @@ flowchart LR
     UI[apps/web<br/>React UI] --> CORE[packages/core<br/>výpočet a kontroly]
     CORE --> RULES[packages/rules<br/>sady pravidel CZ-2026]
     UI --> DOCS[packages/documents<br/>PDF, XLSX, CSV]
-    UI --> PROJ[packages/project<br/>export/import ZIP]
+    UI --> PROJ[apps/web/src/exports<br/>exporty, projekt ZIP]
     UI --> IDB[(IndexedDB<br/>cesty a přílohy)]
     DOCS --> CORE
   end
-  subgraph Server[Kontejner]
+  subgraph Server[Server: Cloudflare Worker nebo kontejner]
     STATIC[statické soubory]
     API["/api/kurzy<br/>cache kurzů ČNB"]
   end
   UI -- načtení aplikace --> STATIC
-  UI -- datum + měna --> API
+  UI -- datum --> API
   API -- denní kurzy --> CNB[(ČNB)]
 ```
 
 - Na server neodchází žádný osobní údaj. Požadavek na kurz obsahuje jen datum.
-- `core`, `rules`, `documents` a `project` nezávisí na prohlížeči, takže je může použít budoucí server.
+- `core`, `rules` a `documents` nezávisí na prohlížeči, takže je může použít budoucí server.
 - Modulární monolit: jedna aplikace, jeden kontejner.
 
 ## 3. Datový model
@@ -62,21 +62,21 @@ Vstup výpočtu je typ `TripInput` v [`packages/core/src/model.ts`](../packages/
 - Částky jsou celá čísla v nejmenších jednotkách měny (haléře, centy) plus kód měny.
 - Kurzy a desetinné vstupy (km, spotřeba) jsou text, aby nevznikaly chyby plovoucí čárky.
 - Časy jsou v českém místním čase `YYYY-MM-DDTHH:mm` (Ú-9).
-- Přechody hranic jsou součástí úseků. Z nich jádro sestaví intervaly pobytu ve státech.
+- Přechody hranic jsou součástí úseků – jeden úsek jich může mít víc (průjezd více státy). Z nich jádro sestaví intervaly pobytu ve státech.
 
-Uložená cesta v aplikaci (IndexedDB) obsahuje navíc údaje pro dokumenty (zaměstnanec, zaměstnavatel, účel, plán, poznámky) a metadata příloh. Je to nadmnožina `TripInput` se `schemaVersion`.
+Uložená cesta v aplikaci (IndexedDB, typ `TripDoc` v [`apps/web/src/model/trip.ts`](../apps/web/src/model/trip.ts)) obsahuje navíc údaje pro dokumenty: zaměstnanec, zaměstnavatel, účel, plán s trasou (`route[]` se zastávkami) a dopravními prostředky (`plannedTransportKinds`, včetně půjčeného auta, autopůjčovny a lodi), poznámky. Formulářová čísla zůstávají textem a na vstup jádra je převádí `toInput.ts`. Aktuální verze schématu je 6. Starší uložené cesty i importované projekty převádí `migrate.ts`.
 
 ```
-trips        { id, schemaVersion, createdAt, updatedAt, lastOpenedAt, data: TripDocument }
-attachments  { id, tripId, expenseId?, kind, subtype, originalName, mime, size, sha256, order, createdAt }
-blobs        { attachmentId, variant: 'original' | 'derived' | 'thumbnail', blob }
-snapshots    { id, tripId, createdAt, ruleSetId, ruleSetVersion, inputHash, result, documentKind }
-settings     { key, value }   // zapamatovaný zaměstnanec a zaměstnavatel, doba uchování
+trips        TripDoc { id, schemaVersion, createdAt, updatedAt, lastOpenedAt, … }
+attachments  { id, tripId, expenseId | null, kind, subtype, originalName, mime, size, sha256, order, createdAt, rotation, crop, conversion, pages }
+blobs        { key: "<attachmentId>:<variant>", attachmentId, variant: 'original' | 'derived' | 'thumbnail', blob }
+snapshots    { id, tripId, createdAt, layout, part, inputHash, model: DocModel }   // neměnný snímek dokumentu
+settings     { key, value }   // zapamatovaný zaměstnanec a zaměstnavatel
 ```
 
 Připraveno pro budoucí firemní verzi: UUID místo pořadových čísel, volitelné `ownerId` a `organizationId`, odděleně uložené výsledky výpočtu (snímky).
 
-## 4. Výpočetní jádro (milník 1, hotovo)
+## 4. Výpočetní jádro
 
 ```ts
 calculate(trip: TripInput, ruleSets?: RuleSet[]): CalculationResult
@@ -101,38 +101,38 @@ calculate(trip: TripInput, ruleSets?: RuleSet[]): CalculationResult
 | Benzin 98 | 39,00 Kč | 573/2025 Sb. |
 | Nafta | 34,10 Kč (do 31. 5.), 44,50 Kč (od 1. 6.) | 573/2025, 78/2026 Sb. |
 | Elektřina | 7,20 Kč/kWh | 573/2025 Sb. |
-| Zahraniční stravné | AT 45, DE 50, FR 50, IT 55, PL 50, SK 40 EUR; HU 50 EUR a GB 45 GBP neověřeno | 489/2025 Sb. |
+| Zahraniční stravné | úplná příloha: 227 států a území (např. AT 45, DE 50, HR 50 EUR, GB 45 GBP, CH 75 CHF, US 70 USD), ostatní země 35 EUR | 489/2025 Sb. |
 
-> **Stav ověření:** hodnoty pocházejí ze shodných sekundárních zdrojů (odborné weby). Primární texty vyhlášek (mf.gov.cz, ppropo.mpsv.cz) nebyly z vývojového prostředí dostupné. Před ostrým provozem je musí ověřit účetní. Zahraniční stravné obsahuje zatím jen sousední a nejčastější státy. U ostatních aplikace vyžádá ruční zadání sazby podle vyhlášky a upozorní na to. Doplnění celé přílohy vyhlášky (cca 170 států) je úkol pro milník 3.
+> **Stav ověření:** zahraniční stravné je převzaté z PDF vyhlášky 489/2025 Sb. od Ministerstva financí (verze sady 1.1.0). Tuzemské sazby, náhrada za km a ceny paliv pocházejí ze shodných sekundárních zdrojů. Primární texty vyhlášek nebyly z vývojového prostředí dostupné, před ostrým provozem je musí ověřit účetní. Každý zdroj v `sources` má odkaz (`url`) na úplné znění. Aplikace ho ukazuje v Souhrnu.
 
 Nová sada pravidel = nový soubor (např. `cz-2027.json`) + test s kontrolními hodnotami. Stará sada zůstává, takže výpočty starších cest se nezmění.
 
 ### Pokrytí testy
 
-60 automatických testů porovnává skutečné částky s ručně spočítanými. Pokrývají všechny případy ze zadání § 29.1: jednodenní, vícedenní a krátkou cestu, bezplatná jídla, zahraniční cestu do jedné země, průjezd více státy, hranici kolem půlnoci, kombinaci tuzemského a zahraničního stravného, více měn, zálohu v cizí měně, doložený i ruční kurz, vozidlo s doloženou i průměrnou cenou, firemní a soukromou platbu, doplatek i přeplatek a zaokrouhlování. Navíc: dny se změnou času, hraniční časy pásem, platová sféra, kapesné, elektromobil a kontroly časové osy.
+Přes 60 testů jádra (z celkem asi 170 jednotkových testů) porovnává skutečné částky s ručně spočítanými. Pokrývají všechny případy ze zadání § 29.1: jednodenní, vícedenní a krátkou cestu, bezplatná jídla, zahraniční cestu do jedné země, průjezd více státy, hranici kolem půlnoci, kombinaci tuzemského a zahraničního stravného, více měn, zálohu v cizí měně, doložený i ruční kurz, vozidlo s doloženou i průměrnou cenou, firemní a soukromou platbu, doplatek i přeplatek a zaokrouhlování. Navíc: dny se změnou času, hraniční časy pásem, platová sféra, kapesné, elektromobil a kontroly časové osy.
 
 Kontrola testů mutací: po změně jediné sazby selže 11 testů.
 
 ## 5. Kurzy ČNB
 
 - `GET /api/kurzy?datum=YYYY-MM-DD` vrátí denní kurzy ČNB platné pro dané datum (ČNB vyhlašuje kurzy v pracovní dny po 14:30. Pro víkend a svátek platí poslední vyhlášený kurz).
-- Server stahuje pouze z pevně dané adresy ČNB, výsledky ukládá do cache v paměti a na disk (kurzy se zpětně nemění). Rate limiting v Caddy.
+- Server stahuje pouze z pevně dané adresy ČNB (nastavitelné přes `CNB_URL`). Výsledky ukládá do mezipaměti v paměti a v Dockeru i na disk (kurzy se zpětně nemění), na Cloudflare do jeho mezipaměti. Limit počtu požadavků je přímo v serveru (`RATE_LIMIT_PER_MINUTE`, výchozí 60 za minutu z jedné adresy).
 - Aplikace uloží ke každé částce kurz, datum kurzu a zdroj. Výpočet je tím reprodukovatelný i bez sítě.
-- Výchozí datum kurzu pro výdaj je den platby (návrh, otevřená otázka Ú-10).
+- Tlačítko „Načíst kurz ČNB“ bere kurz ke dni výdaje, u zahraničního stravného bez zálohy ke dni začátku cesty (otevřená otázka Ú-10).
 
 ## 6. Přílohy
 
-1. Výběr nebo vyfocení souboru → ověření typu podle prvních bajtů (PDF, JPEG, PNG, HEIC), limit 20 MB.
+1. Výběr nebo vyfocení souboru → ověření typu podle prvních bajtů (PDF, JPEG, PNG, HEIC), limit 20 MB na soubor a 300 MB na cestu. Druhy: účetní doklad, doklad o zaplacení, doplňující dokument, doklad k vozidlu (technický průkaz, výpis z registru, smlouva o výpůjčce), podepsaný sken, obrázek podpisu.
 2. Výpočet SHA-256 → kontrola duplicit.
 3. Uložení originálu (nikdy se nepřepisuje) a odvozené varianty: HEIC → JPEG, otočení podle EXIF, zmenšení na delší stranu 2 400 px, ořez a otočení podle uživatele.
 4. Náhled: obrázky přes `<img>`, PDF přes `pdf.js` vykreslené do canvasu (bez spouštění skriptů v PDF).
 
 ## 7. Generování PDF
 
-1. **Snímek:** při kliknutí na „Vytvořit PDF“ se uloží `snapshot` = vstup + výsledek výpočtu + verze pravidel + hash vstupu. Šablony čtou jen snímek.
-2. **PDF k podpisu:** `@react-pdf/renderer` ve Web Workeru (UI nezamrzne), vložené písmo Noto Sans.
-3. **Kompletní dokumentace:** `pdf-lib` složí krycí list a obsah, podepsaný dokument (sken nebo PDF s vloženým PNG podpisem), rozpis výpočtu, přehled výdajů a pro každý výdaj identifikační stranu a doklady (obrázek = stránka A4 se zachovaným poměrem stran, PDF = vložení stran). Potom doplní průběžné číslování „strana X z Y“, číslo příkazu a záložky.
-4. Před stažením se zobrazí počet stran, dokladů a výdajů bez dokladu a velikost souboru. Cíl je pod 10 MB při 30 fotkách díky zmenšení na 200 DPI a JPEG kvalitě 0,8.
+1. **Snímek:** při kliknutí na „Vytvořit PDF“ se uloží `snapshot` = model dokumentu (`DocModel` – všechny údaje už naformátované jako text, včetně verze pravidel) + vzhled + otisk vstupních údajů. Šablony čtou jen snímek, takže stejný snímek dá vždy stejné PDF.
+2. **PDF k podpisu:** `@react-pdf/renderer` v prohlížeči (knihovna se načte až při prvním použití), dva vzhledy (moderní a konzervativní), vložená písma Noto Sans a Noto Serif Bold.
+3. **Kompletní dokumentace:** `pdf-lib` složí krycí list a obsah, podepsaný dokument (sken nebo PDF s vloženým PNG podpisem), rozpis výpočtu, přehled výdajů, pro každý výdaj identifikační stranu a účetní doklady, doklady o zaplacení, doklady k vozidlu a doplňující přílohy (obrázek = stránka A4 se zachovaným poměrem stran, PDF = vložení stran). Potom doplní průběžné číslování „strana X z Y“, číslo příkazu a záložky.
+4. Před stažením se zobrazí počet stran, dokladů a výdajů bez dokladu a velikost souboru. Cíl je pod 10 MB při 30 fotkách díky zmenšení na delší stranu 2 400 px (asi 200 DPI) a JPEG kvalitě 0,85.
 
 ## 8. Export a import projektu
 
@@ -165,13 +165,13 @@ Implementace (`apps/web/src/exports`):
 - Přísná CSP (`apps/server/src/headers.ts`): vše jen z vlastní domény, `blob:`/`data:` pro náhledy a PDF z prohlížeče, `frame-ancestors 'none'`. Navíc `'wasm-unsafe-eval'`, protože sazba PDF používá WebAssembly (ověřeno: bez něj PDF nevznikne). Stejné hlavičky platí v Dockeru, na Cloudflare (`_headers`) i v náhledu pro E2E testy, kde každé porušení CSP test shodí.
 - Žádné skripty, fonty ani analytika třetích stran. `Referrer-Policy: no-referrer`, `X-Content-Type-Options: nosniff`, HSTS.
 - React escapuje výstup. `dangerouslySetInnerHTML`, `innerHTML`, `eval` a volání cizích serverů hlídá test `apps/web/src/security.test.ts`.
-- Endpoint kurzů přijímá jen validované datum, volá pevnou adresu (bez SSRF) a má rate limit.
+- Endpoint kurzů přijímá jen validované datum, volá pevnou adresu (bez SSRF) a má limit počtu požadavků (`apps/server/src/rateLimit.ts`).
 - Závislosti: lockfile, `pnpm audit` v CI, Dependabot.
 - Provoz a nasazení: [07 – Nasazení a provoz](07-nasazeni.md).
 
 ## 10. Automatické mazání
 
-- Každá cesta má `lastOpenedAt`. Při spuštění aplikace se smažou cesty starší než nastavená doba (výchozí 30 dní), včetně příloh a snímků, v jedné transakci IndexedDB.
+- Každá cesta má `lastOpenedAt`. Při otevření úvodní stránky se smažou cesty, které nikdo neotevřel 30 dní (`RETENTION_DAYS`), včetně příloh a snímků. Každá cesta se maže v jedné transakci IndexedDB.
 - 7 dní před smazáním aplikace na cestu upozorní a nabídne stažení projektu.
 - Ruční smazání cesty i všech dat aplikace. Test s posunutým časem ověří, že po smazání v IndexedDB nic nezůstane.
 - Aplikace požádá prohlížeč o trvalé úložiště (`navigator.storage.persist()`).
@@ -180,28 +180,28 @@ Implementace (`apps/web/src/exports`):
 
 | Úroveň | Nástroj | Co |
 |---|---|---|
-| Jednotkové | Vitest | výpočty (hotovo), převody času, kurzy, CSV/XLSX, import ZIP včetně škodlivých balíčků |
+| Jednotkové | Vitest | výpočty, převody času, kurzy, trasa a přechody hranic, migrace dat, CSV/XLSX, import ZIP včetně škodlivých balíčků, server a hlavičky, bezpečnost zdrojového kódu |
 | Dokumenty | Vitest + pdf-lib | počet stran, čísla stran, záložky, české znaky, pořadí příloh, otočené a extrémní obrázky, poškozené soubory |
-| E2E | Playwright | celý tok na 320 px, mobilu, tabletu a desktopu, Chromium a WebKit |
-| Přístupnost | axe-core v Playwright | každá obrazovka bez závažných nálezů |
-| CI | GitHub Actions | typecheck + testy u každého PR |
+| E2E | Playwright | celý tok na 320 px, mobilu a desktopu (Chromium), vždy se zapnutou CSP; offline režim; spouští se i proti kontejneru Docker a simulaci Cloudflare (`E2E_BASE_URL`) |
+| Přístupnost | axe-core v Playwright | úvod a všech 12 kroků bez závažných nálezů |
+| CI | GitHub Actions | typecheck, jednotkové testy, `pnpm audit`, E2E a sestavení a kontrola obrazu Docker u každého PR |
 
 ## 12. Nasazení
 
-- Jeden obraz `ghcr.io/javor55/cestovni-prikazy`: Node server se statickými soubory a `/api/kurzy`.
-- `docker-compose.yml` s Caddy pro HTTPS (Let's Encrypt).
-- Konfigurace proměnnými prostředí: `PORT`, `CNB_URL`, `RATE_CACHE_DIR`, `RETENTION_DAYS_DEFAULT`.
-- **Internet:** Ubuntu VM s veřejnou IP a doménou (nebo bezplatná subdoména).
-- **Firemní síť:** stejný obraz. Pokud server nesmí ven, `/api/kurzy` lze vypnout, aplikace pak nabídne ruční zadání kurzu nebo import kurzovního lístku ČNB (TXT).
+- **Cloudflare Workers:** statické soubory a Worker pro `/api/*` (`wrangler.toml`, `apps/server/src/worker.ts`). Nasazuje se automaticky po sloučení do `main`.
+- **Docker:** obraz se sestaví z `Dockerfile` (Node server se statickými soubory a `/api/kurzy`). `compose.yaml` přidává Caddy pro HTTPS (Let's Encrypt nebo interní certifikát).
+- Konfigurace proměnnými prostředí: `PORT`, `STATIC_DIR`, `RATE_CACHE_DIR`, `CNB_URL`, `RATE_LIMIT_PER_MINUTE`, `TRUST_PROXY` (viz [07 § 4](07-nasazeni.md)).
+- **Firemní síť:** stejný obraz. Pokud server nesmí ven, lze `CNB_URL` nastavit na interní zrcadlo. Kurz jde vždy zadat i ručně.
 
-## 13. Další milníky
+## 13. Milníky
 
 | Milník | Obsah |
 |---|---|
 | 1 | **Výpočetní jádro a sady pravidel – hotovo** |
 | 2 | **Kostra webové aplikace, průvodce formuláři, lokální ukládání, validace v UI, napojení na jádro – hotovo** |
-| 3 | **Přílohy (focení, HEIC, ořez, otočení), kurzy ČNB – hotovo**; úplná tabulka zahraničních sazeb čeká na text přílohy vyhlášky (nástroj pro import je hotový) |
+| 3 | **Přílohy (focení, HEIC, ořez, otočení), kurzy ČNB – hotovo**; úplná příloha zahraničních sazeb (227 států) doplněna později |
 | 4 | **PDF k podpisu (obě šablony) ze snímku výpočtu – hotovo** |
 | 5 | **Podepsaný dokument, PNG podpis, kompletní PDF – hotovo** |
 | 6 | **Exporty XLSX, CSV, JSON, ZIP originálů a export/import projektu – hotovo** |
 | 7 | **Zabezpečení (CSP, hlavičky, limit API, audit), PWA a offline, Docker + Caddy, Cloudflare Workers, dokumentace – hotovo** |
+| Po MVP | Více přechodů hranic v úseku, trasa se zastávkami v plánu, více dopravních prostředků, cena paliva z více tankování, doklady k vozidlu, úplné zahraniční sazby |

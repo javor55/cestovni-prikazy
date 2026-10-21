@@ -1,5 +1,7 @@
 # Etapa 3 – Návrh dokumentů
 
+> **Poznámka (21. 10. 2026):** ukázky jsou z etapy 3. Implementace je v [`packages/documents/src`](../packages/documents/src) (`Modern.tsx`, `Conservative.tsx`). Oproti návrhu: logo firmy zatím podporované není, výchozí je moderní vzhled bez číslování oddílů a identifikační stránky výdajů jsou až v kompletní dokumentaci.
+
 Dva návrhy výsledného PDF „Cestovní příkaz a žádost o vyplacení“. Oba jsou vygenerované knihovnou `@react-pdf/renderer`, kterou má používat aplikace (zdroj: [`design/pdf-ukazky`](../design/pdf-ukazky)). Ukázky tím zároveň ověřují, že knihovna zvládne české znaky, vložené písmo, číslování stran, zápatí na každé stránce a dělení tabulek mezi stránky.
 
 > **Data jsou fiktivní, kurzy jsou ilustrativní.** Sazby (45 EUR za den pro Rakousko, 5,90 Kč/km) odpovídají sadě pravidel CZ-2026 z milníku 1. Částky v ukázce jsou shodné s výsledkem výpočetního jádra pro stejnou cestu (test `packages/core/test/foreign.test.ts`). Uplatňují navržené výchozí hodnoty z otázek pro účetní: krácení z částky pásma, zaokrouhlení stravného na celé EUR nahoru, výsledek na celé Kč. Kontrolní součty: nárok 6 123,67 + 5 541,78 = 11 665,45 Kč, doplatek 17 EUR × 24,35 = 413,95 Kč, celkem 12 079,40 → **12 079 Kč**.
@@ -76,5 +78,5 @@ Konečnou volbu doporučuji nechat na účetní, protože dokument čte hlavně 
 
 - `@react-pdf/renderer` 4.9 funguje dobře, výsledné PDF má 35–55 kB.
 - Chyba knihovny: nastavení `lineHeight` na úrovni stránky způsobí, že se nevykreslí pevně umístěné zápatí. Řádkování se proto nastavuje jen u jednotlivých textových stylů.
-- Písmo Noto Sans neobsahuje znak šipky „→“. V šablonách se používají jen znaky, které písmo obsahuje. Před nasazením přidám test, který ověří pokrytí všech znaků použitých v šablonách.
-- Číslování stran napříč sloučenými přílohami v kompletní dokumentaci obstará `pdf-lib` (doplní se po sloučení). Ověřím v milníku 5.
+- Písmo Noto Sans neobsahuje znak šipky „→“. V šablonách se používají jen znaky, které písmo obsahuje. Automatický test pokrytí znaků zatím chybí. Chybějící znaky v PDF hlídají testy dokumentů a E2E test kompletního PDF.
+- Číslování stran „strana X z Y“ napříč sloučenými přílohami a záložky v kompletní dokumentaci doplňuje `pdf-lib` (hotovo v milníku 5).

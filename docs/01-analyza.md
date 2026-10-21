@@ -1,5 +1,7 @@
 # Etapa 1 – Analýza
 
+> **Poznámka (21. 10. 2026):** toto je původní analýza před implementací. Některé návrhy se během vývoje změnily (např. průvodce má 12 kroků, PDF se vytváří v hlavním vlákně prohlížeče, nepoužívá se React Hook Form, Radix UI, exifr ani WebKit v testech, nasazení je na Cloudflare Workers místo Pages, cena paliva z více dokladů je vážený průměr). Skutečný stav popisují [05 – Technický návrh](05-technicky-navrh.md) a [07 – Nasazení a provoz](07-nasazeni.md).
+
 Stav: **schváleno zadavatelem 21. 10. 2026** (otázky pro účetní zůstávají otevřené)
 Vstup: `zadani_aplikace_cestovni_prikazy.md` (dále „zadání“) a odpovědi zadavatele z 21. 10. 2026.
 
@@ -332,5 +334,5 @@ Budoucí (mimo MVP): serverová synchronizace a účty, organizace a role, schva
 ## 11. Co potřebuji k pokračování
 
 1. ~~**Zadavatel:** potvrdit lokální architekturu (§ 3) a výchozí dobu uchování 30 dní.~~ Potvrzeno (R10).
-2. **Zadavatel:** je Ubuntu VM dostupná z internetu (veřejná IP / port 443) a máte doménu? Případně souhlasíte s Cloudflare Pages pro testování?
+2. ~~**Zadavatel:** je Ubuntu VM dostupná z internetu (veřejná IP / port 443) a máte doménu? Případně souhlasíte s Cloudflare Pages pro testování?~~ Vyřešeno: aplikace běží na Cloudflare Workers, pro vlastní server je připravený Docker s Caddy (viz [07](07-nasazeni.md)).
 3. **Účetní:** odpovědět na otázky v [`02-otazky-pro-ucetni.md`](02-otazky-pro-ucetni.md) a dodat 3–5 skutečných (anonymizovaných) vyúčtování jako vzorové příklady pro testy.

@@ -136,6 +136,7 @@ export function buildDocModel({ trip, mapped, result, docCounts, documentCount, 
       const e = trip.expenses.find((x) => x.id === r.id)!;
       const c = docCounts[r.id] ?? { accounting: 0, payment: 0 };
       return {
+        id: r.id,
         n: String(r.order),
         date: formatDay(e.date),
         category: r.category,

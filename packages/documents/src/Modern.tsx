@@ -3,6 +3,7 @@
 import { Document, Page, StyleSheet, Text, View } from '@react-pdf/renderer';
 import type { ReactNode } from 'react';
 import type { DocModel, DocPart } from './model.js';
+import { SignatureMark } from './SignatureMark.js';
 
 const INK = '#111';
 const MUTED = '#555';
@@ -109,11 +110,12 @@ const Card = ({ label, value, sub, last }: { label: string; value: string; sub?:
   </View>
 );
 
-const Signs = ({ items }: { items: [string, string][] }) => (
+const Signs = ({ items }: { items: [string, string, ReactNode?][] }) => (
   <View style={s.row} wrap={false}>
-    {items.map(([t, h], i) => (
+    {items.map(([t, h, content], i) => (
       <View key={t} style={[s.signBox, i === items.length - 1 ? { marginRight: 0 } : {}]}>
         <Text style={s.signTitle}>{t}</Text>
+        {content}
         <Text style={s.signHint}>{h}</Text>
       </View>
     ))}
@@ -180,7 +182,7 @@ export function PartA({ m }: { m: DocModel }) {
       <Section title="Podpisy">
         <Signs
           items={[
-            ['Zaměstnanec', 'Datum a podpis'],
+            ['Zaměstnanec', 'Datum a podpis', <SignatureMark sig={m.signature} />],
             ['Schválil – zaměstnavatel / nadřízený', 'Jméno, datum a podpis'],
           ]}
         />
@@ -276,7 +278,7 @@ export function PartB({ m }: { m: DocModel }) {
         <Text style={{ marginBottom: 6, color: MUTED }}>Připojeno dokladů: {m.documentCount}</Text>
         <Signs
           items={[
-            ['Zaměstnanec', 'Datum a podpis'],
+            ['Zaměstnanec', 'Datum a podpis', <SignatureMark sig={m.signature} />],
             ['Věcná kontrola', 'Nadřízený – datum, podpis'],
             ['Účetní kontrola', 'Datum, podpis'],
             ['Schváleno k výplatě', 'Datum, podpis'],

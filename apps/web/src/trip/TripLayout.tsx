@@ -102,7 +102,7 @@ export function TripLayout() {
       </main>
     );
 
-  const ctx: TripCtx = { trip, update, mapped: mapped!, result, issues: [...mapped!.issues, ...(result?.issues ?? [])], docCounts, attachmentCount: attachments?.length ?? 0 };
+  const ctx: TripCtx = { trip, update, mapped: mapped!, result, issues: [...mapped!.issues, ...(result?.issues ?? [])], docCounts, attachmentCount: attachments?.filter((a) => a.kind !== 'signed' && a.kind !== 'signature').length ?? 0 };
   const index = Math.max(0, steps.findIndex((s) => s.slug === step));
   const current = steps[index]!;
   const prev = steps[index - 1];

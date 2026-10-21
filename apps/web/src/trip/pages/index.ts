@@ -3,8 +3,10 @@ import type { StepSlug } from '../steps.js';
 import { StepCesta } from './StepCesta.js';
 import { StepJidla } from './StepJidla.js';
 import { StepKdo } from './StepKdo.js';
+import { StepKompletni } from './StepKompletni.js';
 import { StepKontrola } from './StepKontrola.js';
 import { StepPdf } from './StepPdf.js';
+import { StepPodpis } from './StepPodpis.js';
 import { StepPrubeh } from './StepPrubeh.js';
 import { StepSouhrn } from './StepSouhrn.js';
 import { StepVozidlo } from './StepVozidlo.js';
@@ -20,4 +22,6 @@ export const StepPages: Record<StepSlug, ComponentType> = {
   souhrn: StepSouhrn,
   kontrola: StepKontrola,
   pdf: StepPdf,
+  podpis: StepPodpis,
+  kompletni: StepKompletni,
 };

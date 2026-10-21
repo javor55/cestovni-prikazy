@@ -65,6 +65,8 @@ export interface DocModel {
   };
 
   expenses: {
+    /** Interní id výdaje – slouží jen k dohledání dokladů při sestavení kompletní dokumentace. */
+    id?: string;
     n: string;
     date: string;
     category: string;
@@ -103,6 +105,19 @@ export interface DocModel {
 
   documentCount: string;
   declaration: string;
+
+  /**
+   * Vizuální podpis zaměstnance – vkládá se jen do jeho podpisových polí. Nejde o elektronický podpis,
+   * aplikace neověřuje totožnost podepisující osoby.
+   */
+  signature?: {
+    /** PNG jako data URL (ideálně s průhledným pozadím). */
+    image?: string;
+    /** Šířka obrázku v procentech podpisového pole (30–100). */
+    widthPct: number;
+    /** Jednoduché razítko „Podepsáno“ se jménem a datem. */
+    stamp?: { name: string; date: string };
+  };
 }
 
 /** Název souboru podle zadání: CP-RRRR-NNNN_Cestovni-prikaz-a-zadost-o-vyplaceni.pdf */

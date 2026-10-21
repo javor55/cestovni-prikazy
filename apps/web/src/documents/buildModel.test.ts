@@ -42,4 +42,13 @@ describe('model dokumentu', () => {
     expect(await inputHash({ ...t, purpose: 'Jiný účel' }, {})).not.toBe(h1);
     expect(await inputHash(t, { h: { accounting: 1, payment: 0 } })).not.toBe(h1);
   });
+
+  it('cíl v zahraničí má v dokumentu i stát', () => {
+    const t = vienna();
+    t.destinations = 'Záhřeb';
+    t.destinationCountry = 'HR';
+    expect(build(t).trip.destinations).toBe('Záhřeb (Chorvatsko)');
+    t.kind = 'domestic';
+    expect(build(t).trip.destinations).toBe('Záhřeb');
+  });
 });

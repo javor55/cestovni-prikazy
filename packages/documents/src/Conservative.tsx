@@ -217,7 +217,7 @@ function PartB({ m }: { m: DocModel }) {
       <Section n={next()} title="Prohlášení zaměstnance a schválení" wrap={false}>
         <Text style={{ padding: 5, fontSize: 8, lineHeight: 1.3 }}>{m.declaration}</Text>
         <Text style={{ paddingHorizontal: 5, paddingBottom: 4, fontSize: 8 }}>Počet připojených dokladů: {m.documentCount}</Text>
-        <Signatures items={['Datum a podpis zaměstnance', 'Věcná kontrola – podpis nadřízeného', 'Účetní kontrola – podpis', 'Schváleno k výplatě – datum, podpis']} employee={m.signature} />
+        <Signatures items={['Datum a podpis zaměstnance', 'Schválil – jméno, datum a podpis nadřízeného']} employee={m.signature} />
       </Section>
     </Page>
   );

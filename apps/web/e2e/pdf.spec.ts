@@ -44,7 +44,7 @@ async function domesticTrip(page: Page) {
   await s1.getByLabel('Odjezd').fill('2026-03-10T07:00');
   await s1.getByLabel('Příjezd').fill('2026-03-10T15:30');
   await go(page, `${base}/jidla`);
-  await page.getByRole('button', { name: 'Oběd' }).click();
+  await page.getByRole('button', { name: 'Oběd', exact: true }).click();
   await go(page, `${base}/pdf`);
   return base;
 }

@@ -56,7 +56,7 @@ test('celá zahraniční cesta: vyplnění, výpočet, uložení a smazání', a
   await next(page);
 
   // 4 Jídla: snídaně v hotelu, oběd 15. 10.
-  await page.getByRole('button', { name: 'Snídaně v ceně ubytování každé ráno' }).click();
+  await page.getByRole('button', { name: 'Snídaně každé ráno (v ceně ubytování)' }).click();
   await page.getByRole('region', { name: /15\. 10\. 2026/ }).getByRole('button', { name: 'Oběd' }).click();
   await expect(page.getByRole('region', { name: /15\. 10\. 2026/ })).toContainText('23,00 EUR');
   await expect(page.getByRole('region', { name: /16\. 10\. 2026/ })).toContainText('20,00 EUR');

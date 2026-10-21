@@ -106,9 +106,11 @@ export function StepPrubeh() {
                   return (
                     <div key={c.id} className="grid items-end gap-2 sm:grid-cols-[1fr_1fr_auto]">
                       {last ? (
-                        <p className="flex min-h-11 items-center text-[15px]">
-                          {countryName(from) || '?'} → <strong className="ml-1">{countryName(c.to)}</strong>
-                        </p>
+                        // Cílový stát úseku se mění u „Kam“ – zde jen pro přehled, ve stejném rozložení jako ostatní řádky.
+                        <div className="flex flex-col gap-1.5">
+                          <span className="text-sm font-semibold">Cílový stát ({countryName(from) || '?'} → …)</span>
+                          <span className="flex min-h-11 items-center rounded-lg border border-line bg-ground px-3 text-base">{countryName(c.to)}</span>
+                        </div>
                       ) : (
                         <SelectField
                           label={`Stát po cestě (${countryName(from) || '?'} → …)`}
@@ -125,10 +127,12 @@ export function StepPrubeh() {
                         min={s.departure}
                         max={s.arrival}
                       />
-                      {!last && (
+                      {last ? (
+                        <span className="hidden w-12 sm:block" aria-hidden="true" />
+                      ) : (
                         <Button
                           variant="danger"
-                          className="min-h-11 px-3"
+                          className="min-h-11 w-12 px-0"
                           aria-label={`Odebrat stát po cestě ${countryName(c.to) || ''}`.trim()}
                           onClick={() => updateSeg(i, (x) => void x.crossings.splice(j, 1))}
                         >

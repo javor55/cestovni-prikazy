@@ -1,6 +1,6 @@
 import { formatMinutes } from '@cp/core';
 import { formatMinor } from '../../model/format.js';
-import { datesOf, markBreakfasts } from '../../model/meals.js';
+import { datesOf, setMealAll } from '../../model/meals.js';
 import { actualTimes } from '../../model/toInput.js';
 import type { MealsDoc } from '../../model/trip.js';
 import { Button, Card, Notice } from '../../ui/controls.js';
@@ -11,6 +11,13 @@ const mealNames: [keyof MealsDoc, string][] = [
   ['breakfast', 'Snídaně'],
   ['lunch', 'Oběd'],
   ['dinner', 'Večeře'],
+];
+
+/** Hromadné označení: snídaně od druhého dne (po první noci), obědy a večeře každý den cesty. */
+const bulk: { kind: keyof MealsDoc; on: string; off: string; days: (dates: string[]) => string[] }[] = [
+  { kind: 'breakfast', on: 'Snídaně každé ráno (v ceně ubytování)', off: 'Zrušit snídaně', days: (d) => d.slice(1) },
+  { kind: 'lunch', on: 'Oběd každý den', off: 'Zrušit obědy', days: (d) => d },
+  { kind: 'dinner', on: 'Večeře každý večer', off: 'Zrušit večeře', days: (d) => d },
 ];
 
 export function StepJidla() {
@@ -34,17 +41,18 @@ export function StepJidla() {
       <p className="text-[15px] leading-relaxed text-muted">
         Označte jídla, která jste dostali zdarma: od hostitele, na školení, nebo v ceně ubytování, které platí zaměstnavatel. Každé takové jídlo snižuje stravné.
       </p>
-      {dates.length > 1 && (
-        <Button
-          variant="secondary"
-          className="self-start"
-          onClick={() =>
-            update((d) => markBreakfasts(d, dates))
-          }
-        >
-          Snídaně v ceně ubytování každé ráno
-        </Button>
-      )}
+      <div className="flex flex-wrap gap-2" role="group" aria-label="Označit hromadně">
+        {bulk.map(({ kind, on, off, days }) => {
+          const target = days(dates);
+          if (!target.length) return null;
+          const all = target.every((date) => meals(date)[kind]);
+          return (
+            <Button key={kind} variant="secondary" aria-pressed={all} onClick={() => update((d) => setMealAll(d, target, kind, !all))}>
+              {all ? off : on}
+            </Button>
+          );
+        })}
+      </div>
       {dates.map((date) => {
         const day = result?.perDiem?.days.find((x) => x.date === date);
         const m = meals(date);

@@ -280,9 +280,7 @@ export function PartB({ m }: { m: DocModel }) {
         <Signs
           items={[
             ['Zaměstnanec', 'Datum a podpis', <SignatureMark sig={m.signature} />],
-            ['Věcná kontrola', 'Nadřízený – datum, podpis'],
-            ['Účetní kontrola', 'Datum, podpis'],
-            ['Schváleno k výplatě', 'Datum, podpis'],
+            ['Schválil – nadřízený', 'Jméno, datum a podpis'],
           ]}
         />
       </Section>

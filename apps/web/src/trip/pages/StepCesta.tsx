@@ -88,26 +88,34 @@ export function StepCesta() {
           {trip.via && <TextField label="Průjezdní místa (dřívější zápis)" optional value={trip.via} onChange={set('via')} />}
         </fieldset>
 
-        <fieldset className="flex flex-col gap-2">
-          <legend className="text-sm font-semibold">Dopravní prostředky</legend>
-          <div className="grid gap-x-4 sm:grid-cols-2">
-            {transportChoices.map(([k, label]) => (
-              <Checkbox
-                key={k}
-                checked={trip.plannedTransportKinds.includes(k)}
-                onChange={(on) =>
-                  update((d) => {
-                    d.plannedTransportKinds = on ? [...d.plannedTransportKinds, k] : d.plannedTransportKinds.filter((x) => x !== k);
-                  })
-                }
-              >
-                {label}
-              </Checkbox>
-            ))}
-          </div>
-        </fieldset>
+        <div className="flex flex-col gap-2">
+          <SelectField
+            label="Dopravní prostředky"
+            value=""
+            options={[['', trip.plannedTransportKinds.length ? 'Přidat další…' : 'Vyberte…'], ...transportChoices.filter(([k]) => !trip.plannedTransportKinds.includes(k))]}
+            onChange={(k) => k && update((d) => void d.plannedTransportKinds.push(k as TransportKind))}
+            hint="Můžete vybrat víc, např. taxi a letadlo."
+          />
+          {trip.plannedTransportKinds.length > 0 && (
+            <ul className="flex flex-wrap gap-2" aria-label="Vybrané dopravní prostředky">
+              {trip.plannedTransportKinds.map((k) => (
+                <li key={k} className="flex items-center gap-1 rounded-full border border-line-strong bg-white py-1 pr-1 pl-3 text-sm">
+                  {transportLabels[k]}
+                  <button
+                    type="button"
+                    className="flex size-8 items-center justify-center rounded-full text-danger hover:bg-danger-soft"
+                    aria-label={`Odebrat ${transportLabels[k]}`}
+                    onClick={() => update((d) => void (d.plannedTransportKinds = d.plannedTransportKinds.filter((x) => x !== k)))}
+                  >
+                    <Icon d="M6 6l12 12M18 6L6 18" className="size-4" />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
         <div className="grid gap-4 sm:grid-cols-2">
-          <TextField label="Upřesnění dopravy" optional value={trip.plannedTransport} onChange={set('plannedTransport')} placeholder="např. Railjet, vlastní vůz" />
+          <TextField label="Upřesnění dopravy" optional value={trip.plannedTransport} onChange={set('plannedTransport')} placeholder="např. SPZ 1AB 2345, Railjet" />
           <TextField label="Místo vystavení příkazu" optional value={trip.issuedPlace} onChange={set('issuedPlace')} placeholder="Praha" />
           <TextField label="Datum vystavení příkazu" optional type="date" value={trip.issuedOn} onChange={set('issuedOn')} hint="Obvykle den před cestou. Prázdné pole zůstane v PDF k ručnímu doplnění." />
         </div>

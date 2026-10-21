@@ -3,14 +3,14 @@ import { useEffect, useRef, useState } from 'react';
 import { db } from '../storage/db.js';
 import { Icon, icons, Notice } from '../ui/controls.js';
 import { ImageEditor } from './ImageEditor.js';
-import { kindLabels, subtypes, type Attachment, type AttachmentKind } from './model.js';
+import { documentKinds, kindLabels, subtypes, type Attachment, type AttachmentKind } from './model.js';
 import { addFiles, deleteAttachment, getBlob, move, updateMeta } from './store.js';
 
 const formatSize = (bytes: number) =>
   bytes < 1024 * 1024 ? `${Math.max(1, Math.round(bytes / 1024))} kB` : `${(bytes / 1024 / 1024).toFixed(1).replace('.', ',')} MB`;
 
 const ACCEPT = 'image/jpeg,image/png,image/heic,image/heif,.heic,.heif,application/pdf';
-const kinds = Object.entries(kindLabels) as [AttachmentKind, string][];
+const kinds = documentKinds.map((k) => [k, kindLabels[k]] as const);
 
 function Thumb({ a }: { a: Attachment }) {
   const [url, setUrl] = useState<string>();
@@ -40,10 +40,14 @@ async function openOriginal(a: Attachment) {
 }
 
 /** Doklady k jednomu výdaji (nebo k celé cestě): focení, nahrání, typ, pořadí, úpravy, mazání. */
-export function AttachmentList({ tripId, expenseId, defaultKind, privatePayment }: { tripId: string; expenseId: string | null; defaultKind: AttachmentKind; privatePayment?: boolean }) {
+/** fixedKind = seznam jen jednoho druhu bez možnosti ho měnit (např. strany podepsaného skenu). */
+export function AttachmentList({ tripId, expenseId, defaultKind, privatePayment, fixedKind }: { tripId: string; expenseId: string | null; defaultKind: AttachmentKind; privatePayment?: boolean; fixedKind?: AttachmentKind }) {
   const list = useLiveQuery(
-    async () => (await db.attachments.where('tripId').equals(tripId).toArray()).filter((a) => a.expenseId === expenseId).sort((a, b) => a.order - b.order),
-    [tripId, expenseId],
+    async () =>
+      (await db.attachments.where('tripId').equals(tripId).toArray())
+        .filter((a) => a.expenseId === expenseId && (fixedKind ? a.kind === fixedKind : (documentKinds as readonly string[]).includes(a.kind)))
+        .sort((a, b) => a.order - b.order),
+    [tripId, expenseId, fixedKind],
   );
   const camera = useRef<HTMLInputElement>(null);
   const picker = useRef<HTMLInputElement>(null);
@@ -58,7 +62,7 @@ export function AttachmentList({ tripId, expenseId, defaultKind, privatePayment 
     if (!files?.length) return;
     setBusy(true);
     // První doklad je obvykle účetní, další u soukromé platby potvrzení o zaplacení.
-    const kind: AttachmentKind = expenseId === null ? 'supporting' : hasAccounting && privatePayment ? 'payment' : defaultKind;
+    const kind: AttachmentKind = fixedKind ?? (expenseId === null ? 'supporting' : hasAccounting && privatePayment ? 'payment' : defaultKind);
     const r = await addFiles(tripId, expenseId, [...files], kind);
     setMessages([
       ...r.rejected.map((x) => `${x.name}: ${x.reason}`),
@@ -86,7 +90,7 @@ export function AttachmentList({ tripId, expenseId, defaultKind, privatePayment 
                   </span>
                 </div>
               </div>
-              <div className="grid gap-2 sm:grid-cols-2">
+              {!fixedKind && <div className="grid gap-2 sm:grid-cols-2">
                 <select aria-label="Typ dokladu" className="min-h-11 w-full min-w-0 rounded-lg border border-line-strong bg-white px-2 text-sm" value={a.kind} onChange={(e) => updateMeta(a.id, { kind: e.target.value as AttachmentKind, subtype: '' })}>
                   {kinds.map(([v, l]) => (
                     <option key={v} value={v}>
@@ -100,7 +104,7 @@ export function AttachmentList({ tripId, expenseId, defaultKind, privatePayment 
                     <option key={s}>{s}</option>
                   ))}
                 </select>
-              </div>
+              </div>}
               <div className="flex flex-wrap gap-1">
                 {a.mime !== 'application/pdf' && a.conversion !== 'failed' && (
                   <button type="button" className="min-h-11 rounded-lg px-3 text-sm font-semibold text-accent hover:bg-accent-soft" onClick={() => setEditing(a)}>

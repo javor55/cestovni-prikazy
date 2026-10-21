@@ -2,6 +2,7 @@
 import { Document, Page, StyleSheet, Text, View, type Styles } from '@react-pdf/renderer';
 import type { ReactNode } from 'react';
 import type { DocModel, DocPart } from './model.js';
+import { SignatureMark } from './SignatureMark.js';
 
 const B = '0.75pt solid #000';
 const dash = (v: string) => v || '–';
@@ -87,10 +88,12 @@ const Section = ({ n, title, children, wrap = true }: { n: number; title: string
   </View>
 );
 
-const Signatures = ({ items }: { items: string[] }) => (
+/** Podpisová pole; první pole patří zaměstnanci a může obsahovat vložený podpis. */
+const Signatures = ({ items, employee }: { items: string[]; employee?: DocModel['signature'] }) => (
   <View style={[s.row, { borderTop: B }]}>
     {items.map((t, i) => (
       <View key={t} style={[s.sign, { width: `${100 / items.length}%` }, i < items.length - 1 ? { borderRight: B } : {}]}>
+        {i === 0 && <SignatureMark sig={employee} />}
         <Text style={s.signLabel}>{t}</Text>
       </View>
     ))}
@@ -135,7 +138,7 @@ function PartA({ m }: { m: DocModel }) {
       </Section>
       <Section n={4} title="Vystavení a schválení příkazu" wrap={false}>
         <Fields rows={[[['Místo vystavení', m.issued.place, 50], ['Datum vystavení', m.issued.date, 50]]]} />
-        <Signatures items={['Podpis zaměstnance (souhlas s cestou)', 'Schválil – podpis zaměstnavatele / nadřízeného']} />
+        <Signatures items={['Podpis zaměstnance (souhlas s cestou)', 'Schválil – podpis zaměstnavatele / nadřízeného']} employee={m.signature} />
       </Section>
     </Page>
   );
@@ -213,7 +216,7 @@ function PartB({ m }: { m: DocModel }) {
       <Section n={next()} title="Prohlášení zaměstnance a schválení" wrap={false}>
         <Text style={{ padding: 5, fontSize: 8, lineHeight: 1.3 }}>{m.declaration}</Text>
         <Text style={{ paddingHorizontal: 5, paddingBottom: 4, fontSize: 8 }}>Počet připojených dokladů: {m.documentCount}</Text>
-        <Signatures items={['Datum a podpis zaměstnance', 'Věcná kontrola – podpis nadřízeného', 'Účetní kontrola – podpis', 'Schváleno k výplatě – datum, podpis']} />
+        <Signatures items={['Datum a podpis zaměstnance', 'Věcná kontrola – podpis nadřízeného', 'Účetní kontrola – podpis', 'Schváleno k výplatě – datum, podpis']} employee={m.signature} />
       </Section>
     </Page>
   );

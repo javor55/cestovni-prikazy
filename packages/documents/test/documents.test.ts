@@ -99,3 +99,20 @@ describe('konzervativní šablona', () => {
     expect(all).not.toContain('9.');
   });
 });
+
+describe('vložený podpis', () => {
+  it('obrázek podpisu a razítko se objeví jen v podpisových polích zaměstnance', async () => {
+    const { readFile } = await import('node:fs/promises');
+    const png = await readFile(new URL('./fixtures/podpis.png', import.meta.url));
+    const m = sample();
+    m.signature = { image: `data:image/png;base64,${png.toString('base64')}`, widthPct: 80, stamp: { name: 'Jana Ukázková', date: '17. 10. 2026' } };
+    for (const layout of ['modern', 'conservative'] as const) {
+      const buf = await renderToBuffer(documentElement(m, layout, 'full') as Parameters<typeof renderToBuffer>[0]);
+      expect(buf.includes('/Subtype /Image')).toBe(true);
+      const text = (await pages(m, layout, 'full')).join(' ');
+      // razítko v části A i B
+      expect(text.match(/Podepsáno/g)).toHaveLength(2);
+      expect(text).toContain('17. 10. 2026');
+    }
+  });
+});

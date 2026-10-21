@@ -9,7 +9,9 @@
     "./fonts/*": "./fonts/*"
   },
   "dependencies": {
+    "@pdf-lib/fontkit": "^1.1.1",
     "@react-pdf/renderer": "4.9.0",
+    "pdf-lib": "1.17.1",
     "react": "^19.3.1"
   },
   "devDependencies": {

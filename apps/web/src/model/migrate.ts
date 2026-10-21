@@ -26,6 +26,10 @@ export function migrateTrip(raw: unknown): TripDoc {
     t.issuedPlace ??= '';
     t.issuedOn ??= '';
   }
+  if (version < 4) {
+    // v4: způsob podpisu.
+    t.signature ??= { mode: 'scan', widthPct: 70, stamp: false };
+  }
   t.schemaVersion = SCHEMA_VERSION;
   return t as unknown as TripDoc;
 }

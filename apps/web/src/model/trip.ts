@@ -4,7 +4,7 @@
 import type { EmployerSector, PaymentMethod } from '@cp/core';
 import type { FuelType, VehicleType } from '@cp/rules';
 
-export const SCHEMA_VERSION = 3;
+export const SCHEMA_VERSION = 4;
 
 export type TransportKind = 'soukrome-auto' | 'firemni-auto' | 'vlak' | 'autobus' | 'letadlo' | 'mhd' | 'taxi' | 'jine';
 
@@ -120,6 +120,8 @@ export interface TripDoc {
   /** Kurz pro přepočet zahraničního stravného v měně, ve které nebyla záloha. */
   perDiemRates: Record<string, RateDoc>;
   combineShortDomesticDays: boolean;
+  /** Způsob podpisu: nahraný sken, nebo vložený obrázek podpisu (velikost v % podpisového pole, razítko). */
+  signature: { mode: 'scan' | 'image'; widthPct: number; stamp: boolean };
 }
 
 export interface RateDoc {
@@ -217,6 +219,7 @@ export function newTrip(now: Date, remembered?: Pick<TripDoc, 'employee' | 'empl
     employerRates: { domestic: {}, pocketMoneyPct: '', foreignBase: {} },
     perDiemRates: {},
     combineShortDomesticDays: false,
+    signature: { mode: 'scan', widthPct: 70, stamp: false },
   };
 }
 

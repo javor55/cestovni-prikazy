@@ -1,4 +1,8 @@
-export type AttachmentKind = 'accounting' | 'payment' | 'supporting';
+/** signed = strana podepsaného skenu, signature = obrázek podpisu (PNG). */
+export type AttachmentKind = 'accounting' | 'payment' | 'supporting' | 'signed' | 'signature';
+
+/** Druhy dokladů, které se přiřazují k výdajům a cestě (bez podpisu). */
+export const documentKinds = ['accounting', 'payment', 'supporting'] as const;
 export type AttachmentMime = 'application/pdf' | 'image/jpeg' | 'image/png' | 'image/heic';
 
 /** Ořez v poměrných souřadnicích (0–1) vůči obrázku po otočení. */
@@ -45,12 +49,16 @@ export const kindLabels: Record<AttachmentKind, string> = {
   accounting: 'Účetní doklad',
   payment: 'Doklad o zaplacení',
   supporting: 'Doplňující dokument',
+  signed: 'Podepsaný dokument',
+  signature: 'Obrázek podpisu',
 };
 
 export const subtypes: Record<AttachmentKind, string[]> = {
   accounting: ['Účtenka', 'Faktura', 'Jízdenka', 'Parkovací lístek', 'Doklad o ubytování', 'Doklad o dálniční známce', 'Jiný účetní doklad'],
   payment: ['Potvrzení karetní platby', 'Potvrzení z internetového bankovnictví', 'Výpis konkrétní transakce', 'Potvrzení platební brány', 'Pokladní doklad', 'Jiné potvrzení'],
   supporting: ['Rezervace', 'Objednávka', 'Program cesty', 'Pozvánka', 'Vysvětlení chybějícího dokladu', 'Jiný dokument'],
+  signed: [],
+  signature: [],
 };
 
 export const MAX_FILE_BYTES = 20 * 1024 * 1024;

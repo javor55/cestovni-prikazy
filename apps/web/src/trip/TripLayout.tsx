@@ -1,12 +1,12 @@
 import { calculate } from '@cp/core';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router';
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router';
 import { toInput, type DocCounts } from '../model/toInput.js';
 import type { TripDoc } from '../model/trip.js';
 import { db, deleteTrip, getTrip, saveTrip, touchTrip } from '../storage/db.js';
 import { ConfirmDialog } from '../ui/ConfirmDialog.js';
-import { Icon, icons, LinkButton } from '../ui/controls.js';
+import { Icon, icons, LinkButton, Notice } from '../ui/controls.js';
 import { TripContext, type TripCtx } from './context.js';
 import { stepState, steps, type StepSlug, type StepState } from './steps.js';
 import { StepPages } from './pages/index.js';
@@ -21,6 +21,9 @@ const stateLabel: Record<StepState, [string, string]> = {
 export function TripLayout() {
   const { id = '', step = 'kdo' } = useParams();
   const navigate = useNavigate();
+  const [params, setParams] = useSearchParams();
+  const imported = params.get('nacteno');
+  const notConverted = Number(params.get('neprevedeno') ?? 0);
   const [trip, setTrip] = useState<TripDoc | null | undefined>(undefined);
   const [saved, setSaved] = useState(true);
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -173,6 +176,15 @@ export function TripLayout() {
 
           <main className="flex min-w-0 grow flex-col gap-4 px-4 py-5 md:px-0 md:py-0">
             <h1 className="text-2xl font-bold">{current.title}</h1>
+            {imported !== null && (
+              <Notice title="Pracovní projekt byl načten">
+                Cesta se načetla jako nová cesta v tomto prohlížeči, včetně {imported} {imported === '1' ? 'přílohy' : 'příloh'}.
+                {notConverted > 0 && ` ${notConverted} z nich se nepodařilo převést pro PDF – originály jsou uložené.`} Zkontrolujte souhrn.{' '}
+                <button type="button" className="font-semibold text-accent underline" onClick={() => setParams({})}>
+                  Zavřít
+                </button>
+              </Notice>
+            )}
             <Page />
           </main>
         </div>

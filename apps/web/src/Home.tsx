@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router';
 import { formatDateTime } from './model/format.js';
 import { actualTimes } from './model/toInput.js';
@@ -14,6 +14,29 @@ export function Home() {
   const [purged, setPurged] = useState(0);
   const [confirmAll, setConfirmAll] = useState(false);
   const deleted = params.get('smazano');
+  const fileInput = useRef<HTMLInputElement>(null);
+  const [importing, setImporting] = useState(false);
+  const [importError, setImportError] = useState('');
+
+  const importFile = async (file: File) => {
+    setImporting(true);
+    setImportError('');
+    try {
+      // Kontrola a rozbalení projektu se načítá až při použití.
+      const { importProject, ImportError } = await import('./exports/project.js');
+      try {
+        const r = await importProject(file, new Date());
+        navigate(`/cesta/${r.tripId}/souhrn?nacteno=${r.attachments}${r.failed ? `&neprevedeno=${r.failed}` : ''}`);
+      } catch (e) {
+        if (!(e instanceof ImportError)) throw e;
+        setImportError(e.message);
+      }
+    } catch {
+      setImportError('Projekt se nepodařilo načíst. Soubor je poškozený nebo nepodporovaný.');
+    } finally {
+      setImporting(false);
+    }
+  };
 
   useEffect(() => {
     void (async () => {
@@ -69,9 +92,27 @@ export function Home() {
           <Button onClick={create}>
             <Icon d={icons.plus} /> Nová pracovní cesta
           </Button>
-          <Button variant="secondary" disabled title="Připravujeme" className="opacity-60">
-            <Icon d={icons.upload} /> Načíst pracovní projekt (připravujeme)
+          <Button variant="secondary" disabled={importing} onClick={() => fileInput.current?.click()}>
+            <Icon d={icons.upload} /> {importing ? 'Načítám projekt…' : 'Načíst pracovní projekt'}
           </Button>
+          <input
+            ref={fileInput}
+            type="file"
+            accept=".zip,application/zip"
+            className="sr-only"
+            tabIndex={-1}
+            aria-label="Soubor pracovního projektu"
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              e.target.value = '';
+              if (f) void importFile(f);
+            }}
+          />
+          {importError && (
+            <Notice tone="danger" title="Projekt se nepodařilo načíst">
+              <span role="alert">{importError}</span> Nic se neuložilo.
+            </Notice>
+          )}
         </div>
 
         {trips && trips.length > 0 && (
@@ -81,6 +122,8 @@ export function Home() {
             </h2>
             {trips.map((t) => {
               const { start, end } = actualTimes(t);
+              const expires = expiresAt(t);
+              const soon = expires.getTime() - Date.now() < 7 * 24 * 60 * 60 * 1000;
               return (
                 <Link key={t.id} to={`/cesta/${t.id}/kdo`} className="flex flex-col gap-1 rounded-xl border border-line bg-white p-4 text-ink no-underline hover:border-accent-line">
                   <span className="flex justify-between gap-2">
@@ -90,7 +133,11 @@ export function Home() {
                   <span className="text-sm text-muted">
                     {start ? `${formatDateTime(start)} – ${formatDateTime(end)}` : 'bez termínu'} · {t.kind === 'foreign' ? 'zahraniční' : 'tuzemská'} · {t.expenses.length} výdajů
                   </span>
-                  <span className="text-xs text-subtle">Smaže se {expiresAt(t).toLocaleDateString('cs-CZ')}, pokud ji neotevřete</span>
+                  {soon ? (
+                    <span className="text-xs font-semibold text-warn">Smaže se už {expires.toLocaleDateString('cs-CZ')}. Otevřete ji, nebo si v kroku Exporty stáhněte pracovní projekt.</span>
+                  ) : (
+                    <span className="text-xs text-subtle">Smaže se {expires.toLocaleDateString('cs-CZ')}, pokud ji neotevřete</span>
+                  )}
                 </Link>
               );
             })}

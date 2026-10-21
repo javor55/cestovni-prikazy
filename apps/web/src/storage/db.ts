@@ -1,5 +1,6 @@
 import Dexie, { type EntityTable } from 'dexie';
 import type { Attachment, StoredBlob } from '../attachments/model.js';
+import type { Snapshot } from '../documents/snapshot.js';
 import { migrateTrip } from '../model/migrate.js';
 import type { TripDoc } from '../model/trip.js';
 
@@ -17,6 +18,7 @@ export class AppDb extends Dexie {
   settings!: EntityTable<Setting, 'key'>;
   attachments!: EntityTable<Attachment, 'id'>;
   blobs!: EntityTable<StoredBlob, 'key'>;
+  snapshots!: EntityTable<Snapshot, 'id'>;
 
   constructor(name = 'cestovni-prikazy') {
     super(name);
@@ -27,6 +29,9 @@ export class AppDb extends Dexie {
     this.version(2).stores({
       attachments: 'id, tripId, expenseId, sha256',
       blobs: 'key, attachmentId',
+    });
+    this.version(3).stores({
+      snapshots: 'id, tripId, createdAt',
     });
   }
 }
@@ -57,7 +62,8 @@ export async function touchTrip(id: string, now: Date, d: AppDb = db): Promise<v
 
 /** Smaže cestu včetně všech příloh a jejich souborů v jedné transakci. */
 export async function deleteTrip(id: string, d: AppDb = db): Promise<void> {
-  await d.transaction('rw', d.trips, d.attachments, d.blobs, async () => {
+  await d.transaction('rw', [d.trips, d.attachments, d.blobs, d.snapshots], async () => {
+    await d.snapshots.where('tripId').equals(id).delete();
     const ids = await d.attachments.where('tripId').equals(id).primaryKeys();
     await d.blobs.where('attachmentId').anyOf(ids).delete();
     await d.attachments.bulkDelete(ids);
@@ -66,8 +72,8 @@ export async function deleteTrip(id: string, d: AppDb = db): Promise<void> {
 }
 
 export async function deleteEverything(d: AppDb = db): Promise<void> {
-  await d.transaction('rw', [d.trips, d.settings, d.attachments, d.blobs], async () => {
-    await Promise.all([d.trips.clear(), d.settings.clear(), d.attachments.clear(), d.blobs.clear()]);
+  await d.transaction('rw', [d.trips, d.settings, d.attachments, d.blobs, d.snapshots], async () => {
+    await Promise.all([d.trips.clear(), d.settings.clear(), d.attachments.clear(), d.blobs.clear(), d.snapshots.clear()]);
   });
 }
 

@@ -7,7 +7,7 @@ import { StepIssues } from '../IssueList.js';
 
 export function StepCesta() {
   const { trip, update } = useTrip();
-  const set = (k: 'number' | 'purpose' | 'startPlace' | 'endPlace' | 'destinations' | 'via' | 'plannedStart' | 'plannedEnd' | 'plannedTransport' | 'note') => (v: string) =>
+  const set = (k: 'number' | 'purpose' | 'startPlace' | 'endPlace' | 'destinations' | 'via' | 'plannedStart' | 'plannedEnd' | 'plannedTransport' | 'issuedPlace' | 'issuedOn' | 'note') => (v: string) =>
     update((d) => void (d[k] = v));
 
   return (
@@ -43,6 +43,8 @@ export function StepCesta() {
           <TextField label="Cílová místa" value={trip.destinations} onChange={set('destinations')} placeholder="Vídeň" />
           <TextField label="Průjezdní místa" optional value={trip.via} onChange={set('via')} />
           <TextField label="Dopravní prostředek" value={trip.plannedTransport} onChange={set('plannedTransport')} placeholder="vlak, soukromé auto…" className="sm:col-span-2" />
+          <TextField label="Místo vystavení příkazu" optional value={trip.issuedPlace} onChange={set('issuedPlace')} placeholder="Praha" />
+          <TextField label="Datum vystavení příkazu" optional type="date" value={trip.issuedOn} onChange={set('issuedOn')} hint="Obvykle den před cestou. Prázdné pole zůstane v PDF k ručnímu doplnění." />
         </div>
         <p className="text-[13px] text-subtle">Časy zadávejte v českém čase. Skutečný průběh vyplníte v dalším kroku.</p>
       </Card>

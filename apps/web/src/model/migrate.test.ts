@@ -12,6 +12,7 @@ describe('migrace uložené cesty', () => {
     expect(t.perDiemRates.EUR).toEqual({ rate: '24,30', unit: '1', rateDate: '' });
     expect(t.advances[0]).toMatchObject({ rateUnit: '1', rateDate: '' });
     expect(t.expenses[0]!.rateDate).toBe('');
+    expect(t).toMatchObject({ issuedPlace: '', issuedOn: '' });
   });
 
   it('aktuální verzi nechá beze změny a novější odmítne', () => {

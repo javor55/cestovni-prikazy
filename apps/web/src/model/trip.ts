@@ -4,7 +4,7 @@
 import type { EmployerSector, PaymentMethod } from '@cp/core';
 import type { FuelType, VehicleType } from '@cp/rules';
 
-export const SCHEMA_VERSION = 2;
+export const SCHEMA_VERSION = 3;
 
 export type TransportKind = 'soukrome-auto' | 'firemni-auto' | 'vlak' | 'autobus' | 'letadlo' | 'mhd' | 'taxi' | 'jine';
 
@@ -103,6 +103,9 @@ export interface TripDoc {
   plannedStart: string;
   plannedEnd: string;
   plannedTransport: string;
+  /** Místo a datum vystavení cestovního příkazu. */
+  issuedPlace: string;
+  issuedOn: string;
   /** Skutečný začátek a konec, pokud se liší od prvního odjezdu a posledního příjezdu. */
   actualStart: string;
   actualEnd: string;
@@ -187,6 +190,8 @@ export function newTrip(now: Date, remembered?: Pick<TripDoc, 'employee' | 'empl
     plannedStart: '',
     plannedEnd: '',
     plannedTransport: '',
+    issuedPlace: '',
+    issuedOn: '',
     actualStart: '',
     actualEnd: '',
     note: '',

@@ -1,6 +1,6 @@
 import { createContext, useContext } from 'react';
 import type { CalculationResult, Issue } from '@cp/core';
-import type { Mapped } from '../model/toInput.js';
+import type { DocCounts, Mapped } from '../model/toInput.js';
 import type { TripDoc } from '../model/trip.js';
 
 export interface TripCtx {
@@ -11,6 +11,9 @@ export interface TripCtx {
   result?: CalculationResult;
   /** Chyby formuláře + výsledek kontrol výpočtu. */
   issues: Issue[];
+  /** Počty dokladů k výdajům a celkový počet příloh cesty. */
+  docCounts: DocCounts;
+  attachmentCount: number;
 }
 
 export const TripContext = createContext<TripCtx | null>(null);

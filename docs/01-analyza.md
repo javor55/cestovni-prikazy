@@ -1,6 +1,6 @@
 # Etapa 1 – Analýza
 
-Stav: **návrh k připomínkám**
+Stav: **schváleno zadavatelem 21. 10. 2026** (otázky pro účetní zůstávají otevřené)
 Vstup: `zadani_aplikace_cestovni_prikazy.md` (dále „zadání“) a odpovědi zadavatele z 21. 10. 2026.
 
 Legislativní body označené **Ú-n** jsou otázky pro účetní. Jejich úplný seznam je v [`02-otazky-pro-ucetni.md`](02-otazky-pro-ucetni.md). Tam, kde se uvádí výklad zákona, jde o můj pracovní předpoklad, ne o závazný výklad. Výpočet bude vždy konfigurovatelný a předpoklad zůstane označený, dokud ho účetní nepotvrdí.
@@ -26,6 +26,7 @@ Stejný kód má později běžet ve firemní síti a architektura nesmí bráni
 | R7 | Postup | Práce v PR, autor po sobě vždy zkontroluje vlastní výstup. |
 | R8 | Jazyk | Pouze čeština, pouze česká legislativa. |
 | R9 | Mezery v zadání | Doplnit tak, aby výsledek odpovídal legislativě a byl dobře použitelný. |
+| R10 | Architektura | Schválena lokální architektura (§ 3) a doba uchování 30 dní nečinnosti. |
 
 ### 2.1 Odpověď na dotaz k R3: lze sazby tahat z ČNB?
 
@@ -65,7 +66,7 @@ Zadání počítá se serverovou anonymní relací (token, odkaz, PostgreSQL, S3
 |---|---|
 | Anonymní relace, token, odkaz pro pokračování (§ 6.1) | Cesta se ukládá v prohlížeči (IndexedDB). Pokračovat lze ve **stejném prohlížeči** nebo na jiném zařízení přes **pracovní projekt (ZIP)**. Odkaz pro pokračování neexistuje, protože data nejsou na serveru. |
 | Upozornění o ukládání (§ 6.2) | Text se upraví: „Data se ukládají pouze v tomto prohlížeči. Nikam se neodesílají. Pro přenos na jiné zařízení nebo zálohu si stáhněte pracovní projekt.“ |
-| Automatické mazání po 7 dnech (§ 6.3) | Lokální automatické mazání po nastavitelné době nečinnosti. Navrhuji výchozí **30 dní**, protože se data nikam neodesílají a podpis u nadřízeného může trvat déle. Před smazáním se při otevření aplikace zobrazí upozornění. *(k potvrzení zadavatelem)* |
+| Automatické mazání po 7 dnech (§ 6.3) | Lokální automatické mazání po nastavitelné době nečinnosti. Navrhuji výchozí **30 dní**, protože se data nikam neodesílají a podpis u nadřízeného může trvat déle. Před smazáním se při otevření aplikace zobrazí upozornění. *(schváleno, R10)* |
 | Ruční smazání (§ 6.5) | Beze změny. Smaže data cesty z prohlížeče. Navíc bude volba „Smazat všechna data aplikace v tomto prohlížeči“. |
 | PostgreSQL, S3 (§ 26) | V MVP není potřeba. Datový model je navržený tak, aby šel později uložit na server (viz § 8). |
 | Antivirová kontrola, rate limiting, ochrana sdílených URL (§ 25) | Soubory neopouštějí zařízení, proto odpadá antivir i serverová kontrola přístupu. Zůstává validace formátu (magická čísla souborů), limity velikosti, ochrana proti XSS a bezpečný import ZIP. Rate limiting jen u endpointu kurzů. |
@@ -277,7 +278,7 @@ Varianta .NET (zadání § 26) je vhodná, pokud bude firemní verzi rozvíjet .
 | 5 | Zaokrouhlování | Stravné za den na celé Kč nahoru, přepočty kurzem na haléře, celková částka k výplatě na celé Kč | Ú-8 |
 | 6 | Doklad o zaplacení | Nepovinný. Varování u výdaje placeného soukromou kartou bez potvrzení. | navrženo |
 | 7 | Limity souborů | 20 MB na soubor, 300 MB na cestu (omezeno úložištěm prohlížeče) | navrženo |
-| 8 | Doba uchování | 30 dní nečinnosti, nastavitelné | k potvrzení (§ 3.1) |
+| 8 | Doba uchování | 30 dní nečinnosti, nastavitelné | rozhodnuto (R10) |
 | 9 | PDF/A | Ne v MVP. Fonty se vkládají vždy, takže přechod na PDF/A je možný později. | navrženo |
 | 10 | Krycí list | Ano, lze vypnout | navrženo |
 | 11 | Jazyk | Pouze čeština | rozhodnuto (R8) |
@@ -330,6 +331,6 @@ Budoucí (mimo MVP): serverová synchronizace a účty, organizace a role, schva
 
 ## 11. Co potřebuji k pokračování
 
-1. **Zadavatel:** potvrdit lokální architekturu (§ 3) a výchozí dobu uchování 30 dní.
+1. ~~**Zadavatel:** potvrdit lokální architekturu (§ 3) a výchozí dobu uchování 30 dní.~~ Potvrzeno (R10).
 2. **Zadavatel:** je Ubuntu VM dostupná z internetu (veřejná IP / port 443) a máte doménu? Případně souhlasíte s Cloudflare Pages pro testování?
 3. **Účetní:** odpovědět na otázky v [`02-otazky-pro-ucetni.md`](02-otazky-pro-ucetni.md) a dodat 3–5 skutečných (anonymizovaných) vyúčtování jako vzorové příklady pro testy.

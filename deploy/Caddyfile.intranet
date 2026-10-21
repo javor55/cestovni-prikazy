@@ -1,0 +1,14 @@
+# Firemní síť bez veřejné domény. Aplikace musí běžet přes HTTPS – prohlížeč jinak nepovolí šifrovací
+# funkce, které aplikace používá (kontrolní součty dokladů, náhodná id).
+#
+# Varianta A (výchozí): certifikát vydá interní certifikační autorita Caddy. Její kořenový certifikát
+# (docker compose exec caddy cat /data/caddy/pki/authorities/local/root.crt) je potřeba
+# nainstalovat do počítačů a telefonů jako důvěryhodný – obvykle to zařídí IT přes politiky.
+#
+# Varianta B: firemní certifikát. Soubory dejte do deploy/certs a nahraďte řádek „tls internal“
+# řádkem „tls /certs/server.crt /certs/server.key“ (a v compose.yaml připojte ./deploy/certs:/certs:ro).
+{$DOMAIN} {
+	tls internal
+	encode zstd gzip
+	reverse_proxy app:8787
+}

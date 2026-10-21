@@ -1,17 +1,19 @@
 {
   "name": "@cp/server",
-  "version": "0.1.0",
+  "version": "0.7.0",
   "private": true,
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/main.ts",
-    "start": "tsx src/main.ts"
+    "start": "node dist/server.mjs",
+    "build": "esbuild src/main.ts --bundle --platform=node --target=node22 --format=esm --outfile=dist/server.mjs --legal-comments=none"
   },
   "dependencies": {
     "@hono/node-server": "^2.1.5",
     "hono": "^4.13.13"
   },
   "devDependencies": {
+    "esbuild": "^0.28.2",
     "tsx": "^4.23.15"
   }
 }

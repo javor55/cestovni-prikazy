@@ -1,23 +1,28 @@
-import { Hono } from 'hono';
-import { serveStatic } from '@hono/node-server/serve-static';
+import { Hono, type Context } from 'hono';
 import type { CnbClient } from './cnb.js';
+import { securityHeaders } from './headers.js';
+import { rateLimit } from './rateLimit.js';
 
 export interface AppOptions {
   cnb: CnbClient;
-  /** Adresář se sestavenou webovou aplikací. Bez něj server poskytuje jen API. */
-  staticDir?: string;
   today?: () => string;
+  /** Identifikace klienta pro limit počtu požadavků (IP adresa). */
+  clientKey?: (c: Context) => string;
+  /** Počet požadavků na API za minutu z jedné adresy. */
+  rateLimitPerMinute?: number;
 }
 
-export function createApp({ cnb, staticDir, today = () => new Date().toISOString().slice(0, 10) }: AppOptions) {
+/** API aplikace. Sdílí ho server v Node (Docker) i funkce na Cloudflare Pages. */
+export function createApp({ cnb, today = () => new Date().toISOString().slice(0, 10), clientKey = () => 'vsichni', rateLimitPerMinute = 60 }: AppOptions) {
   const app = new Hono();
 
   app.use('*', async (c, next) => {
     await next();
-    c.header('X-Content-Type-Options', 'nosniff');
-    c.header('Referrer-Policy', 'no-referrer');
-    c.header('X-Robots-Tag', 'noindex');
+    for (const [k, v] of Object.entries(securityHeaders)) c.header(k, v);
   });
+  // Pro kontrolu stavu kontejneru (Docker healthcheck) – mimo limit požadavků.
+  app.get('/zdravi', (c) => c.text('ok'));
+  app.use('/api/*', rateLimit({ limit: rateLimitPerMinute, key: clientKey }));
 
   // Kurzy ČNB. Požadavek obsahuje jen datum – žádné údaje o uživateli ani cestě.
   app.get('/api/kurzy', async (c) => {
@@ -36,14 +41,6 @@ export function createApp({ cnb, staticDir, today = () => new Date().toISOString
     }
   });
 
-  if (staticDir) {
-    app.use('/assets/*', async (c, next) => {
-      await next();
-      c.header('Cache-Control', 'public, max-age=31536000, immutable');
-    });
-    app.use('*', serveStatic({ root: staticDir }));
-    // Aplikace je SPA – ostatní cesty vrací index.html.
-    app.get('*', serveStatic({ root: staticDir, path: 'index.html' }));
-  }
+  app.all('/api/*', (c) => c.json({ error: 'Neznámá adresa API.' }, 404));
   return app;
 }

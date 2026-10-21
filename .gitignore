@@ -3,3 +3,6 @@ design/pdf-ukazky/out/
 apps/web/dist/
 apps/web/test-results/
 apps/web/playwright-report/
+apps/server/dist/
+.env
+.wrangler/

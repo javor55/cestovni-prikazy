@@ -5,6 +5,11 @@ import { Home } from './Home.js';
 import { TripLayout } from './trip/TripLayout.js';
 import './index.css';
 
+// Service worker jen v sestavené aplikaci: umožní ji otevřít i bez připojení.
+if (import.meta.env.PROD && 'serviceWorker' in navigator) {
+  window.addEventListener('load', () => void navigator.serviceWorker.register('/sw.js').catch(() => undefined));
+}
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <BrowserRouter>

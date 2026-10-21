@@ -1,0 +1,18 @@
+# Upozornění na nové verze závislostí (bezpečnostní opravy). Drobné aktualizace se sdružují do jednoho PR.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      zavislosti:
+        update-types: [minor, patch]
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+  - package-ecosystem: docker
+    directory: /
+    schedule:
+      interval: monthly

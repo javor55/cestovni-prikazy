@@ -21,7 +21,8 @@ export interface DocModel {
   issued: { place: string; date: string };
 
   employer: { name: string; ico: string; seat: string; unit: string; costCenter: string; project: string; sector: string };
-  employee: { name: string; personalNumber: string; position: string; department: string; regularWorkplace: string; address: string };
+  /** bankAccount = číslo účtu pro výplatu náhrad (nepovinné). */
+  employee: { name: string; personalNumber: string; position: string; department: string; regularWorkplace: string; address: string; bankAccount?: string };
 
   trip: {
     kind: string;

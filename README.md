@@ -18,6 +18,7 @@ Webová aplikace pro zaměstnance: vyplní pracovní cestu, nechá si spočítat
 - **PDF k podpisu** ve dvou vzhledech (moderní a konzervativní). Podpis jako nahraný sken, nebo vložený obrázek podpisu s razítkem.
 - **Kompletní dokumentace** – jedno PDF s krycím listem, obsahem, podepsaným dokumentem, rozpisem výpočtu a všemi doklady seřazenými podle výdajů, s čísly stran a záložkami.
 - **Exporty** – XLSX a CSV pro účetní, JSON s úplnými daty, ZIP s originály dokladů a pracovní projekt (ZIP), který jde načíst v jiném prohlížeči nebo zařízení.
+- **Hlídá formality** – dotaz na snídani v ceně ubytování, upozornění na doklad bez potvrzení o zaplacení, lhůta 10 pracovních dnů pro předložení vyúčtování, číslo účtu pro výplatu ve vyúčtování.
 - **Na telefonu jako aplikace** – jde přidat na plochu a po první návštěvě funguje i bez připojení.
 - **Sazby 2026** – tuzemské stravné, náhrada za km a ceny paliv podle vyhlášky 573/2025 Sb. a jejích novel, zahraniční stravné pro 227 států a území podle vyhlášky 489/2025 Sb. Odkazy na předpisy jsou přímo v aplikaci.
 

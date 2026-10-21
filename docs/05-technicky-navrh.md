@@ -64,7 +64,7 @@ Vstup výpočtu je typ `TripInput` v [`packages/core/src/model.ts`](../packages/
 - Časy jsou v českém místním čase `YYYY-MM-DDTHH:mm` (Ú-9).
 - Přechody hranic jsou součástí úseků – jeden úsek jich může mít víc (průjezd více státy). Z nich jádro sestaví intervaly pobytu ve státech.
 
-Uložená cesta v aplikaci (IndexedDB, typ `TripDoc` v [`apps/web/src/model/trip.ts`](../apps/web/src/model/trip.ts)) obsahuje navíc údaje pro dokumenty: zaměstnanec, zaměstnavatel, účel, plán s trasou (`route[]` se zastávkami) a dopravními prostředky (`plannedTransportKinds`, včetně půjčeného auta, autopůjčovny a lodi), poznámky. Formulářová čísla zůstávají textem a na vstup jádra je převádí `toInput.ts`. Aktuální verze schématu je 6. Starší uložené cesty i importované projekty převádí `migrate.ts`.
+Uložená cesta v aplikaci (IndexedDB, typ `TripDoc` v [`apps/web/src/model/trip.ts`](../apps/web/src/model/trip.ts)) obsahuje navíc údaje pro dokumenty: zaměstnanec, zaměstnavatel, účel, plán s trasou (`route[]` se zastávkami) a dopravními prostředky (`plannedTransportKinds`, včetně půjčeného auta, autopůjčovny a lodi), poznámky. Formulářová čísla zůstávají textem a na vstup jádra je převádí `toInput.ts`. Aktuální verze schématu je 7. Starší uložené cesty i importované projekty převádí `migrate.ts`.
 
 ```
 trips        TripDoc { id, schemaVersion, createdAt, updatedAt, lastOpenedAt, … }

@@ -16,7 +16,8 @@ export function StepSouhrn() {
   const warnings = issues.filter((i) => i.severity === 'warning').length;
   const missingRates = issues.filter((i) => i.code === 'PER_DIEM_MISSING_RATE').map((i) => i.ref?.currency).filter(Boolean) as string[];
   const perDiemCurrencies = [...new Set([...missingRates, ...Object.keys(trip.perDiemRates)])];
-  const missingCountries = issues.filter((i) => i.code === 'FOREIGN_RATE_MISSING').map((i) => i.ref?.country).filter(Boolean) as string[];
+  // Ruční sazba: stát bez sazby, stát se sazbou „ostatní země“ (Ú-28) a státy, kde už ji uživatel zadal.
+  const missingCountries = issues.filter((i) => i.code === 'FOREIGN_RATE_MISSING' || i.code === 'FOREIGN_RATE_OTHER').map((i) => i.ref?.country).filter(Boolean) as string[];
   const ownCountries = [...new Set([...missingCountries, ...Object.keys(trip.employerRates.foreignBase)])];
 
   return (
@@ -49,7 +50,7 @@ export function StepSouhrn() {
                   label={`Základní sazba zahraničního stravného – ${countryName(c)}`}
                   value={r.amount}
                   onChange={(v) => update((d) => void (d.employerRates.foreignBase[c] = { ...r, amount: v }))}
-                  hint="Podle vyhlášky MF o sazbách zahraničního stravného pro rok 2026."
+                  hint="Podle vyhlášky MF o sazbách zahraničního stravného pro rok 2026. Prázdné pole = sazba podle přílohy vyhlášky (u států, které příloha neuvádí, sazba pro ostatní země)."
                 />
                 <NumberField
                   label="Měna sazby"

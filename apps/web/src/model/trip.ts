@@ -4,7 +4,7 @@
 import type { EmployerSector, PaymentMethod } from '@cp/core';
 import type { FuelType, VehicleType } from '@cp/rules';
 
-export const SCHEMA_VERSION = 6;
+export const SCHEMA_VERSION = 7;
 
 export type TransportKind =
   | 'soukrome-auto'
@@ -85,6 +85,8 @@ export interface ExpenseDoc {
   reimbursable: boolean;
   /** U tankování a nabíjení množství v l / kWh – z dokladů se počítá cena paliva pro náhradu za vozidlo. */
   fuelQuantity: string;
+  /** U ubytování: byla v ceně snídaně? '' = zatím neodpovězeno (aplikace se zeptá). */
+  breakfast: '' | 'yes' | 'no';
   note: string;
 }
 
@@ -125,7 +127,8 @@ export interface TripDoc {
   lastOpenedAt: string;
 
   number: string;
-  employee: { name: string; personalNumber: string; position: string; department: string; regularWorkplace: string; address: string };
+  /** bankAccount = číslo účtu pro výplatu náhrad (uvede se v PDF). */
+  employee: { name: string; personalNumber: string; position: string; department: string; regularWorkplace: string; address: string; bankAccount: string };
   employer: { name: string; ico: string; seat: string; unit: string; costCenter: string; project: string };
   sector: EmployerSector;
 
@@ -210,6 +213,7 @@ export function emptyExpense(date = ''): ExpenseDoc {
     documentNumber: '',
     reimbursable: true,
     fuelQuantity: '',
+    breakfast: '',
     note: '',
   };
 }
@@ -223,7 +227,7 @@ export function newTrip(now: Date, remembered?: Pick<TripDoc, 'employee' | 'empl
     updatedAt: iso,
     lastOpenedAt: iso,
     number: '',
-    employee: remembered?.employee ?? { name: '', personalNumber: '', position: '', department: '', regularWorkplace: '', address: '' },
+    employee: { name: '', personalNumber: '', position: '', department: '', regularWorkplace: '', address: '', bankAccount: '', ...remembered?.employee },
     employer: remembered?.employer ?? { name: '', ico: '', seat: '', unit: '', costCenter: '', project: '' },
     sector: remembered?.sector ?? 'business',
     kind: 'domestic',

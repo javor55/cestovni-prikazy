@@ -28,7 +28,7 @@ Počítat stejně i pro dohody (DPP, DPČ)?\
 **Ú-15 – Lhůty a vnitřní předpis**
 Platí zákonná lhůta 10 pracovních dnů pro předložení vyúčtování, nebo jiná podle vnitřního předpisu?\
 *Návrh:* aplikace zobrazí informativní upozornění s datem podle zákonné lhůty.\
-*Jak je to teď v aplikaci:* Aplikace zatím žádnou lhůtu pro předložení vyúčtování nezobrazuje ani nehlídá.
+*Jak je to teď v aplikaci:* V kroku Kontrola aplikace ukáže datum, do kdy je potřeba vyúčtování předložit: 10 pracovních dnů po skončení cesty, bez víkendů a státních svátků. Jinou lhůtu podle vnitřního předpisu zatím nastavit nejde.
 
 **Ú-16 – Požadované doklady**
 Které doklady vyžadujete? Stačí účtenka, nebo chcete u plateb soukromou kartou i potvrzení o zaplacení (výpis transakce)? Vyžadujete jízdenky u MHD?\
@@ -47,7 +47,7 @@ Zahraniční cesty: zapisují se časy v českém čase, nebo v místním čase 
 **Ú-5 – Tuzemská a zahraniční část v jednom dni**
 Příklad: odjezd z Prahy v 6:00, přechod hranice v 9:00, celý zbytek dne v Německu. Jak se počítá tuzemské stravné za 3 hodiny v ČR v den odjezdu a v den návratu (sčítá se doba v ČR za oba dny, nebo se počítá zvlášť za každý den)?\
 *Návrh:* podle vašeho postupu, prosíme o jeden konkrétní vzorový příklad.\
-*Jak je to teď v aplikaci:* Tuzemské stravné se počítá zvlášť za každý kalendářní den podle doby strávené v Česku. Doba z obou dnů se nesčítá. Výpočet umí krátké dny sčítat jen u čistě tuzemské cesty, kde žádný den nedosáhne 5 hodin, a v aplikaci se to zatím nedá zapnout.
+*Jak je to teď v aplikaci:* Tuzemské stravné se počítá zvlášť za každý kalendářní den podle doby strávené v Česku, doba z různých dnů se nesčítá. Pokud to vnitřní předpis stanoví, jde u čistě tuzemské cesty zapnout sčítání dnů kratších než 5 hodin (krok Kdo cestuje → Sazby podle vnitřního předpisu).
 
 **Ú-4 – Více států v jednom dni**
 Podle sazby kterého státu se počítá zahraniční stravné, pokud zaměstnanec v jednom dni projede více státy (např. ČR → Rakousko → Itálie)?\
@@ -67,7 +67,7 @@ Tuzemská cesta kratší než 5 hodin (bez nároku na stravné) a zahraniční c
 **Ú-6 – Snídaně v ceně ubytování**
 Snídaně zahrnutá v ceně hotelu: krátíte stravné vždy, nebo jen pokud je na dokladu uvedená samostatně?\
 *Návrh:* krátit vždy, když je snídaně součástí uhrazeného ubytování. Aplikace se při zadání ubytování zeptá.\
-*Jak je to teď v aplikaci:* Při zadání ubytování se aplikace na snídani zatím neptá. V kroku Bezplatná jídla je tlačítko „Snídaně v ceně ubytování každé ráno“, které označí snídani od druhého dne cesty. Jednotlivé snídaně jde také zaklikat ručně.
+*Jak je to teď v aplikaci:* Při zadání ubytování se aplikace zeptá, jestli byla v ceně snídaně. Odpověď „Ano“ označí snídani každé ráno po první noci. V kroku Bezplatná jídla jde označení upravit, zrušit jde i dodatečnou odpovědí „Snídaně v ceně nebyla“.
 
 **Ú-7 – Letecká doprava**
 Za okamžik přechodu hranice při letu považujete odlet z / přílet na letiště v ČR?\
@@ -127,7 +127,7 @@ Máte zaměstnance, kteří jezdí soukromým elektromobilem nebo plug-in hybrid
 **Ú-19 – Co potřebujete v PDF**
 Používáte konkrétní tiskopis cestovního příkazu (např. tiskopis SEVT), na který jste zvyklá? Chybí v něm něco, co potřebujete pro zaúčtování (nákladové středisko, zakázka, číslo účtu pro výplatu)?\
 *Návrh:* vlastní přehledný formát se vším ze zadání. Pokud preferujete známý tiskopis, uděláme konzervativní variantu co nejblíže jemu.\
-*Jak je to teď v aplikaci:* PDF jde vytvořit ve dvou vzhledech: „Moderní“ a „Konzervativní“ (blízký tradičnímu tiskopisu). Obsahuje nákladové středisko a projekt/zakázku. Číslo účtu pro výplatu zatím zadat nejde.
+*Jak je to teď v aplikaci:* PDF jde vytvořit ve dvou vzhledech: „Moderní“ a „Konzervativní“ (blízký tradičnímu tiskopisu). Obsahuje nákladové středisko a projekt/zakázku. Číslo účtu pro výplatu se zadává u zaměstnance a ve vyúčtování se zobrazí u částky k výplatě.
 
 ---
 
@@ -176,7 +176,7 @@ Auto půjčené od rodiny nebo známého posuzujeme jako vozidlo zaměstnance (n
 **Ú-28 – Austrálie ve vyhlášce 489/2025 Sb.**
 Příloha uvádí „Austrálie a Oceánie – ostrovní státy“ (70 USD), ale poznámka vyjmenovává jen ostrovní státy. Austrálie sama jmenovitě uvedena není. Použít pro ni sazbu „Ostatní země neuvedené v příloze“ (35 EUR)?\
 *Návrh:* ano, podle doslovného znění. Aplikace na to upozorní a sazbu jde u cesty přepsat ručně.\
-*Jak je to teď v aplikaci:* Austrálie se počítá sazbou pro ostatní země (35 EUR) a aplikace na to upozorní. Ruční přepsání sazby se u ní zatím nenabízí – pole pro vlastní sazbu se ukáže jen u státu, pro který sazba úplně chybí.
+*Jak je to teď v aplikaci:* Austrálie se počítá sazbou pro ostatní země (35 EUR) a aplikace na to upozorní. V Souhrnu jde sazbu pro tento stát přepsat ručně.
 
 ## Vzorové příklady
 

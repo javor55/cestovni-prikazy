@@ -211,6 +211,7 @@ function PartB({ m }: { m: DocModel }) {
           rows={m.settlement.rows.map((r) => [r.label, r.foreign, r.czk])}
           foot={[`${m.settlement.payoutLabel.toUpperCase()} (zaokrouhleno na celé Kč)`, '', m.settlement.payout]}
         />
+        {m.employee.bankAccount ? <Text style={{ paddingHorizontal: 5, paddingVertical: 4, fontSize: 8 }}>Číslo účtu zaměstnance pro výplatu: {m.employee.bankAccount}</Text> : null}
       </Section>
 
       <Section n={next()} title="Prohlášení zaměstnance a schválení" wrap={false}>

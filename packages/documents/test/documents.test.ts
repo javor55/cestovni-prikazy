@@ -41,6 +41,13 @@ describe.each(['modern', 'conservative'] as const)('šablona %s', (layout) => {
     expect(all).toContain('CZ-2026 v1.0.0');
   });
 
+  it('číslo účtu pro výplatu je ve vyúčtování, jen když je zadané', async () => {
+    const m = sample();
+    expect((await pages(m, layout, 'full')).join(' ')).not.toContain('Číslo účtu zaměstnance');
+    m.employee.bankAccount = '123456789/0800';
+    expect((await pages(m, layout, 'full')).join(' ')).toContain('Číslo účtu zaměstnance pro výplatu: 123456789/0800');
+  });
+
   it('jen část A má jednu stranu bez vyúčtování', async () => {
     const p = await pages(sample(), layout, 'A');
     expect(p).toHaveLength(1);

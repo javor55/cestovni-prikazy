@@ -1,5 +1,6 @@
 import { formatMinutes } from '@cp/core';
 import { formatMinor } from '../../model/format.js';
+import { datesOf, markBreakfasts } from '../../model/meals.js';
 import { actualTimes } from '../../model/toInput.js';
 import type { MealsDoc } from '../../model/trip.js';
 import { Button, Card, Notice } from '../../ui/controls.js';
@@ -11,20 +12,6 @@ const mealNames: [keyof MealsDoc, string][] = [
   ['lunch', 'Oběd'],
   ['dinner', 'Večeře'],
 ];
-
-function datesOf(start: string, end: string): string[] {
-  if (!start || !end || end < start) return [];
-  const out: string[] = [];
-  const d = new Date(`${start.slice(0, 10)}T00:00:00Z`);
-  const last = end.slice(0, 10);
-  while (out.length < 366) {
-    const iso = d.toISOString().slice(0, 10);
-    if (iso > last) break;
-    out.push(iso);
-    d.setUTCDate(d.getUTCDate() + 1);
-  }
-  return out;
-}
 
 export function StepJidla() {
   const { trip, update, result } = useTrip();
@@ -52,9 +39,7 @@ export function StepJidla() {
           variant="secondary"
           className="self-start"
           onClick={() =>
-            update((d) => {
-              for (const date of dates.slice(1)) d.meals[date] = { ...(d.meals[date] ?? { breakfast: false, lunch: false, dinner: false }), breakfast: true };
-            })
+            update((d) => markBreakfasts(d, dates))
           }
         >
           Snídaně v ceně ubytování každé ráno

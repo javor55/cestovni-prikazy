@@ -184,7 +184,7 @@ Import: limit počtu souborů (500) a rozbalené velikosti (500 MB), přijetí j
 |---|---|
 | 1 | **Výpočetní jádro a sady pravidel – hotovo** |
 | 2 | **Kostra webové aplikace, průvodce formuláři, lokální ukládání, validace v UI, napojení na jádro – hotovo** |
-| 3 | Přílohy (focení, HEIC, ořez, otočení), kurzy ČNB, úplná tabulka zahraničních sazeb |
+| 3 | **Přílohy (focení, HEIC, ořez, otočení), kurzy ČNB – hotovo**; úplná tabulka zahraničních sazeb čeká na text přílohy vyhlášky (nástroj pro import je hotový) |
 | 4 | PDF k podpisu (obě šablony) ze snímku výpočtu |
 | 5 | Podepsaný dokument, PNG podpis, kompletní PDF |
 | 6 | Exporty XLSX, CSV, JSON a export/import projektu |

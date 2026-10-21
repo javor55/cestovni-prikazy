@@ -1,8 +1,15 @@
 import type { PaymentMethod } from '@cp/core';
 import { useState } from 'react';
 import { currencyOptions } from '../../model/countries.js';
-import { formatDay, formatMinor, formatRate } from '../../model/format.js';
+import { convertToCzk, impliedRate } from '@cp/core';
+import { formatDay, formatMinor, formatRate, normalizeDecimal, toMinor } from '../../model/format.js';
 import { actualTimes } from '../../model/toInput.js';
+import { CnbButton } from '../../rates/CnbButton.js';
+import { AttachmentList } from '../../attachments/AttachmentList.js';
+import { deleteForExpense } from '../../attachments/store.js';
+import { db } from '../../storage/db.js';
+import { useLiveQuery } from 'dexie-react-hooks';
+import type { Attachment } from '../../attachments/model.js';
 import { emptyExpense, expenseCategories, paymentLabels, rateSourceLabels, type ExpenseDoc, type RateSource } from '../../model/trip.js';
 import { Button, Card, Checkbox, Icon, icons, NumberField, SelectField, TextField } from '../../ui/controls.js';
 import { useTrip } from '../context.js';
@@ -15,6 +22,7 @@ const rateOptions = Object.entries(rateSourceLabels) as [RateSource, string][];
 export function StepVydaje() {
   const { trip, update, result, issues } = useTrip();
   const [open, setOpen] = useState<string | null>(null);
+  const attachments = useLiveQuery(() => db.attachments.where('tripId').equals(trip.id).toArray(), [trip.id]) ?? [];
   const total = result?.expenses.reduce((s, e) => s + (e.reimbursable ? e.czk : 0), 0) ?? 0;
 
   const set = <K extends keyof ExpenseDoc>(i: number, k: K) => (v: ExpenseDoc[K]) => update((d) => void (d.expenses[i]![k] = v));
@@ -51,6 +59,7 @@ export function StepVydaje() {
                 </span>
                 {r && e.currency !== 'CZK' && <span className="whitespace-nowrap">{formatMinor(r.czk)}</span>}
               </span>
+              <DocSummary list={attachments.filter((a) => a.expenseId === e.id)} />
             </button>
             {isOpen && (
               <div className="flex flex-col gap-4 border-t border-line pt-4">
@@ -87,17 +96,29 @@ export function StepVydaje() {
                         hint="Podle výpisu nebo potvrzení z bankovnictví. Kurz se dopočítá."
                       />
                     ) : (
-                      <div className="grid gap-4 sm:grid-cols-2">
-                        <NumberField
-                          label={`Kurz Kč za ${e.rateUnit || 1} ${e.currency}`}
-                          value={e.rate}
-                          onChange={set(i, 'rate')}
-                          hint={e.rateSource === 'CNB' ? 'Automatické načtení kurzu ČNB přibude v příští verzi. Zatím ho opište z cnb.cz.' : undefined}
-                        />
-                        <NumberField label="Množství" value={e.rateUnit} onChange={set(i, 'rateUnit')} hint="ČNB uvádí kurz za 1, u některých měn za 100 jednotek." />
-                      </div>
+                      <>
+                        <div className="grid gap-4 sm:grid-cols-2">
+                          <NumberField label={`Kurz Kč za ${e.rateUnit || 1} ${e.currency}`} value={e.rate} onChange={set(i, 'rate')} />
+                          <NumberField label="Množství" value={e.rateUnit} onChange={set(i, 'rateUnit')} hint="ČNB uvádí kurz za 1, u některých měn za 100 jednotek." />
+                        </div>
+                        {e.rateSource === 'CNB' && (
+                          <CnbButton
+                            date={e.date}
+                            currency={e.currency}
+                            rateDate={e.rateDate}
+                            onRate={(r) =>
+                              update((d) => {
+                                const x = d.expenses[i]!;
+                                x.rate = r.rate.replace('.', ',');
+                                x.rateUnit = String(r.amount);
+                                x.rateDate = r.rateDate;
+                              })
+                            }
+                          />
+                        )}
+                      </>
                     )}
-                    {r?.rate && e.rateSource === 'BANK_CONFIRMATION' && <p className="text-[13px] text-muted">Odpovídá kurzu {formatRate(r.rate)} Kč za 1 {e.currency}.</p>}
+                    <Conversion e={e} />
                   </div>
                 )}
                 <div className="grid gap-4 sm:grid-cols-2">
@@ -107,7 +128,10 @@ export function StepVydaje() {
                 <Checkbox checked={!e.reimbursable} onChange={(v) => set(i, 'reimbursable')(!v)}>
                   Neproplácet (např. doklad o tankování, který slouží jen k určení ceny paliva)
                 </Checkbox>
-                <p className="text-[13px] text-subtle">Fotky a skeny dokladů půjde připojit v příští verzi.</p>
+                <div className="flex flex-col gap-2 border-t border-line pt-4">
+                  <h3 className="text-base font-bold">Doklady</h3>
+                  <AttachmentList tripId={trip.id} expenseId={e.id} defaultKind="accounting" privatePayment={['PRIVATE_CARD', 'EMPLOYEE_TRANSFER'].includes(e.paymentMethod)} />
+                </div>
                 <div className="flex flex-wrap gap-2">
                   <Button variant="secondary" onClick={() => setOpen(null)}>
                     Hotovo
@@ -116,6 +140,7 @@ export function StepVydaje() {
                     variant="danger"
                     onClick={() => {
                       update((d) => void d.expenses.splice(i, 1));
+                      void deleteForExpense(trip.id, e.id);
                       setOpen(null);
                     }}
                   >
@@ -127,6 +152,14 @@ export function StepVydaje() {
           </Card>
         );
       })}
+
+      <details className="rounded-2xl border border-line bg-white p-4">
+        <summary className="min-h-11 cursor-pointer font-semibold text-accent">
+          Další dokumenty k cestě{attachments.some((a) => a.expenseId === null) && ` (${attachments.filter((a) => a.expenseId === null).length})`}
+        </summary>
+        <p className="my-2 text-[13px] text-subtle">Program cesty, pozvánka, rezervace a další podklady, které nepatří k jednomu výdaji.</p>
+        <AttachmentList tripId={trip.id} expenseId={null} defaultKind="supporting" />
+      </details>
 
       <Button
         className="self-start"
@@ -140,5 +173,37 @@ export function StepVydaje() {
         <Icon d={icons.plus} /> Přidat výdaj
       </Button>
     </>
+  );
+}
+
+function DocSummary({ list }: { list: Attachment[] }) {
+  const acc = list.filter((a) => a.kind === 'accounting').length;
+  const pay = list.filter((a) => a.kind === 'payment').length;
+  if (!list.length) return <span className="text-xs font-semibold text-warn">! Bez dokladu</span>;
+  return (
+    <span className="text-xs font-semibold text-ok">
+      ✓ {acc} {acc === 1 ? 'účetní doklad' : 'účetních dokladů'}
+      {pay > 0 && ` · ${pay} ${pay === 1 ? 'doklad o zaplacení' : 'doklady o zaplacení'}`}
+    </span>
+  );
+}
+
+/** Přepočet na Kč přímo ve formuláři – nezávisle na tom, zda je už vyplněná celá cesta. */
+function Conversion({ e }: { e: ExpenseDoc }) {
+  const amount = toMinor(e.amount, e.currency);
+  if (amount === null || amount <= 0) return null;
+  const money = { amount, currency: e.currency };
+  if (e.rateSource === 'BANK_CONFIRMATION') {
+    const czk = toMinor(e.czkAmount, 'CZK');
+    if (!czk) return null;
+    return <p className="text-[13px] text-muted">Odpovídá kurzu {formatRate(impliedRate(money, czk))} Kč za 1 {e.currency}.</p>;
+  }
+  const rate = normalizeDecimal(e.rate);
+  if (!rate) return null;
+  const unit = Number(normalizeDecimal(e.rateUnit) ?? '1') || 1;
+  return (
+    <p className="text-[15px]">
+      = <strong>{formatMinor(convertToCzk(money, rate, unit))}</strong>
+    </p>
   );
 }

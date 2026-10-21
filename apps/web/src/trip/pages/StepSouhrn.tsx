@@ -3,6 +3,8 @@ import { ruleSets } from '@cp/rules';
 import { Link } from 'react-router';
 import { countryName } from '../../model/countries.js';
 import { formatMinor, formatRate } from '../../model/format.js';
+import { CnbButton } from '../../rates/CnbButton.js';
+import { actualTimes } from '../../model/toInput.js';
 import { Card, H2, Icon, icons, Notice, NumberField } from '../../ui/controls.js';
 import { useTrip } from '../context.js';
 import { StepIssues } from '../IssueList.js';
@@ -24,15 +26,21 @@ export function StepSouhrn() {
       {(perDiemCurrencies.length > 0 || ownCountries.length > 0) && (
         <Card>
           <H2>Doplňte pro výpočet</H2>
-          {perDiemCurrencies.map((cur) => (
-            <NumberField
-              key={cur}
-              label={`Kurz pro přepočet zahraničního stravného (Kč za 1 ${cur})`}
-              value={trip.perDiemRates[cur] ?? ''}
-              onChange={(v) => update((d) => void (d.perDiemRates[cur] = v))}
-              hint="Ve vybrané měně nebyla záloha. Použijte kurz ČNB podle pokynu účetní (automaticky v příští verzi)."
-            />
-          ))}
+          {perDiemCurrencies.map((cur) => {
+            const r = trip.perDiemRates[cur] ?? { rate: '', unit: '1', rateDate: '' };
+            const date = actualTimes(trip).start.slice(0, 10);
+            return (
+              <div key={cur} className="flex flex-col gap-2">
+                <NumberField
+                  label={`Kurz pro přepočet zahraničního stravného (Kč za ${r.unit || 1} ${cur})`}
+                  value={r.rate}
+                  onChange={(v) => update((d) => void (d.perDiemRates[cur] = { ...r, rate: v }))}
+                  hint="V této měně nebyla záloha. Výchozí je kurz ČNB ke dni začátku cesty – postup potvrzuje účetní (Ú-10)."
+                />
+                <CnbButton date={date} currency={cur} rateDate={r.rateDate} onRate={(x) => update((d) => void (d.perDiemRates[cur] = { rate: x.rate.replace('.', ','), unit: String(x.amount), rateDate: x.rateDate }))} />
+              </div>
+            );
+          })}
           {ownCountries.map((c) => {
             const r = trip.employerRates.foreignBase[c] ?? { amount: '', currency: 'EUR' };
             return (

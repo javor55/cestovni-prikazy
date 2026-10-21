@@ -4,7 +4,7 @@
 import type { EmployerSector, PaymentMethod } from '@cp/core';
 import type { FuelType, VehicleType } from '@cp/rules';
 
-export const SCHEMA_VERSION = 4;
+export const SCHEMA_VERSION = 5;
 
 export type TransportKind = 'soukrome-auto' | 'firemni-auto' | 'vlak' | 'autobus' | 'letadlo' | 'mhd' | 'taxi' | 'jine';
 
@@ -19,10 +19,21 @@ export interface SegmentDoc {
   transport: TransportKind;
   carrier: string;
   km: string;
-  /** Čas přechodu hranice, pokud úsek vede do jiného státu. */
-  crossingAt: string;
+  /**
+   * Přechody hranic v pořadí, v jakém proběhly. Každý vede ze státu předchozího přechodu (u prvního ze státu
+   * odjezdu) do státu `to`; poslední vede vždy do státu příjezdu (viz route.ts). Čas může chybět – aplikace
+   * pak upozorní a dobu odhadne.
+   */
+  crossings: CrossingDoc[];
   private: boolean;
   note: string;
+}
+
+export interface CrossingDoc {
+  id: string;
+  /** Stát, do kterého se hranicí vjíždí. */
+  to: string;
+  at: string;
 }
 
 export interface MealsDoc {
@@ -102,7 +113,13 @@ export interface TripDoc {
   via: string;
   plannedStart: string;
   plannedEnd: string;
+  /** Plánovaný dopravní prostředek; prázdné = nezvoleno (starší cesty mají jen text). */
+  plannedTransportKind: TransportKind | '';
+  /** Upřesnění dopravního prostředku (např. „Railjet“, „vlastní vůz“). */
   plannedTransport: string;
+  /** Stát cíle cesty a státy, kterými se po cestě projíždí – z nich se předvyplní průběh cesty. */
+  destinationCountry: string;
+  transitCountries: string[];
   /** Místo a datum vystavení cestovního příkazu. */
   issuedPlace: string;
   issuedOn: string;
@@ -144,7 +161,7 @@ export function emptySegment(prev?: SegmentDoc): SegmentDoc {
     transport: prev?.transport ?? 'vlak',
     carrier: '',
     km: '',
-    crossingAt: '',
+    crossings: [],
     private: false,
     note: '',
   };
@@ -191,7 +208,10 @@ export function newTrip(now: Date, remembered?: Pick<TripDoc, 'employee' | 'empl
     via: '',
     plannedStart: '',
     plannedEnd: '',
+    plannedTransportKind: '',
     plannedTransport: '',
+    destinationCountry: '',
+    transitCountries: [],
     issuedPlace: '',
     issuedOn: '',
     actualStart: '',
@@ -285,3 +305,20 @@ export const fuelLabels: Record<FuelType, string> = {
   diesel: 'Nafta',
   electricity: 'Elektřina',
 };
+
+/** Plánovaný dopravní prostředek jako text pro dokumenty: druh a upřesnění. */
+export function plannedTransportText(t: Pick<TripDoc, 'plannedTransportKind' | 'plannedTransport'>): string {
+  return [t.plannedTransportKind && transportLabels[t.plannedTransportKind], t.plannedTransport].filter(Boolean).join(', ');
+}
+
+/** Přechody hranic úseku jako text, např. „CZ–AT 14. 10. 2026 9:45, AT–SI čas nezadán“. */
+export function crossingsText(s: Pick<SegmentDoc, 'fromCountry' | 'crossings'>, time: (local: string) => string): string {
+  let from = s.fromCountry;
+  return s.crossings
+    .map((c) => {
+      const t = `${from}–${c.to} ${c.at ? time(c.at) : 'čas nezadán'}`;
+      from = c.to;
+      return t;
+    })
+    .join(', ');
+}

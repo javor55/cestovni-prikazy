@@ -1,6 +1,7 @@
 import type { Conversion, Expense, ExpensePayer, Issue, PaymentMethod, TripInput } from '@cp/core';
 import { normalizeDecimal, toMinor } from './format.js';
-import type { TripDoc } from './trip.js';
+import { missingTransit } from './route.js';
+import type { SegmentDoc, TripDoc } from './trip.js';
 
 const PAYER: Record<PaymentMethod, ExpensePayer> = {
   PRIVATE_CARD: 'EMPLOYEE',
@@ -155,7 +156,7 @@ export function toInput(doc: TripDoc, docs?: DocCounts): Mapped {
     kind: doc.kind,
     start,
     end,
-    segments: doc.segments.map((s) => ({
+    segments: doc.segments.map((s, i) => ({
       id: s.id,
       from: { place: s.fromPlace || '?', country: s.fromCountry },
       to: { place: s.toPlace || '?', country: s.toCountry },
@@ -163,7 +164,7 @@ export function toInput(doc: TripDoc, docs?: DocCounts): Mapped {
       arrival: s.arrival,
       transport: s.transport,
       ...(normalizeDecimal(s.km) && { km: Number(normalizeDecimal(s.km)) }),
-      ...(s.fromCountry !== s.toCountry && s.crossingAt && { borderCrossings: [{ at: s.crossingAt, from: s.fromCountry, to: s.toCountry }] }),
+      ...crossingsOf(s, i, issues),
       ...(s.private && { private: true }),
     })),
     meals: Object.entries(doc.meals).map(([date, m]) => ({
@@ -180,4 +181,50 @@ export function toInput(doc: TripDoc, docs?: DocCounts): Mapped {
     options: { combineShortDomesticDays: doc.combineShortDomesticDays },
   };
   return { input, issues, actualStart: start, actualEnd: end };
+}
+
+/**
+ * Přechody hranic úseku pro výpočet. Přechod bez času se vynechá a doba ve státě, kterým se projíždělo,
+ * se započte k sousednímu státu (s varováním). Bez jediného času jádro dobu odhadne a upozorní samo.
+ */
+function crossingsOf(s: SegmentDoc, index: number, issues: Issue[]): { borderCrossings?: TripInput['segments'][number]['borderCrossings'] } {
+  const name = `Úsek ${index + 1} (${s.fromPlace || '?'} → ${s.toPlace || '?'})`;
+  const ref = { step: 'prubeh', segmentId: s.id };
+  for (const [a, b] of missingTransit(s)) {
+    issues.push({
+      severity: 'warning',
+      code: 'FORM_TRANSIT_MISSING',
+      message: `${name}: státy ${a} a ${b} spolu nesousedí. Doplňte státy, kterými jste projížděli („+ stát po cestě“) – stravné se řídí státem, ve kterém jste ten den strávili nejvíc času.`,
+      ref,
+    });
+  }
+  if (s.crossings.some((c) => !c.to)) {
+    issues.push({ severity: 'error', code: 'FORM_CROSSING_COUNTRY', message: `${name}: vyberte stát u každého přechodu hranice, nebo přechod odeberte.`, ref });
+    return {};
+  }
+  const timed = s.crossings.filter((c) => c.at);
+  if (timed.length === 0) return {};
+  const out: NonNullable<TripInput['segments'][number]['borderCrossings']> = [];
+  let current = s.fromCountry;
+  let prev = s.fromCountry;
+  for (const c of s.crossings) {
+    if (c.at) {
+      out.push({ at: c.at, from: current, to: c.to });
+      current = c.to;
+    } else {
+      issues.push({
+        severity: 'warning',
+        code: 'FORM_CROSSING_TIME',
+        message: `${name}: chybí čas přechodu hranice ${prev} → ${c.to}. Doba ve státě ${out.length ? prev : c.to} se započte k sousednímu státu. Doplňte čas.`,
+        ref,
+      });
+      // Bez času se vjezd do státu připíše k poslednímu přechodu s časem (na začátku úseku se nezapočte).
+      if (out.length) {
+        out.at(-1)!.to = c.to;
+        current = c.to;
+      }
+    }
+    prev = c.to;
+  }
+  return { borderCrossings: out };
 }

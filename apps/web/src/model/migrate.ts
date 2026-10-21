@@ -1,4 +1,4 @@
-import { SCHEMA_VERSION, type TripDoc } from './trip.js';
+import { newId, SCHEMA_VERSION, type TripDoc } from './trip.js';
 
 /**
  * Převede uloženou cestu ze starší verze schématu na aktuální. Používá se při načtení z prohlížeče
@@ -29,6 +29,18 @@ export function migrateTrip(raw: unknown): TripDoc {
   if (version < 4) {
     // v4: způsob podpisu.
     t.signature ??= { mode: 'scan', widthPct: 70, stamp: false };
+  }
+  if (version < 5) {
+    // v5: více přechodů hranic v jednom úseku; stát cíle, státy po cestě a druh dopravy v plánu.
+    const doc = t as unknown as TripDoc & { segments: (TripDoc['segments'][number] & { crossingAt?: string })[] };
+    for (const s of doc.segments) {
+      const at = s.crossingAt ?? '';
+      delete s.crossingAt;
+      s.crossings = s.fromCountry !== s.toCountry ? [{ id: newId(), to: s.toCountry, at }] : [];
+    }
+    doc.plannedTransportKind ??= '';
+    doc.transitCountries ??= [];
+    doc.destinationCountry ??= doc.segments.find((s) => s.toCountry !== 'CZ')?.toCountry ?? '';
   }
   t.schemaVersion = SCHEMA_VERSION;
   return t as unknown as TripDoc;

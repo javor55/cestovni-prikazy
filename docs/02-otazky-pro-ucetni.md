@@ -134,6 +134,10 @@ Počítá se kapesné z výsledného zahraničního stravného za den (po kráce
 Cesta trvající přesně 12 hodin patří do pásma 5–12 h a přesně 18 hodin do pásma 12–18 h. Pobyt v zahraničí přesně 1 hodinu už zakládá nárok na 1/3 zahraničního stravného. Souhlasí?
 *Návrh:* ano.
 
+**Ú-25 – Průjezd dalšími státy**
+Při cestě po zemi (např. autem z Ústí nad Labem do Záhřebu přes Rakousko a Slovinsko) zapisujete čas vjezdu do každého státu, kterým zaměstnanec projíždí, a stravné za den určujete podle státu, ve kterém strávil nejvíc času? Nebo stačí čas přechodu české hranice a celá doba v zahraničí se počítá cílovému státu?
+*Návrh:* zapisovat vjezd do každého státu. Aplikace u pozemní cesty mezi státy, které spolu nesousedí, upozorní na chybějící stát po cestě (varování, ne chyba). Při chybějícím čase započte dobu k sousednímu státu a upozorní.
+
 ## Vzorové příklady
 
 Prosíme o 3–5 skutečných vyúčtování (stačí anonymizovaná), ideálně:

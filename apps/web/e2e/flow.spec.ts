@@ -37,7 +37,7 @@ test('celá zahraniční cesta: vyplnění, výpočet, uložení a smazání', a
   await next(page);
 
   // 3 Průběh: tam a zpět s přechodem hranice
-  await page.getByRole('button', { name: 'Přidat úsek' }).click();
+  await page.getByRole('button', { name: 'Zadat úseky ručně' }).click();
   const s1 = page.getByRole('region', { name: 'Úsek 1' });
   await s1.getByLabel('Kam').fill('Vídeň');
   await s1.getByLabel('Stát').nth(1).selectOption('AT');
@@ -114,7 +114,7 @@ test('chyba v časové ose se ukáže v kroku i v kontrole s odkazem na opravu',
   await page.getByRole('button', { name: 'Nová pracovní cesta' }).click();
   await page.waitForURL(/\/kdo$/);
   await page.goto(page.url().replace('/kdo', '/prubeh'));
-  await page.getByRole('button', { name: 'Přidat úsek' }).click();
+  await page.getByRole('button', { name: 'Zadat úseky ručně' }).click();
   const s1 = page.getByRole('region', { name: 'Úsek 1' });
   await s1.getByLabel('Odjezd').fill('2026-03-10T10:00');
   await s1.getByLabel('Příjezd').fill('2026-03-10T09:00');

@@ -3,7 +3,7 @@ import { DOC_MODEL_VERSION, type DocModel } from '@cp/documents/model';
 import { countryName } from '../model/countries.js';
 import { formatDateTime, formatDay, formatMinor, formatRate } from '../model/format.js';
 import type { DocCounts, Mapped } from '../model/toInput.js';
-import { fuelLabels, paymentLabels, transportLabels, type TripDoc } from '../model/trip.js';
+import { crossingsText, fuelLabels, paymentLabels, plannedTransportText, transportLabels, type TripDoc } from '../model/trip.js';
 
 /** Číslo bez měny pro sloupec „Kč“. */
 const num = (minor: number) => formatMinor(minor).replace(/\s?Kč$/, '');
@@ -81,7 +81,7 @@ export function buildDocModel({ trip, mapped, result, docCounts, documentCount, 
       plannedEnd: formatDateTime(trip.plannedEnd),
       destinations: trip.destinations,
       via: trip.via,
-      transport: trip.plannedTransport,
+      transport: plannedTransportText(trip),
       advances: trip.advances.filter((a) => a.amount).map((a) => `${a.amount} ${a.currency}${a.providedOn ? ` (${formatDay(a.providedOn)})` : ''}`),
       note: trip.note,
     },
@@ -96,7 +96,7 @@ export function buildDocModel({ trip, mapped, result, docCounts, documentCount, 
         arrival: formatDateTime(x.arrival),
         transport: transportLabels[x.transport] + (x.private ? ' – soukromá část' : '') + (x.carrier ? `, ${x.carrier}` : ''),
         km: x.km,
-        border: x.fromCountry !== x.toCountry && x.crossingAt ? `${x.fromCountry}–${x.toCountry} ${formatDateTime(x.crossingAt)}` : x.fromCountry !== x.toCountry ? 'čas nezadán' : '',
+        border: crossingsText(x, formatDateTime),
       })),
     perDiem: {
       days: (pd?.days ?? []).map((d) => ({

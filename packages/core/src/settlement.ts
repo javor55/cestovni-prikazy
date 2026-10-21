@@ -162,7 +162,7 @@ export function settle(
       // Bez zálohy v této měně se stravné přepočte na Kč kurzem, který dodá aplikace (Ú-10).
       const r = rateOf(trip.perDiemRates?.[cur]);
       if (!r) {
-        issues.error('PER_DIEM_MISSING_RATE', `Chybí kurz pro přepočet zahraničního stravného v ${cur} na Kč. Načtěte kurz ČNB.`);
+        issues.error('PER_DIEM_MISSING_RATE', `Chybí kurz pro přepočet zahraničního stravného v ${cur} na Kč. Načtěte kurz ČNB.`, { currency: cur });
         continue;
       }
       const amount = pd + pm;

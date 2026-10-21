@@ -2,12 +2,15 @@
 
 Webová aplikace pro přípravu cestovního příkazu, výpočet cestovních náhrad podle českého zákoníku práce a sestavení kompletní dokumentace (PDF, XLSX, CSV, JSON) k odevzdání účetní.
 
-Hotové je výpočetní jádro (`packages/core`) se sazbami pro rok 2026 (`packages/rules`). Webová aplikace vzniká v dalších milnících. Dokumentace je v adresáři [`docs/`](docs/).
+Hotové je výpočetní jádro (`packages/core`) se sazbami pro rok 2026 (`packages/rules`) a webová aplikace s průvodcem vyplněním cesty (`apps/web`). Data se ukládají jen v prohlížeči. PDF, přílohy, kurzy ČNB a exporty přibudou v dalších milnících. Dokumentace je v adresáři [`docs/`](docs/).
 
 ```
 pnpm install
-pnpm check     # kontrola typů + testy
+pnpm --filter @cp/web dev   # vývojový server na http://localhost:5173
+pnpm check                  # kontrola typů + jednotkové testy
+pnpm e2e                    # testy v prohlížeči (mobil 320 px, mobil, desktop)
 ```
+
 
 | Dokument | Obsah |
 |---|---|

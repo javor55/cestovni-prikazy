@@ -1,4 +1,4 @@
-import type { DocPart, Layout } from '@cp/documents/model';
+import type { DocPart, Lang } from '@cp/documents/model';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router';
@@ -13,7 +13,7 @@ export function StepPdf() {
   const { trip, mapped, result, issues, docCounts, attachmentCount } = useTrip();
   const errors = issues.filter((i) => i.severity === 'error').length;
   const latest = useLiveQuery(() => db.snapshots.where('tripId').equals(trip.id).reverse().sortBy('createdAt').then((l) => l[0]), [trip.id]);
-  const [layout, setLayout] = useState<Layout>('modern');
+  const [lang, setLang] = useState<Lang>('cs');
   const [part, setPart] = useState<DocPart>('full');
   const [hash, setHash] = useState('');
   const [busy, setBusy] = useState(false);
@@ -31,7 +31,7 @@ export function StepPdf() {
   const stale = latest && hash && latest.inputHash !== hash;
 
   const show = async (snapshot: Snapshot) => {
-    const blob = await generatePdf(snapshot.model, snapshot.layout, snapshot.part);
+    const blob = await generatePdf(snapshot.model, snapshot.part);
     setFile({ url: URL.createObjectURL(blob), name: fileName(snapshot.model, snapshot.part), snapshot });
   };
 
@@ -44,10 +44,9 @@ export function StepPdf() {
         id: crypto.randomUUID(),
         tripId: trip.id,
         createdAt: now.toISOString(),
-        layout,
         part,
         inputHash: hash || (await inputHash(trip, docCounts)),
-        model: buildDocModel({ trip, mapped, result, docCounts, documentCount: attachmentCount, now }),
+        model: buildDocModel({ trip, mapped, result, docCounts, documentCount: attachmentCount, now, lang }),
       };
       await db.snapshots.add(snapshot);
       await show(snapshot);
@@ -78,12 +77,12 @@ export function StepPdf() {
           ]}
         />
         <RadioCards
-          legend="Vzhled"
-          value={layout}
-          onChange={setLayout}
+          legend="Jazyk dokumentu"
+          value={lang}
+          onChange={setLang}
           options={[
-            { value: 'modern', title: 'Moderní (doporučeno)', hint: 'Částka k výplatě a souhrn nahoře, přehledné tabulky.' },
-            { value: 'conservative', title: 'Konzervativní', hint: 'Číslované oddíly a mřížka jako na tradičním tiskopisu.' },
+            { value: 'cs', title: 'Česky', hint: 'Výchozí – pro nadřízeného i účetní.' },
+            { value: 'en', title: 'English', hint: 'Pro zahraničního nadřízeného. Údaje zadané v aplikaci (účel, místa, popisy) se nepřekládají.' },
           ]}
         />
         <Button onClick={create} disabled={busy || blockedFull} className="self-start">
@@ -101,7 +100,7 @@ export function StepPdf() {
         <Card>
           <H2>Naposledy vytvořené PDF</H2>
           <p className="text-[15px] text-muted">
-            {new Date(latest.createdAt).toLocaleString('cs-CZ')} · {latest.part === 'full' ? 'příkaz a vyúčtování' : 'jen příkaz'} · {latest.layout === 'modern' ? 'moderní' : 'konzervativní'}
+            {new Date(latest.createdAt).toLocaleString('cs-CZ')} · {latest.part === 'full' ? 'příkaz a vyúčtování' : 'jen příkaz'} · {latest.model.lang === 'en' ? 'anglicky' : 'česky'}
           </p>
           {stale && <Notice tone="warn">Údaje cesty se od vytvoření tohoto PDF změnily. Pro odevzdání vytvořte PDF znovu.</Notice>}
           <Button variant="secondary" className="self-start" onClick={() => show(latest)}>
@@ -125,7 +124,7 @@ export function StepPdf() {
           <p className="text-[13px] text-subtle">{file.name}</p>
           <iframe title="Náhled PDF" src={file.url} className="hidden h-[75vh] w-full rounded-lg border border-line md:block" />
           <Notice>
-            Dokument vytiskněte a podepište. <strong>Stáhněte si také pracovní projekt</strong>, abyste se k cestě mohli vrátit i z jiného zařízení – tato funkce přibude v další verzi, zatím zůstává cesta uložená v tomto prohlížeči.
+            Dokument vytiskněte a podepište. Pracovní projekt pro jiné zařízení nebo archiv stáhnete v posledním kroku.
           </Notice>
         </Card>
       )}

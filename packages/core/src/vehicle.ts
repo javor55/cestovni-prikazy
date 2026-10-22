@@ -3,6 +3,7 @@ import { Fraction } from './fraction.js';
 import type { IssueList } from './issues.js';
 import type { TripInput } from './model.js';
 import type { ExpenseResult } from './settlement.js';
+import { formatMoney } from './money.js';
 import { datePart } from './time.js';
 
 export interface VehicleResult {
@@ -16,9 +17,14 @@ export interface VehicleResult {
   quantity: string;
   unit: 'l' | 'kWh';
   fuelPrice: number;
-  /** RECEIPT = cena z jednoho dokladu, RECEIPTS = vážený průměr z dokladů o tankování, AVERAGE = vyhláška. */
-  fuelPriceSource: 'RECEIPT' | 'RECEIPTS' | 'AVERAGE';
+  /**
+   * RECEIPT = cena z jednoho dokladu, RECEIPTS = vážený průměr z dokladů o tankování, AVERAGE = vyhláška,
+   * AVERAGE_MANUAL = průměrná cena zadaná ručně (např. po novele vyhlášky).
+   */
+  fuelPriceSource: 'RECEIPT' | 'RECEIPTS' | 'AVERAGE' | 'AVERAGE_MANUAL';
   fuelPriceRef: string;
+  /** Průměrná cena podle sady pravidel k rozhodnému dni (pro porovnání; chybí, pokud ji sada nezná). */
+  rulesAveragePrice?: number;
   fuelCompensation: number;
   total: number;
 }
@@ -98,8 +104,17 @@ export function computeVehicle(trip: TripInput, rules: RuleSet, issues: IssueLis
     price = v.receiptPrice.amount;
     source = 'RECEIPT';
     ref = `doklad ze dne ${v.receiptPrice.date}`;
+  }
+  const avg = rules.vehicle.averagePrices.find((p) => p.fuel === v.fuel && p.validFrom <= date && date <= p.validTo);
+  if (!source && v.averagePriceOverride) {
+    price = v.averagePriceOverride.amount;
+    source = 'AVERAGE_MANUAL';
+    ref = v.averagePriceOverride.source.trim() || 'zadáno ručně';
+    issues.warning(
+      'FUEL_PRICE_MANUAL',
+      `Průměrná cena paliva je zadaná ručně (${formatMoney({ amount: price, currency: 'CZK' })}, ${ref})${avg ? ` místo ceny podle vyhlášky ${avg.source} (${formatMoney({ amount: avg.amount, currency: 'CZK' })})` : ''}. Účetní ověří zdroj.`,
+    );
   } else if (!source) {
-    const avg = rules.vehicle.averagePrices.find((p) => p.fuel === v.fuel && p.validFrom <= date && date <= p.validTo);
     if (!avg) {
       issues.error('FUEL_PRICE_MISSING', `Pro datum ${date} není v sadě pravidel průměrná cena pro zvolený druh paliva. Přiložte doklad o tankování s cenou.`);
       return undefined;
@@ -128,6 +143,7 @@ export function computeVehicle(trip: TripInput, rules: RuleSet, issues: IssueLis
     fuelPrice: price,
     fuelPriceSource: source,
     fuelPriceRef: ref,
+    ...(avg && { rulesAveragePrice: avg.amount }),
     fuelCompensation,
     total: basic + fuelCompensation,
   };

@@ -4,7 +4,7 @@
 import type { EmployerSector, PaymentMethod } from '@cp/core';
 import type { FuelType, VehicleType } from '@cp/rules';
 
-export const SCHEMA_VERSION = 7;
+export const SCHEMA_VERSION = 8;
 
 export type TransportKind =
   | 'soukrome-auto'
@@ -115,6 +115,10 @@ export interface VehicleDoc {
   receiptDate: string;
   /** Cena paliva: z dokladů o tankování mezi výdaji (vážený průměr), z jednoho dokladu, nebo průměrná podle vyhlášky. */
   fuelPriceMode: 'receipts' | 'receipt' | 'average';
+  /** Ručně zadaná průměrná cena (Kč za 1 l / kWh), když se průměrná cena podle vyhlášky změnila. Prázdné = podle sady pravidel. */
+  averagePrice: string;
+  /** Odkud ručně zadaná průměrná cena pochází, např. „vyhláška č. 123/2026 Sb. od 1. 11. 2026“. */
+  averagePriceSource: string;
   requestedByEmployer: boolean;
   note: string;
 }
@@ -264,6 +268,8 @@ export function newTrip(now: Date, remembered?: Pick<TripDoc, 'employee' | 'empl
       receiptPrice: '',
       receiptDate: '',
       fuelPriceMode: 'average',
+      averagePrice: '',
+      averagePriceSource: '',
       requestedByEmployer: true,
       note: '',
     },

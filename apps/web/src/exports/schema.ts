@@ -100,6 +100,8 @@ export const tripSchema = z.object({
     receiptPrice: short,
     receiptDate: short,
     fuelPriceMode: z.enum(['receipts', 'receipt', 'average']),
+    averagePrice: short,
+    averagePriceSource: short,
     requestedByEmployer: z.boolean(),
     note: text,
   }),
@@ -133,6 +135,7 @@ const s = text;
 /** Model dokumentu ze snímku. Vizuální podpis se do snímku neukládá, proto ho schéma nepřijme. */
 const docModelSchema = z.object({
   version: z.number().int(),
+  lang: z.enum(['cs', 'en']).optional(),
   number: s,
   createdAt: s,
   ruleSet: s,
@@ -165,7 +168,7 @@ const docModelSchema = z.object({
 export const snapshotSchema = z.object({
   id,
   createdAt: isoTime,
-  layout: z.enum(['modern', 'conservative']),
+  layout: z.enum(['modern', 'conservative']).optional(),
   part: z.enum(['full', 'A']),
   inputHash: z.string().regex(/^[0-9a-f]{64}$/),
   model: docModelSchema,

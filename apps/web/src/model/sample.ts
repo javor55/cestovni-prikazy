@@ -5,6 +5,7 @@ import { emptyExpense, emptySegment, newTrip, type TripDoc } from './trip.js';
 export function vienna(): TripDoc {
   const t = newTrip(new Date('2026-10-12T08:00:00Z'));
   Object.assign(t, { kind: 'foreign', number: 'CP-2026-0042', purpose: 'Jednání', issuedPlace: 'Praha', issuedOn: '2026-10-12' });
+  t.employee.bankAccount = '2000145399/0800';
   const out = { ...emptySegment(), fromPlace: 'Praha', toPlace: 'Vídeň', toCountry: 'AT', departure: '2026-10-14T06:30', arrival: '2026-10-14T11:00', crossings: [{ id: 'x1', to: 'AT', at: '2026-10-14T09:45' }], transport: 'soukrome-auto' as const, km: '343' };
   const back = { ...emptySegment(out), toPlace: 'Praha', toCountry: 'CZ', departure: '2026-10-16T14:00', arrival: '2026-10-16T18:30', crossings: [{ id: 'x2', to: 'CZ', at: '2026-10-16T15:15' }], km: '343' };
   t.segments = [out, back];

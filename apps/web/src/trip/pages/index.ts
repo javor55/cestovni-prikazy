@@ -2,10 +2,8 @@ import type { ComponentType } from 'react';
 import type { StepSlug } from '../steps.js';
 import { StepCesta } from './StepCesta.js';
 import { StepJidla } from './StepJidla.js';
-import { StepExport } from './StepExport.js';
 import { StepKdo } from './StepKdo.js';
-import { StepKompletni } from './StepKompletni.js';
-import { StepKontrola } from './StepKontrola.js';
+import { StepOdevzdani } from './StepOdevzdani.js';
 import { StepPdf } from './StepPdf.js';
 import { StepPodpis } from './StepPodpis.js';
 import { StepPrubeh } from './StepPrubeh.js';
@@ -21,9 +19,7 @@ export const StepPages: Record<StepSlug, ComponentType> = {
   vydaje: StepVydaje,
   vozidlo: StepVozidlo,
   souhrn: StepSouhrn,
-  kontrola: StepKontrola,
   pdf: StepPdf,
   podpis: StepPodpis,
-  kompletni: StepKompletni,
-  export: StepExport,
+  kompletni: StepOdevzdani,
 };

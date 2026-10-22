@@ -37,6 +37,19 @@ describe('cena paliva u soukromého vozidla', () => {
     expect(r.issues.map((i) => i.code)).toContain('FUEL_RECEIPTS_MISSING');
   });
 
+  it('ručně zadaná průměrná cena (novela vyhlášky) nahradí cenu ze sady pravidel a upozorní', () => {
+    const r = base({ ...car, averagePriceOverride: { amount: m(35.1), source: 'vyhláška č. 123/2026 Sb.' } });
+    expect(r.vehicle).toMatchObject({ fuelPrice: m(35.1), fuelPriceSource: 'AVERAGE_MANUAL', fuelPriceRef: 'vyhláška č. 123/2026 Sb.', rulesAveragePrice: m(34.7) });
+    // 686 km × 5,6 l / 100 = 38,416 l × 35,10 = 1 348,4016 → 1 348,40 Kč
+    expect(r.vehicle!.fuelCompensation).toBe(m(1348.4));
+    expect(r.issues.find((i) => i.code === 'FUEL_PRICE_MANUAL')?.message).toContain('místo ceny podle vyhlášky 573/2025 (34,70 Kč)');
+  });
+
+  it('doklad o tankování má přednost před ručně zadanou průměrnou cenou', () => {
+    const r = base({ ...car, receiptPrice: { amount: m(38.9), date: '2026-03-10' }, averagePriceOverride: { amount: m(35.1), source: 'x' } });
+    expect(r.vehicle!.fuelPriceSource).toBe('RECEIPT');
+  });
+
   it('cena z jednoho dokladu zůstává', () => {
     const r = base({ ...car, receiptPrice: { amount: m(38.9), date: '2026-03-10' } });
     expect(r.vehicle).toMatchObject({ fuelPrice: m(38.9), fuelPriceSource: 'RECEIPT' });

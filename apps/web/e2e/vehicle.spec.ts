@@ -39,3 +39,38 @@ test('soukromé auto: cena paliva z více tankování (vážený průměr) a tec
   await expect(page.getByRole('list', { name: 'Připojené doklady' })).toContainText('tp.jpg');
   await page.getByLabel('Druh', { exact: true }).selectOption('Technický průkaz');
 });
+
+test('průměrná cena paliva podle vyhlášky je vidět a jde ručně změnit; sazby jsou k nahlédnutí', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Nová pracovní cesta' }).click();
+  await page.waitForURL(/\/kdo$/);
+  const base = page.url().replace(/\/kdo$/, '');
+  await page.goto(`${base}/cesta`);
+  await page.getByLabel('Plánovaný začátek').fill('2026-03-10T06:00');
+  await page.getByLabel('Plánovaný konec').fill('2026-03-11T20:00');
+  await go(page, `${base}/vozidlo`);
+  await page.getByText('Na cestě jsem použil(a) osobní vozidlo').click();
+  await page.getByLabel(/Spotřeba podle technického průkazu/).fill('5,6');
+  await page.getByLabel('Ujeté kilometry').fill('686');
+  const avg = page.getByLabel('Průměrná cena paliva');
+  await expect(avg).toContainText('Průměrná cena podle vyhlášky 573/2025 Sb.: 34,70 Kč za 1 l');
+  const calc = page.getByRole('region', { name: 'Výpočet náhrady' });
+  await expect(calc).toContainText('34,70 Kč');
+
+  await page.getByLabel(/Jiná průměrná cena za 1 l/).fill('35,10');
+  await page.getByLabel('Zdroj ceny').fill('vyhláška č. 123/2026 Sb.');
+  // 686 km × 5,6 l / 100 = 38,416 l × 35,10 = 1 348,40 Kč
+  await expect(calc).toContainText('průměrná cena zadaná ručně, vyhláška č. 123/2026 Sb.');
+  await expect(calc).toContainText('1 348,40 Kč');
+
+  await go(page, `${base}/souhrn`);
+  await expect(page.getByRole('region', { name: 'Kontrola' })).toContainText('Průměrná cena paliva je zadaná ručně (35,10 Kč, vyhláška č. 123/2026 Sb.) místo ceny podle vyhlášky 573/2025 (34,70 Kč)');
+  await expect(page.getByRole('region', { name: 'Jak se počítá' })).toContainText('km × sazba za km');
+  await page.getByRole('link', { name: /Sazby a hodnoty, se kterými aplikace počítá/ }).click();
+  await expect(page.getByText('Sazby a hodnoty výpočtu')).toBeVisible();
+  await page.getByLabel('Hledat stát').fill('Chorvatsko');
+  await expect(page.getByRole('region', { name: 'Zahraniční stravné' }).getByRole('row', { name: /Chorvatsko/ })).toContainText('50,00 EUR');
+  await expect(page.getByRole('region', { name: 'Soukromé vozidlo' })).toContainText('41,80 Kč / l');
+  await page.getByRole('link', { name: 'Zpět' }).click();
+  await expect(page).toHaveURL(/\/souhrn$/);
+});

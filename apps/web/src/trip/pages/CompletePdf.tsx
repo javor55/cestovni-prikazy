@@ -10,7 +10,8 @@ import { useTrip } from '../context.js';
 
 const size = (b: number) => (b < 1024 * 1024 ? `${Math.round(b / 1024)} kB` : `${(b / 1024 / 1024).toFixed(1).replace('.', ',')} MB`);
 
-export function StepKompletni() {
+/** Sestavení kompletní dokumentace v PDF – součást kroku Odevzdání. */
+export function CompletePdf() {
   const { trip, docCounts } = useTrip();
   const latest = useLiveQuery(() => db.snapshots.where('tripId').equals(trip.id).filter((s) => s.part === 'full').reverse().sortBy('createdAt').then((l) => l[0] ?? null), [trip.id]);
   const [busy, setBusy] = useState(false);
@@ -101,13 +102,6 @@ export function StepKompletni() {
           </div>
           <p className="text-[13px] text-subtle">{result.name}</p>
           <iframe title="Náhled kompletního PDF" src={result.url} className="hidden h-[75vh] w-full rounded-lg border border-line md:block" />
-          <p className="text-[13px] text-subtle">
-            Originály dokladů v ZIP, tabulky XLSX/CSV a pracovní projekt najdete v kroku{' '}
-            <Link to={`/cesta/${trip.id}/export`} className="font-semibold text-accent underline">
-              Exporty
-            </Link>
-            .
-          </p>
         </Card>
       )}
     </>

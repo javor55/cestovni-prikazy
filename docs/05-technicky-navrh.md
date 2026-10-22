@@ -140,8 +140,8 @@ Kontrola testů mutací: po změně jediné sazby selže 11 testů.
 
 ## 7. Generování PDF
 
-1. **Snímek:** při kliknutí na „Vytvořit PDF“ se uloží `snapshot` = model dokumentu (`DocModel` – všechny údaje už naformátované jako text, včetně verze pravidel) + vzhled + otisk vstupních údajů. Šablony čtou jen snímek, takže stejný snímek dá vždy stejné PDF.
-2. **PDF k podpisu:** `@react-pdf/renderer` v prohlížeči (knihovna se načte až při prvním použití), dva vzhledy (moderní a konzervativní), vložená písma Noto Sans a Noto Serif Bold.
+1. **Snímek:** při kliknutí na „Vytvořit PDF“ se uloží `snapshot` = model dokumentu (`DocModel` – všechny údaje už naformátované jako text, včetně verze pravidel) + obsah (celý dokument / jen část A) + otisk vstupních údajů. Jazyk (`lang`: cs/en) je součástí modelu. Šablony čtou jen snímek, takže stejný snímek dá vždy stejné PDF.
+2. **PDF k podpisu:** `@react-pdf/renderer` v prohlížeči (knihovna se načte až při prvním použití), jeden vzhled česky nebo anglicky (pevné popisky v `packages/documents/src/labels.ts`, číselníky a poznámky přeloží `apps/web/src/documents/i18n.ts`), vložená písma Noto Sans a Noto Serif Bold. Test hlídá, že písmo obsahuje všechny znaky šablon.
 3. **Kompletní dokumentace:** `pdf-lib` složí krycí list a obsah, podepsaný dokument (sken nebo PDF s vloženým PNG podpisem), rozpis výpočtu, přehled výdajů, pro každý výdaj identifikační stranu a hned za ní všechny jeho doklady (účetní doklad, doklad o zaplacení, doplňující dokumenty), potom doklady k vozidlu a doplňující přílohy k cestě (obrázek = stránka A4 se zachovaným poměrem stran, PDF = vložení stran). Potom doplní průběžné číslování „strana X z Y“, číslo příkazu a záložky.
 4. Před stažením se zobrazí počet stran, dokladů a výdajů bez dokladu a velikost souboru. Cíl je pod 10 MB při 30 fotkách díky zmenšení na delší stranu 2 400 px (asi 200 DPI) a JPEG kvalitě 0,85.
 
@@ -165,7 +165,8 @@ Implementace (`apps/web/src/exports`):
 
 ## 8a. Exporty pro účetní
 
-- **XLSX** (`packages/documents/src/tabular.ts`): listy Souhrn, Useky, Stravne, Vydaje, Vozidlo podle zadání § 20 a navíc Kontroly (chyby a varování výpočtu). Částky jsou čísla s formátem `#,##0.00` a měna je v samostatném sloupci. Data a časy jsou skutečné hodnoty data. Texty se ukládají jako text, nikdy jako vzorec, a sešit neobsahuje makra.
+- **XLSX** (`packages/documents/src/tabular.ts`): listy Souhrn, Useky, Stravne, Vydaje, Vozidlo podle zadání § 20 a navíc Kontroly (chyby a varování výpočtu).
+- **Výpočet jako vzorce** (`apps/web/src/exports/formulas.ts`, jen v XLSX): listy Vypocet vyuctovani, Vypocet stravne, Vypocet vydaje, Vypocet vozidlo a Parametry. Vstupy jsou hodnoty z aplikace (minuty po dnech, sazby, kurzy, částky), výsledky vzorce Excelu stejné jako ve výpočetním jádru (pásma přes IF, krácení, zaokrouhlení podle sady pravidel, přepočty ROUND na haléře, vážený průměr ceny paliva). Sloupec „Kontrola“ porovná vzorec s výsledkem aplikace. Buňky nesou i hodnotu z aplikace a sešit má `fullCalcOnLoad`. Ověřeno přepočtem v LibreOffice. Částky jsou čísla s formátem `#,##0.00` a měna je v samostatném sloupci. Data a časy jsou skutečné hodnoty data. Texty se ukládají jako text, nikdy jako vzorec, a sešit neobsahuje makra.
 - **CSV**: ZIP s `souhrn.csv`, `useky.csv`, `stravne.csv`, `vydaje.csv`, `vozidlo.csv` a `kontroly.csv`. Kódování UTF-8 s BOM, oddělovač středník, řádky CRLF, data ISO 8601, částky s desetinnou tečkou bez symbolu měny. Text začínající `= + - @` dostane apostrof (ochrana proti CSV injection).
 - **JSON**: úplná data cesty, verze schématu, metadata příloh (bez obsahu souborů) a výsledek výpočtu.
 - **Originály dokladů**: ZIP s nezměněnými soubory ve složkách podle výdajů (`01_Ubytovani/01_ucetni-doklad_uctenka.jpg`), názvy bez diakritiky.
@@ -194,7 +195,7 @@ Implementace (`apps/web/src/exports`):
 | Jednotkové | Vitest | výpočty, převody času, kurzy, trasa a přechody hranic, migrace dat, CSV/XLSX, import ZIP včetně škodlivých balíčků, server a hlavičky, bezpečnost zdrojového kódu |
 | Dokumenty | Vitest + pdf-lib | počet stran, čísla stran, záložky, české znaky, pořadí příloh, otočené a extrémní obrázky, poškozené soubory |
 | E2E | Playwright | celý tok na 320 px, mobilu a desktopu (Chromium), vždy se zapnutou CSP; offline režim; spouští se i proti kontejneru Docker a simulaci Cloudflare (`E2E_BASE_URL`) |
-| Přístupnost | axe-core v Playwright | úvod a všech 12 kroků bez závažných nálezů |
+| Přístupnost | axe-core v Playwright | úvod a všech 10 kroků bez závažných nálezů |
 | CI | GitHub Actions | typecheck, jednotkové testy, `pnpm audit`, E2E a sestavení a kontrola obrazu Docker u každého PR |
 
 ## 12. Nasazení

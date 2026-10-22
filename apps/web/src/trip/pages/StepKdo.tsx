@@ -1,6 +1,7 @@
 import { ruleSets } from '@cp/rules';
 import { useEffect, useState } from 'react';
 import { formatMinor } from '../../model/format.js';
+import { bankAccountProblem } from '../../model/bankAccount.js';
 import { validIco, type AresSubject } from '../../registry/ares.js';
 import { getRemembered, setRemembered } from '../../storage/db.js';
 import { Card, Checkbox, H2, Notice, NumberField, RadioCards, TextField } from '../../ui/controls.js';
@@ -57,7 +58,8 @@ export function StepKdo() {
               value={trip.employee.bankAccount}
               onChange={emp('bankAccount')}
               placeholder="123456789/0800"
-              hint="Uvede se ve vyúčtování u částky k výplatě."
+              hint="Uvede se ve vyúčtování u částky k výplatě. Povinné, pokud platíte výdaje ze soukromých prostředků."
+              error={bankAccountProblem(trip.employee.bankAccount)}
             />
           </div>
         </details>

@@ -1,7 +1,7 @@
-import type { FuelType } from '@cp/rules';
+import { ruleSets, type FuelType } from '@cp/rules';
 import { AttachmentList } from '../../attachments/AttachmentList.js';
-import { formatMinor, normalizeDecimal } from '../../model/format.js';
-import { FUEL_CATEGORIES } from '../../model/toInput.js';
+import { formatDay, formatMinor, normalizeDecimal } from '../../model/format.js';
+import { actualTimes, FUEL_CATEGORIES } from '../../model/toInput.js';
 import { fuelLabels, type VehicleDoc } from '../../model/trip.js';
 import { Button, Card, Checkbox, H2, Notice, NumberField, RadioCards, SelectField, TextField } from '../../ui/controls.js';
 import { useTrip } from '../context.js';
@@ -19,7 +19,10 @@ export function StepVozidlo() {
   const r = result?.vehicle;
   const uses = (k: string) => trip.segments.some((s) => s.transport === k);
   const fuelReceipts = trip.expenses.filter((e) => FUEL_CATEGORIES.has(e.category) && normalizeDecimal(e.fuelQuantity));
-  const priceSource = { RECEIPTS: 'podle dokladů o tankování', RECEIPT: 'cena z dokladu', AVERAGE: 'průměrná cena' } as const;
+  const priceSource = { RECEIPTS: 'podle dokladů o tankování', RECEIPT: 'cena z dokladu', AVERAGE: 'průměrná cena', AVERAGE_MANUAL: 'průměrná cena zadaná ručně' } as const;
+  // Průměrná cena podle sady pravidel ke dni začátku cesty (stejně jako ve výpočtu).
+  const priceDate = actualTimes(trip).start.slice(0, 10) || trip.plannedStart.slice(0, 10);
+  const rulesAverage = ruleSets[0]!.vehicle.averagePrices.find((p) => p.fuel === v.fuel && priceDate && p.validFrom <= priceDate && priceDate <= p.validTo);
 
   return (
     <>
@@ -127,6 +130,39 @@ export function StepVozidlo() {
                   ) : (
                     <Notice tone="warn">Zatím žádný výdaj za pohonné hmoty s vyplněným množstvím. Do té doby se počítá s průměrnou cenou podle vyhlášky.</Notice>
                   ))}
+                {v.fuelPriceMode !== 'receipt' && (
+                  <div className="flex flex-col gap-3 rounded-xl border border-line p-3" aria-label="Průměrná cena paliva">
+                    <p className="text-[15px]">
+                      {rulesAverage ? (
+                        <>
+                          Průměrná cena podle vyhlášky {rulesAverage.source} Sb.: <strong>{formatMinor(rulesAverage.amount)}</strong> za 1 {unit} (platí {formatDay(rulesAverage.validFrom)} – {formatDay(rulesAverage.validTo)}, rozhoduje den
+                          začátku cesty {formatDay(priceDate)}).
+                        </>
+                      ) : (
+                        <>Pro {priceDate ? `den ${formatDay(priceDate)}` : 'datum cesty'} průměrnou cenu v uložených sazbách nemáme – zadejte ji níže.</>
+                      )}
+                      {v.fuelPriceMode === 'receipts' && ' Použije se, jen když chybí doklady o tankování s množstvím.'}
+                    </p>
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <NumberField
+                        label={`Jiná průměrná cena za 1 ${unit} (Kč)`}
+                        optional
+                        value={v.averagePrice}
+                        onChange={set('averagePrice')}
+                        hint="Jen když se cena podle vyhlášky změnila a aplikace novou cenu ještě nezná."
+                      />
+                      {v.averagePrice.trim() && (
+                        <TextField
+                          label="Zdroj ceny"
+                          value={v.averagePriceSource}
+                          onChange={set('averagePriceSource')}
+                          placeholder="např. vyhláška č. 123/2026 Sb., od 1. 11. 2026"
+                          hint="Uvede se ve výpočtu i v PDF, aby to účetní mohla ověřit."
+                        />
+                      )}
+                    </div>
+                  </div>
+                )}
                 {v.fuelPriceMode === 'receipt' && (
                   <div className="grid gap-4 sm:grid-cols-2">
                     <NumberField label={`Cena za 1 ${unit} z dokladu (Kč)`} value={v.receiptPrice} onChange={set('receiptPrice')} />

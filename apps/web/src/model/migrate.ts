@@ -60,6 +60,12 @@ export function migrateTrip(raw: unknown): TripDoc {
     doc.employee.bankAccount ??= '';
     for (const e of doc.expenses) e.breakfast ??= '';
   }
+  if (version < 8) {
+    // v8: ručně zadaná průměrná cena paliva (změna vyhlášky).
+    const doc = t as unknown as TripDoc;
+    doc.vehicle.averagePrice ??= '';
+    doc.vehicle.averagePriceSource ??= '';
+  }
   t.schemaVersion = SCHEMA_VERSION;
   return t as unknown as TripDoc;
 }

@@ -1,7 +1,7 @@
 import { expect, test } from './fixtures.js';
 import { go } from './helpers.js';
 
-test('ubytování se zeptá na snídani; kontrola ukáže lhůtu pro odevzdání vyúčtování', async ({ page }) => {
+test('ubytování se zeptá na snídani; kontrola v souhrnu ukáže lhůtu pro odevzdání vyúčtování', async ({ page }) => {
   await page.goto('/');
   await page.getByRole('button', { name: 'Nová pracovní cesta' }).click();
   await page.waitForURL(/\/kdo$/);
@@ -39,7 +39,7 @@ test('ubytování se zeptá na snídani; kontrola ukáže lhůtu pro odevzdání
   await page.getByRole('button', { name: 'Zrušit večeře' }).click();
   await expect(dinner(/15\. 10\. 2026/)).toHaveAttribute('aria-pressed', 'false');
 
-  await go(page, `${base}/kontrola`);
+  await go(page, `${base}/souhrn`);
   // Konec v pátek 16. 10. 2026, 28. 10. je svátek → 10. pracovní den je 2. 11. 2026.
   await expect(page.getByText('Vyúčtování předložte zaměstnavateli do 2. 11. 2026')).toBeVisible();
 });

@@ -30,8 +30,8 @@ async function input(over: Partial<AssemblyInput> = {}): Promise<AssemblyInput> 
     { ...m.expenses[0]!, n: '1' },
     { ...m.expenses[0]!, n: '2', category: 'Parkovné', supplier: 'Garáž' },
   ];
-  const signedPdf = await render(documentElement(m, 'modern', 'full') as Parameters<typeof renderToBuffer>[0]);
-  const vypis = await render(documentElement(m, 'conservative', 'A') as Parameters<typeof renderToBuffer>[0]); // libovolné jednostránkové PDF
+  const signedPdf = await render(documentElement(m, 'full') as Parameters<typeof renderToBuffer>[0]);
+  const vypis = await render(documentElement(m, 'A') as Parameters<typeof renderToBuffer>[0]); // libovolné jednostránkové PDF
   return {
     model: m,
     signed: { source: 'generated', pdf: signedPdf, visualSignature: true },

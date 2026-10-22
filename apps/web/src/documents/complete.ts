@@ -66,7 +66,7 @@ export async function buildComplete(trip: TripDoc, snapshot: Snapshot, now: Date
     signed = { source: 'scan', files: await Promise.all(scan.map(toFile)) };
   } else {
     const signedModel = await withSignature(model, trip, now);
-    const pdf = await generatePdf(signedModel ?? model, snapshot.layout, 'full');
+    const pdf = await generatePdf(signedModel ?? model, 'full');
     signed = { source: 'generated', pdf: await bytes(pdf), visualSignature: Boolean(signedModel) };
   }
 

@@ -120,6 +120,11 @@ export interface Vehicle {
    * cena všech tankování v Kč / celkové množství (Ú-26). Má přednost před `receiptPrice`.
    */
   fuelPriceFromExpenses?: boolean;
+  /**
+   * Ručně zadaná průměrná cena PHM v haléřích (např. po novele vyhlášky, kterou sada pravidel ještě nezná).
+   * Použije se místo průměrné ceny ze sady pravidel; `source` uvádí, odkud cena pochází.
+   */
+  averagePriceOverride?: { amount: number; source: string };
   /** Datum pro výběr průměrné ceny; výchozí je den začátku cesty. */
   date?: IsoDate;
   requestedByEmployer: boolean;

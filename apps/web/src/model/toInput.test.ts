@@ -7,6 +7,7 @@ import { emptyExpense, emptySegment, newTrip, type TripDoc } from './trip.js';
 function viennaTrip(): TripDoc {
   const t = newTrip(new Date('2026-10-12T08:00:00Z'));
   t.kind = 'foreign';
+  t.employee.bankAccount = '2000145399/0800';
   const out = { ...emptySegment(), fromPlace: 'Praha', toPlace: 'Vídeň', toCountry: 'AT', departure: '2026-10-14T06:30', arrival: '2026-10-14T11:00', crossings: [{ id: 'x1', to: 'AT', at: '2026-10-14T09:45' }], transport: 'soukrome-auto' as const };
   const back = { ...emptySegment(out), toPlace: 'Praha', toCountry: 'CZ', departure: '2026-10-16T14:00', arrival: '2026-10-16T18:30', crossings: [{ id: 'x2', to: 'CZ', at: '2026-10-16T15:15' }] };
   t.segments = [out, back];
@@ -63,5 +64,17 @@ describe('převod formuláře na vstup výpočtu', () => {
     t.expenses[0]!.amount = '23x';
     const m = toInput(t);
     expect(m.issues).toEqual([expect.objectContaining({ code: 'FORM_EXPENSE_AMOUNT', ref: { expenseId: t.expenses[0]!.id, step: 'vydaje' } })]);
+  });
+
+  it('výdaje ze soukromých prostředků vyžadují číslo účtu, chybný formát je varování', () => {
+    const t = viennaTrip();
+    t.employee.bankAccount = '';
+    expect(toInput(t).issues).toEqual([expect.objectContaining({ code: 'FORM_BANK_ACCOUNT', severity: 'error', ref: { step: 'vydaje' } })]);
+    t.employee.bankAccount = '123456789/0800';
+    expect(toInput(t).issues).toEqual([expect.objectContaining({ code: 'FORM_BANK_ACCOUNT_FORMAT', severity: 'warning' })]);
+    // Bez soukromých výdajů číslo účtu povinné není.
+    t.employee.bankAccount = '';
+    for (const e of t.expenses) e.paymentMethod = 'COMPANY_CARD';
+    expect(toInput(t).issues).toEqual([]);
   });
 });

@@ -3,7 +3,8 @@
 
 export const DOC_MODEL_VERSION = 1;
 
-export type Layout = 'modern' | 'conservative';
+/** Jazyk dokumentu k podpisu (např. pro zahraničního nadřízeného). */
+export type Lang = 'cs' | 'en';
 /** full = cestovní příkaz + vyúčtování; A = jen cestovní příkaz k podpisu před cestou. */
 export type DocPart = 'full' | 'A';
 
@@ -14,6 +15,8 @@ export interface Row {
 
 export interface DocModel {
   version: number;
+  /** Jazyk dokumentu; chybí u snímků z doby před volbou jazyka = čeština. */
+  lang?: Lang;
   number: string;
   /** Datum a čas vytvoření snímku, např. „21. 10. 2026 14:05“. */
   createdAt: string;

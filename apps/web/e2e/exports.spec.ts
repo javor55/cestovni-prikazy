@@ -11,7 +11,7 @@ async function save(page: Page, button: string): Promise<{ download: Download; b
 
 test('exporty XLSX, CSV, JSON, originály a pracovní projekt; projekt se znovu načte', async ({ page }) => {
   const base = await tripWithPdf(page);
-  await go(page, `${base}/export`);
+  await go(page, `${base}/kompletni`);
 
   const xlsx = await save(page, 'XLSX (Excel)');
   expect(xlsx.download.suggestedFilename()).toBe('CP-2026-0099_Vyuctovani.xlsx');

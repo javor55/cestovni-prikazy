@@ -21,6 +21,11 @@ export function IssueItem({ issue, showLink }: { issue: Issue; showLink?: boolea
         <span>
           <strong>{l.label}:</strong> <span className="text-ink">{issue.message}</span>
         </span>
+        {issue.code === 'RULESET_USED' && (
+          <Link to={`/sazby?zpet=/cesta/${trip.id}/souhrn`} className="self-start font-semibold text-accent">
+            Zobrazit sazby a hodnoty této sady pravidel
+          </Link>
+        )}
         {showLink && step && (
           <Link to={`/cesta/${trip.id}/${step}`} className="self-start font-semibold text-accent">
             Opravit v kroku „{steps.find((s) => s.slug === step)?.title}“

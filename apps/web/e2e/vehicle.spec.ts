@@ -66,11 +66,16 @@ test('průměrná cena paliva podle vyhlášky je vidět a jde ručně změnit; 
   await go(page, `${base}/souhrn`);
   await expect(page.getByRole('region', { name: 'Kontrola' })).toContainText('Průměrná cena paliva je zadaná ručně (35,10 Kč, vyhláška č. 123/2026 Sb.) místo ceny podle vyhlášky 573/2025 (34,70 Kč)');
   await expect(page.getByRole('region', { name: 'Jak se počítá' })).toContainText('km × sazba za km');
+  // Informace o použité sadě pravidel v kontrole odkazuje na její hodnoty.
+  await expect(page.getByText('Výpočet podle sady pravidel CZ-2026 verze 1.2.0.')).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Zobrazit sazby a hodnoty této sady pravidel' })).toHaveAttribute('href', /\/sazby\?zpet=/);
   await page.getByRole('link', { name: /Sazby a hodnoty, se kterými aplikace počítá/ }).click();
   await expect(page.getByText('Sazby a hodnoty výpočtu')).toBeVisible();
   await page.getByLabel('Hledat stát').fill('Chorvatsko');
   await expect(page.getByRole('region', { name: 'Zahraniční stravné' }).getByRole('row', { name: /Chorvatsko/ })).toContainText('50,00 EUR');
   await expect(page.getByRole('region', { name: 'Soukromé vozidlo' })).toContainText('41,80 Kč / l');
+  const [rules] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: /Stáhnout sadu pravidel CZ-2026 v1\.2\.0/ }).click()]);
+  expect(rules.suggestedFilename()).toBe('CZ-2026_v1.2.0_sada-pravidel.json');
   await page.getByRole('link', { name: 'Zpět' }).click();
   await expect(page).toHaveURL(/\/souhrn$/);
 });

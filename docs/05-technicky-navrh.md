@@ -142,7 +142,7 @@ Kontrola testů mutací: po změně jediné sazby selže 11 testů.
 
 1. **Snímek:** při kliknutí na „Vytvořit PDF“ se uloží `snapshot` = model dokumentu (`DocModel` – všechny údaje už naformátované jako text, včetně verze pravidel) + vzhled + otisk vstupních údajů. Šablony čtou jen snímek, takže stejný snímek dá vždy stejné PDF.
 2. **PDF k podpisu:** `@react-pdf/renderer` v prohlížeči (knihovna se načte až při prvním použití), dva vzhledy (moderní a konzervativní), vložená písma Noto Sans a Noto Serif Bold.
-3. **Kompletní dokumentace:** `pdf-lib` složí krycí list a obsah, podepsaný dokument (sken nebo PDF s vloženým PNG podpisem), rozpis výpočtu, přehled výdajů, pro každý výdaj identifikační stranu a účetní doklady, doklady o zaplacení, doklady k vozidlu a doplňující přílohy (obrázek = stránka A4 se zachovaným poměrem stran, PDF = vložení stran). Potom doplní průběžné číslování „strana X z Y“, číslo příkazu a záložky.
+3. **Kompletní dokumentace:** `pdf-lib` složí krycí list a obsah, podepsaný dokument (sken nebo PDF s vloženým PNG podpisem), rozpis výpočtu, přehled výdajů, pro každý výdaj identifikační stranu a hned za ní všechny jeho doklady (účetní doklad, doklad o zaplacení, doplňující dokumenty), potom doklady k vozidlu a doplňující přílohy k cestě (obrázek = stránka A4 se zachovaným poměrem stran, PDF = vložení stran). Potom doplní průběžné číslování „strana X z Y“, číslo příkazu a záložky.
 4. Před stažením se zobrazí počet stran, dokladů a výdajů bez dokladu a velikost souboru. Cíl je pod 10 MB při 30 fotkách díky zmenšení na delší stranu 2 400 px (asi 200 DPI) a JPEG kvalitě 0,85.
 
 ## 8. Export a import projektu

@@ -5,7 +5,6 @@ import type { AssemblyParts } from '@cp/documents';
 export const ALL: AssemblyParts = {
   cover: true,
   signed: true,
-  calculation: true,
   expenseOverview: true,
   expenseIdPages: true,
   accounting: true,
@@ -19,7 +18,6 @@ export const ALL: AssemblyParts = {
 export const SIGNED_AND_RECEIPTS: AssemblyParts = {
   cover: false,
   signed: true,
-  calculation: false,
   expenseOverview: false,
   expenseIdPages: false,
   accounting: true,
@@ -32,7 +30,6 @@ export const SIGNED_AND_RECEIPTS: AssemblyParts = {
 export const partLabels: [keyof AssemblyParts, string][] = [
   ['cover', 'Krycí list a obsah'],
   ['signed', 'Podepsaný cestovní příkaz a vyúčtování'],
-  ['calculation', 'Detailní přehled výpočtu'],
   ['expenseOverview', 'Přehled výdajů'],
   ['expenseIdPages', 'Identifikační stránka před doklady každého výdaje'],
   ['accounting', 'Účetní doklady k výdajům'],

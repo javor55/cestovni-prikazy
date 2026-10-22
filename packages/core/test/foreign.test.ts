@@ -180,6 +180,14 @@ describe('zahraniční cesta', () => {
       ['HR', '1/1', m(37.5)],
     ]);
     expect(r.settlement!.convertedPerDiem).toEqual([{ currency: 'EUR', amount: m(159.17), exactAmount: '159.1667', rate: '24.350', rateUnit: 1, czk: m(3875.71) }]);
+    // Rozpis dne po státech pro Souhrn.
+    expect(r.perDiem!.days[0]!.intervals).toEqual([
+      { from: '08:00', to: '11:43', country: 'CZ', minutes: 223 },
+      { from: '11:43', to: '16:00', country: 'AT', minutes: 257 },
+      { from: '16:00', to: '17:00', country: 'SI', minutes: 60 },
+      { from: '17:00', to: '24:00', country: 'HR', minutes: 420 },
+    ]);
+    expect(r.perDiem!.days[5]!.intervals.map((i) => `${i.from}-${i.to} ${i.country}`)).toEqual(['00:00-13:00 HR', '13:00-15:15 SI', '15:15-19:30 AT', '19:30-23:00 CZ']);
     expect(r.settlement!.payout).toBe(m(3876));
   });
 

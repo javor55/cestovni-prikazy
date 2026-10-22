@@ -1,5 +1,5 @@
 // Stránky, které kompletní dokumentace přidává kolem podepsaného dokumentu: krycí list a obsah,
-// detailní přehled výpočtu, přehled výdajů a identifikační stránky výdajů.
+// přehled výdajů a identifikační stránky výdajů.
 // Zápatí s průběžným číslováním doplňuje až sestavení (assemble.ts) – proto mají stránky dole volný okraj.
 import { Document, Page, StyleSheet, Text, View } from '@react-pdf/renderer';
 import type { ReactNode } from 'react';
@@ -144,51 +144,6 @@ export function CoverAndToc({ m, toc, info }: { m: DocModel; toc: TocEntry[]; in
             <Text style={{ width: 50, textAlign: 'right', fontSize: e.level === 2 ? 8 : 9 }}>{e.page}</Text>
           </View>
         ))}
-      </Page>
-    </Doc>
-  );
-}
-
-export function CalculationOverview({ m }: { m: DocModel }) {
-  const pd = m.perDiem;
-  return (
-    <Doc m={m}>
-      <Page size="A4" style={s.page}>
-        <Text style={s.kicker}>{m.number}</Text>
-        <Text style={s.h1}>Detailní přehled výpočtu</Text>
-        <Text style={s.h2}>Stravné po dnech</Text>
-        <Table
-          cols={[{ h: 'Den', w: 14 }, { h: 'V ČR', w: 9 }, { h: 'Tuzemské', w: 22 }, { h: 'V zahraničí', w: 10 }, { h: 'Stát, pásmo, sazba', w: 19 }, { h: 'Jídla', w: 7 }, { h: 'Zahraniční', w: 19, right: true }]}
-          rows={pd.days.map((d) => [
-            d.date,
-            d.domesticTime,
-            d.domestic ? `${d.domestic} = ${d.domesticAmount}` : '–',
-            d.foreignTime,
-            d.country ? `${d.country}, ${d.tier} z ${d.base} = ${d.tierAmount}` : '–',
-            dash(d.meals),
-            d.amount ? `${d.reduction ? `${d.reduction} » ` : ''}${d.amount}${d.pocketMoney ? ` + kapesné ${d.pocketMoney}` : ''}` : '–',
-          ])}
-          foot={['Celkem', '', pd.domesticTotal, '', '', '', dash(pd.foreignTotal)]}
-        />
-        <Text style={s.note}>{pd.note}</Text>
-        {m.vehicle && (
-          <View wrap={false}>
-            <Text style={s.h2}>Náhrada za soukromé vozidlo</Text>
-            <KV
-              items={[
-                ['Vozidlo', m.vehicle.vehicle],
-                ['Základní náhrada', `${m.vehicle.basicCalc} = ${m.vehicle.basic} Kč`],
-                ['Pohonné hmoty', `${m.vehicle.fuelCalc} = ${m.vehicle.fuelComp} Kč (${m.vehicle.fuelPriceSource}, spotřeba ${m.vehicle.consumption})`],
-                ['Celkem', `${m.vehicle.total} Kč`],
-              ]}
-            />
-          </View>
-        )}
-        <View wrap={false}>
-          <Text style={s.h2}>Vyúčtování</Text>
-          <Table cols={[{ h: 'Položka', w: 60 }, { h: 'Cizí měna', w: 20, right: true }, { h: 'Kč', w: 20, right: true }]} rows={m.settlement.rows.map((r) => [r.label, r.foreign, r.czk])} foot={[m.settlement.payoutLabel, '', m.settlement.payout]} />
-          <Text style={s.note}>Výpočet podle pravidel {m.ruleSet}.</Text>
-        </View>
       </Page>
     </Doc>
   );

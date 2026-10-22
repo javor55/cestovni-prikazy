@@ -2,14 +2,13 @@ import { ruleSets } from '@cp/rules';
 import { useState } from 'react';
 import { Link, useSearchParams } from 'react-router';
 import { download } from './exports/download.js';
+import { bandLabel } from './model/bands.js';
 import { formatDay, formatMinor } from './model/format.js';
 import { fuelLabels } from './model/trip.js';
 import { Button, Card, H2, Icon, icons, TextField } from './ui/controls.js';
 
 const fmtHours = (min: number | null) => (min === null ? '' : `${Math.round((min / 60) * 100) / 100}`.replace('.', ','));
-// Pásma v minutách: 300–720 = „od 5 do 12 h“, 721–1080 = „nad 12 do 18 h“, 1081– = „nad 18 h“.
-const from = (min: number) => (min % 60 === 1 ? `nad ${fmtHours(min - 1)}` : `od ${fmtHours(min)}`);
-const band = (minMinutes: number, maxMinutes: number | null) => (maxMinutes === null ? `${from(minMinutes)} h` : `${from(minMinutes)} do ${fmtHours(maxMinutes)} h`);
+const band = bandLabel;
 const rounding = { NONE: 'nezaokrouhluje se', HALF_UP_UNIT: 'matematicky na celé jednotky', CEIL_UNIT: 'nahoru na celé jednotky' } as const;
 
 /**

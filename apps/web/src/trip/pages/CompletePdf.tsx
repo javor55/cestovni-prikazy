@@ -62,7 +62,7 @@ export function CompletePdf() {
       <Card>
         <H2>Kompletní dokumentace</H2>
         <p className="text-[15px] leading-relaxed text-muted">
-          Jedno PDF pro účetní: krycí list, obsah a seznam příloh, podepsaný cestovní příkaz a vyúčtování, přehled výpočtu a výdajů, u každého výdaje identifikační stránka a hned za ní všechny jeho doklady (účetní doklad, doklad o zaplacení, doplňující dokumenty), doklady k vozidlu a doplňující přílohy k cestě.
+          Jedno PDF pro účetní: krycí list, obsah a seznam příloh, podepsaný cestovní příkaz a vyúčtování, přehled výdajů, u každého výdaje identifikační stránka a hned za ní všechny jeho doklady (účetní doklad, doklad o zaplacení, doplňující dokumenty), doklady k vozidlu a doplňující přílohy k cestě.
         </p>
         <RadioCards
           legend="Obsah PDF"
@@ -73,7 +73,7 @@ export function CompletePdf() {
             if (v === 'receipts') setParts(SIGNED_AND_RECEIPTS);
           }}
           options={[
-            { value: 'all', title: 'Vše (doporučeno pro účetní)', hint: 'Krycí list, obsah, podepsaný dokument, přehledy a všechny doklady.' },
+            { value: 'all', title: 'Vše (doporučeno pro účetní)', hint: 'Krycí list, obsah, podepsaný dokument, přehled výdajů a všechny doklady.' },
             { value: 'receipts', title: 'Jen podepsaný dokument a doklady k výdajům', hint: 'Podepsaný příkaz a vyúčtování, za ním u každého výdaje účetní doklad a doklad o zaplacení.' },
             { value: 'custom', title: 'Vlastní výběr', hint: 'Zvolíte jednotlivé části.' },
           ]}

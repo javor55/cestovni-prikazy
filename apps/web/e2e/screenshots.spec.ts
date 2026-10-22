@@ -130,6 +130,7 @@ test('ukázková cesta do Vídně', async ({ page }) => {
     const [pdf] = await Promise.all([page.waitForEvent('download'), done.getByRole('link', { name: 'Stáhnout kompletní PDF' }).click()]);
     await pdf.saveAs(`${dir}/ukazka-kompletni-dokumentace.pdf`);
   }
+  await page.getByRole('heading', { name: 'Odevzdání a exporty', level: 1 }).scrollIntoViewIfNeeded();
   await shot(page, '09-kompletni');
 
 

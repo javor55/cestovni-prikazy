@@ -7,7 +7,7 @@ export * from './model.js';
 export { registerFonts, resetFonts, type FontSources } from './fonts.js';
 import { resetFonts } from './fonts.js';
 export { ModernDocument };
-export { assemble, type AssemblyFile, type AssemblyInput, type AssemblyStats, type FileKind } from './assemble.js';
+export { ALL_PARTS, assemble, type AssemblyParts, type AssemblyFile, type AssemblyInput, type AssemblyStats, type FileKind } from './assemble.js';
 
 export function documentElement(model: DocModel, part: DocPart) {
   return createElement(ModernDocument, { m: model, part });

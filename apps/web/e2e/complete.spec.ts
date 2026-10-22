@@ -2,8 +2,9 @@ import type { Page } from '@playwright/test';
 import { expect, test } from './fixtures.js';
 import { go, image, pdfText, tripWithPdf } from './helpers.js';
 
-async function buildAndDownload(page: Page, base: string) {
+async function buildAndDownload(page: Page, base: string, preset?: string) {
   await go(page, `${base}/kompletni`);
+  if (preset) await page.getByText(preset, { exact: true }).click();
   await page.getByRole('button', { name: 'Sestavit kompletní PDF' }).click();
   const done = page.getByRole('region', { name: 'Kompletní PDF' });
   await expect(done).toBeVisible({ timeout: 30_000 });
@@ -53,4 +54,28 @@ test('podepsaný sken a odmítnutí podpisu, který není PNG', async ({ page })
   expect(pages[0]!.replace(/\s/g, '')).toContain('UKÁZKOVÁFIRMAS.R.O.');
   expect(all).toContain('podepsaný dokument nahrán jako sken');
   expect(all).toContain('Podepsaný dokument – podepsano.jpg');
+});
+
+test('kompletní PDF jen s podepsaným dokumentem a doklady k výdajům', async ({ page }) => {
+  const base = await tripWithPdf(page);
+  await go(page, `${base}/podpis`);
+  await page.getByText('Vytisknu, podepíšu a nahraji sken').click();
+  await page.getByLabel('Vybrat soubory dokladů').setInputFiles({ name: 'podepsano.jpg', mimeType: 'image/jpeg', buffer: await image(page, 'image/jpeg') });
+  await expect(page.getByText('Nahráno souborů: 1')).toBeVisible();
+
+  const { pages } = await buildAndDownload(page, base, 'Jen podepsaný dokument a doklady k výdajům');
+  expect(pages).toHaveLength(2);
+  expect(pages[0]).toContain('Podepsaný dokument – podepsano.jpg');
+  expect(pages[1]).toContain('Výdaj č. 1 · Vlak · Účetní doklad · jizdenka.jpg');
+  expect(pages.join(' ')).not.toContain('Kompletní dokumentace pracovní cesty');
+
+  // Vlastní výběr si prohlížeč pamatuje.
+  await page.reload();
+  await expect(page.getByLabel('Jen podepsaný dokument a doklady k výdajům')).toBeChecked();
+  await page.getByText('Vlastní výběr', { exact: true }).click();
+  await page.getByLabel('Podepsaný cestovní příkaz a vyúčtování', { exact: true }).uncheck();
+  await page.getByLabel('Účetní doklady k výdajům', { exact: true }).uncheck();
+  await page.getByLabel('Doklady o zaplacení k výdajům', { exact: true }).uncheck();
+  await expect(page.getByText('Vyberte alespoň jednu část.')).toBeVisible();
+  await expect(page.getByRole('button', { name: /Sestavit/ })).toBeDisabled();
 });

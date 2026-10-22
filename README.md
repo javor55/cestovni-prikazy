@@ -16,7 +16,7 @@ Webová aplikace pro zaměstnance: vyplní pracovní cestu, nechá si spočítat
 - **Doklady** – focení mobilem, PDF, JPG, PNG i HEIC. Otočení a ořez, kontrola skutečného formátu souboru, upozornění na duplicitní doklad. Originál se nikdy nemění.
 - **Soukromé vozidlo** – základní náhrada za km a náhrada za palivo. Cena paliva podle dokladů o tankování (vážený průměr z více tankování), z jednoho dokladu, nebo průměrná cena z vyhlášky (zobrazená v aplikaci; po změně vyhlášky jde zadat ručně se zdrojem). Přiložení technického průkazu.
 - **PDF k podpisu česky nebo anglicky** (pro zahraničního nadřízeného). Podpis jako nahraný sken, nebo vložený obrázek podpisu s razítkem. Číslo účtu pro výplatu je ve vyúčtování a při výdajích ze soukromých prostředků je povinné.
-- **Kompletní dokumentace** – jedno PDF s krycím listem, obsahem, podepsaným dokumentem, rozpisem výpočtu a všemi doklady seřazenými podle výdajů, s čísly stran a záložkami.
+- **Kompletní dokumentace** – jedno PDF s krycím listem, obsahem, podepsaným dokumentem, rozpisem výpočtu a všemi doklady seřazenými podle výdajů, s čísly stran a záložkami. Jde zvolit, které části obsahuje (např. jen podepsaný dokument a doklady k výdajům).
 - **Ověřitelný výpočet** – Souhrn popisuje vzorce a odkazuje na stránku se všemi uloženými sazbami (stravné, 227 států, náhrada za km, ceny paliv). XLSX obsahuje celý výpočet jako vzorce Excelu se sloupcem „Kontrola“ proti výsledku aplikace.
 - **Exporty** – XLSX a CSV pro účetní, JSON s úplnými daty, ZIP s originály dokladů a pracovní projekt (ZIP), který jde načíst v jiném prohlížeči nebo zařízení.
 - **Zaměstnavatel z ARES** – vyhledání firmy podle IČO nebo názvu doplní název, IČO a sídlo. U státu, obce, kraje nebo příspěvkové organizace nastaví platovou sféru.

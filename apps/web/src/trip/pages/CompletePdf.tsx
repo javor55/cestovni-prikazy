@@ -1,11 +1,12 @@
-import type { AssemblyStats } from '@cp/documents';
+import type { AssemblyParts, AssemblyStats } from '@cp/documents';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router';
 import { buildComplete, completeFileName } from '../../documents/complete.js';
+import { ALL, loadParts, partLabels, sameParts, saveParts, SIGNED_AND_RECEIPTS } from '../../documents/parts.js';
 import { inputHash } from '../../documents/snapshot.js';
 import { db } from '../../storage/db.js';
-import { Button, Card, H2, Icon, Notice } from '../../ui/controls.js';
+import { Button, Card, Checkbox, H2, Icon, Notice, RadioCards } from '../../ui/controls.js';
 import { useTrip } from '../context.js';
 
 const size = (b: number) => (b < 1024 * 1024 ? `${Math.round(b / 1024)} kB` : `${(b / 1024 / 1024).toFixed(1).replace('.', ',')} MB`);
@@ -18,6 +19,14 @@ export function CompletePdf() {
   const [error, setError] = useState('');
   const [result, setResult] = useState<{ url: string; name: string; stats: AssemblyStats } | null>(null);
   const [stale, setStale] = useState(false);
+  const [parts, setPartsState] = useState<AssemblyParts>(loadParts);
+  const [custom, setCustom] = useState(false);
+  const setParts = (p: AssemblyParts) => {
+    setPartsState(p);
+    saveParts(p);
+  };
+  const preset = custom ? 'custom' : sameParts(parts, ALL) ? 'all' : sameParts(parts, SIGNED_AND_RECEIPTS) ? 'receipts' : 'custom';
+  const nothing = partLabels.every(([k]) => !parts[k]);
 
   useEffect(() => {
     if (latest) void inputHash(trip, docCounts).then((h) => setStale(h !== latest.inputHash));
@@ -38,7 +47,7 @@ export function CompletePdf() {
     setBusy(true);
     setError('');
     try {
-      const { blob, stats } = await buildComplete(trip, latest, new Date());
+      const { blob, stats } = await buildComplete(trip, latest, new Date(), parts);
       setResult({ url: URL.createObjectURL(blob), name: completeFileName(latest.model), stats });
     } catch (e) {
       setError(`Kompletní PDF se nepodařilo vytvořit: ${(e as Error).message}`);
@@ -55,7 +64,32 @@ export function CompletePdf() {
         <p className="text-[15px] leading-relaxed text-muted">
           Jedno PDF pro účetní: krycí list, obsah a seznam příloh, podepsaný cestovní příkaz a vyúčtování, přehled výpočtu a výdajů, u každého výdaje identifikační stránka a hned za ní všechny jeho doklady (účetní doklad, doklad o zaplacení, doplňující dokumenty), doklady k vozidlu a doplňující přílohy k cestě.
         </p>
-        <Button className="self-start" onClick={create} disabled={busy}>
+        <RadioCards
+          legend="Obsah PDF"
+          value={preset}
+          onChange={(v) => {
+            setCustom(v === 'custom');
+            if (v === 'all') setParts(ALL);
+            if (v === 'receipts') setParts(SIGNED_AND_RECEIPTS);
+          }}
+          options={[
+            { value: 'all', title: 'Vše (doporučeno pro účetní)', hint: 'Krycí list, obsah, podepsaný dokument, přehledy a všechny doklady.' },
+            { value: 'receipts', title: 'Jen podepsaný dokument a doklady k výdajům', hint: 'Podepsaný příkaz a vyúčtování, za ním u každého výdaje účetní doklad a doklad o zaplacení.' },
+            { value: 'custom', title: 'Vlastní výběr', hint: 'Zvolíte jednotlivé části.' },
+          ]}
+        />
+        {preset === 'custom' && (
+          <fieldset className="flex flex-col rounded-xl border border-line px-3 py-1">
+            <legend className="px-1 text-sm font-semibold">Části dokumentu</legend>
+            {partLabels.map(([k, label]) => (
+              <Checkbox key={k} checked={parts[k]} onChange={(v) => setParts({ ...parts, [k]: v })}>
+                {label}
+              </Checkbox>
+            ))}
+          </fieldset>
+        )}
+        {nothing && <p className="text-[13px] text-danger">Vyberte alespoň jednu část.</p>}
+        <Button className="self-start" onClick={create} disabled={busy || nothing}>
           {busy ? 'Sestavuji PDF…' : result ? 'Sestavit znovu' : 'Sestavit kompletní PDF'}
         </Button>
         {error && (

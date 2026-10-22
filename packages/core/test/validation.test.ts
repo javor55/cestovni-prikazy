@@ -123,7 +123,7 @@ describe('kontroly časové osy', () => {
   it('výpočet je deterministický a uvádí použitou sadu pravidel', () => {
     const t = trip({ start: '2026-03-10T07:00', end: '2026-03-10T15:30' });
     expect(calculate(t)).toEqual(calculate(t));
-    expect(calculate(t).ruleSet).toMatchObject({ id: 'CZ-2026', version: '1.1.0' });
+    expect(calculate(t).ruleSet).toMatchObject({ id: 'CZ-2026', version: '1.2.0' });
     expect(codes(calculate(t))).toContain('RULESET_USED');
   });
 });

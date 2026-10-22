@@ -1,7 +1,8 @@
 import { formatMinutes, type CalculationResult, type ConversionSource } from '@cp/core';
 import { DOC_MODEL_VERSION, type DocModel } from '@cp/documents/model';
 import { countryName } from '../model/countries.js';
-import { formatDateTime, formatDay, formatMinor, formatRate } from '../model/format.js';
+import { ruleSets } from '@cp/rules';
+import { formatDateTime, formatDay, formatExact, formatMinor, formatRate, perDiemRoundingNote } from '../model/format.js';
 import type { DocCounts, Mapped } from '../model/toInput.js';
 import { crossingsText, fuelLabels, paymentLabels, plannedTransportText, transportLabels, type TripDoc } from '../model/trip.js';
 
@@ -42,11 +43,14 @@ export function buildDocModel({ trip, mapped, result, docCounts, documentCount, 
   if (s) {
     if (s.domesticPerDiemCzk || !s.currencies.length) rows.push({ label: 'Tuzemské stravné', foreign: '', czk: num(s.domesticPerDiemCzk) });
     for (const c of s.convertedPerDiem) {
-      rows.push({ label: `Zahraniční stravné × kurz ${formatRate(c.rate)}${c.rateUnit > 1 ? ` / ${c.rateUnit}` : ''}`, foreign: formatMinor(c.amount, c.currency), czk: num(c.czk) });
+      rows.push({ label: `Zahraniční stravné × kurz ${formatRate(c.rate)}${c.rateUnit > 1 ? ` / ${c.rateUnit}` : ''}`, foreign: c.exactAmount ? formatExact(c.exactAmount, c.currency) : formatMinor(c.amount, c.currency), czk: num(c.czk) });
     }
     for (const c of s.currencies) {
-      rows.push({ label: 'Zahraniční stravné', foreign: formatMinor(c.perDiem, c.currency), czk: '' });
-      if (c.pocketMoney) rows.push({ label: 'Kapesné', foreign: formatMinor(c.pocketMoney, c.currency), czk: '' });
+      if (c.perDiemExact) rows.push({ label: c.pocketMoney ? 'Zahraniční stravné a kapesné' : 'Zahraniční stravné', foreign: formatExact(c.perDiemExact, c.currency), czk: '' });
+      else {
+        rows.push({ label: 'Zahraniční stravné', foreign: formatMinor(c.perDiem, c.currency), czk: '' });
+        if (c.pocketMoney) rows.push({ label: 'Kapesné', foreign: formatMinor(c.pocketMoney, c.currency), czk: '' });
+      }
       if (c.fromAdvance) rows.push({ label: 'Výdaje uhrazené ze zálohy', foreign: formatMinor(c.fromAdvance, c.currency), czk: '' });
       rows.push({ label: 'Poskytnutá záloha', foreign: `−${formatMinor(c.advance, c.currency)}`, czk: '' });
       rows.push({
@@ -130,7 +134,7 @@ export function buildDocModel({ trip, mapped, result, docCounts, documentCount, 
       note: [
         'S/O/V = bezplatně poskytnutá snídaně/oběd/večeře.',
         Object.keys(pd?.foreignTotals ?? {}).length ? 'Krácení zahraničního stravného z částky pásma.' : '',
-        'Stravné za den je zaokrouhleno na celé jednotky měny nahoru.',
+        perDiemRoundingNote(ruleSets[0]!.rounding, Object.keys(pd?.foreignTotals ?? {}).length > 0),
         ...dayNotes,
       ]
         .filter(Boolean)

@@ -33,15 +33,15 @@ describe('převod formuláře na vstup výpočtu', () => {
     expect(toMinor('-5', 'CZK')).toBeNull();
   });
 
-  it('ukázková cesta do Vídně z formuláře dá stejný výsledek jako test jádra (12 079 Kč)', () => {
+  it('ukázková cesta do Vídně z formuláře dá stejný výsledek jako test jádra (12 055 Kč)', () => {
     const { input, issues } = toInput(viennaTrip());
     expect(issues).toEqual([]);
     expect(input!.start).toBe('2026-10-14T06:30');
     expect(input!.end).toBe('2026-10-16T18:30');
     const r = calculate(input!);
     expect(r.ok).toBe(true);
-    expect(r.perDiem!.foreignTotals).toEqual({ EUR: 7300 });
-    expect(r.settlement!.payout).toBe(1207900);
+    expect(r.perDiem!.foreignTotals).toEqual({ EUR: 7200 });
+    expect(r.settlement!.payout).toBe(1205500);
   });
 
   it('bez úseků použije plánovaný začátek a konec', () => {

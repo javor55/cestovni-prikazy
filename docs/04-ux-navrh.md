@@ -5,7 +5,7 @@
 Klikací prototyp: **https://claude.ai/artifact/QQYmeWsMRQ9Q1aqLUPnjx8** (soukromý, otevře ho jen vlastník, sdílet lze z menu Share).
 Zdrojové soubory prototypu jsou v [`design/ux-prototyp/`](../design/ux-prototyp). Jde o formát návrhového plátna, nejsou to soubory budoucí aplikace a samostatně se v prohlížeči neotevřou.
 
-Data v prototypu vycházejí z ukázkové cesty z [etapy 3](03-navrh-dokumentu.md). Částky v prototypu jsou z doby před dokončením výpočetního jádra: stravné za 16. 10. je v něm 15 EUR a výsledek 11 958 Kč, podle jádra 20 EUR a 12 079 Kč.
+Data v prototypu vycházejí z ukázkové cesty z [etapy 3](03-navrh-dokumentu.md). Částky v prototypu jsou z doby před dokončením výpočetního jádra: stravné za 16. 10. je v něm 15 EUR a výsledek 11 958 Kč, podle jádra 19,50 EUR a 12 055 Kč (od sady pravidel 1.2.0, která zahraniční stravné nezaokrouhluje).
 
 ## Obrazovky
 

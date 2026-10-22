@@ -3,7 +3,7 @@ import { Fraction, ZERO } from './fraction.js';
 import type { IssueList } from './issues.js';
 import type { CountryCode, MealDay, TripInput } from './model.js';
 import { formatMoney, roundMinor, type Money } from './money.js';
-import { datePart, datesBetween, dayStart, formatDate, formatMinutes, nextDate, overlap } from './time.js';
+import { datePart, datesBetween, dayStart, formatDate, formatMinutes, nextDate, overlap, TIME_ZONE } from './time.js';
 import { HOME, type Timeline } from './timeline.js';
 
 export interface DomesticDay {
@@ -35,8 +35,19 @@ export interface ForeignDay {
   amount: number;
 }
 
+/** Úsek dne v jednom státě (místní čas „HH:MM“, konec dne „24:00“). Soukromá část se do doby nepočítá. */
+export interface DayInterval {
+  from: string;
+  to: string;
+  country: CountryCode;
+  minutes: number;
+  private?: boolean;
+}
+
 export interface DayResult {
   date: string;
+  /** Časové úseky dne po státech – rozpis, ze kterého vznikly doby v ČR a v zahraničí. */
+  intervals: DayInterval[];
   label: string;
   domesticMinutes: number;
   foreignMinutes: number;
@@ -62,7 +73,25 @@ export interface PerDiemResult {
  */
 export const exactForeignTotals = new WeakMap<PerDiemResult, { perDiem: Record<string, Fraction>; pocketMoney: Record<string, Fraction> }>();
 
-type Minutes = { date: string; domestic: number; foreign: Map<CountryCode, number>; order: CountryCode[] };
+type Minutes = { date: string; domestic: number; foreign: Map<CountryCode, number>; order: CountryCode[]; intervals: DayInterval[] };
+
+const clock = new Intl.DateTimeFormat('cs-CZ', { timeZone: TIME_ZONE, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
+// Okamžiky jsou v minutách od epochy.
+const hhmm = (t: number, dayEnd: number) => (t >= dayEnd ? '24:00' : clock.format(t * 60000));
+
+/** Rozdělí interval [s, e) podle soukromých částí na započítané a soukromé kusy. */
+function splitByExcluded(s: number, e: number, excluded: Timeline['excluded']): { s: number; e: number; private: boolean }[] {
+  const cuts = new Set([s, e]);
+  for (const x of excluded) {
+    if (x.start > s && x.start < e) cuts.add(x.start);
+    if (x.end > s && x.end < e) cuts.add(x.end);
+  }
+  const points = [...cuts].sort((a, b) => a - b);
+  return points.slice(0, -1).map((a, i) => {
+    const b = points[i + 1]!;
+    return { s: a, e: b, private: excluded.some((x) => x.start <= a && b <= x.end) };
+  });
+}
 
 function minutesPerDay(trip: TripInput, tl: Timeline): Minutes[] {
   return datesBetween(datePart(trip.start), datePart(trip.end)).map((date) => {
@@ -71,9 +100,13 @@ function minutesPerDay(trip: TripInput, tl: Timeline): Minutes[] {
     let domestic = 0;
     const foreign = new Map<CountryCode, number>();
     const order: CountryCode[] = [];
+    const intervals: DayInterval[] = [];
     for (const p of tl.presence) {
       let m = overlap(p.start, p.end, ds, de);
       if (!m) continue;
+      for (const piece of splitByExcluded(Math.max(p.start, ds), Math.min(p.end, de), tl.excluded)) {
+        intervals.push({ from: hhmm(piece.s, de), to: hhmm(piece.e, de), country: p.country, minutes: piece.e - piece.s, ...(piece.private && { private: true }) });
+      }
       for (const x of tl.excluded) {
         m -= overlap(Math.max(p.start, ds), Math.min(p.end, de), x.start, x.end);
       }
@@ -84,7 +117,7 @@ function minutesPerDay(trip: TripInput, tl: Timeline): Minutes[] {
         order.push(p.country);
       }
     }
-    return { date, domestic, foreign, order };
+    return { date, domestic, foreign, order, intervals };
   });
 }
 
@@ -141,6 +174,7 @@ export function computePerDiem(trip: TripInput, tl: Timeline, rules: RuleSet, is
     const meals = mealCounts(trip.meals.find((m) => m.date === d.date), tier !== undefined);
     const day: DayResult = {
       date: d.date,
+      intervals: d.intervals,
       label: formatDate(d.date),
       domesticMinutes: d.domestic,
       foreignMinutes,

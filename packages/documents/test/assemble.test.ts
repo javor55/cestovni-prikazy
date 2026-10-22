@@ -68,7 +68,6 @@ describe('kompletní dokumentace', () => {
       next('Kompletní dokumentace pracovní cesty'),
       next('Obsah a seznam příloh'),
       next('Část A · Cestovní příkaz'),
-      next('Detailní přehled výpočtu'),
       next('Přehled výdajů'),
       next('Výdaj č. 1 · Ubytování Popis'),
       next('Výdaj č. 1 · Ubytování · Účetní doklad · faktura.jpg'),
@@ -80,8 +79,8 @@ describe('kompletní dokumentace', () => {
     ];
     expect(order.every((x) => x >= 0)).toBe(true);
     // Obsah odkazuje na skutečnou stranu oddílu.
-    expect(p[1]).toMatch(new RegExp(`Detailní přehled výpočtu ${order[3]! + 1}`));
-    expect(p[order[9]!]).toContain('K výdaji není přiložen žádný doklad');
+    expect(p[1]).toMatch(new RegExp(`Přehled výdajů ${order[3]! + 1}`));
+    expect(p[order[8]!]).toContain('K výdaji není přiložen žádný doklad');
 
     // Krycí list uvádí souhrn a obsah odkazuje na skutečné strany.
     expect(p[0]).toContain(`Celkem stran: ${p.length}`);
@@ -134,11 +133,11 @@ describe('kompletní dokumentace', () => {
   });
 
   it('jen vybrané části: podepsaný dokument a doklady k výdajům', async () => {
-    const parts = { ...ALL_PARTS, cover: false, calculation: false, expenseOverview: false, expenseIdPages: false, expenseSupporting: false, vehicle: false, supporting: false };
+    const parts = { ...ALL_PARTS, cover: false, expenseOverview: false, expenseIdPages: false, expenseSupporting: false, vehicle: false, supporting: false };
     const { bytes, stats } = await assemble(await input({ parts }));
     const p = await texts(bytes);
     expect(p[0]).toContain('Část A · Cestovní příkaz');
-    expect(p.join(' ')).not.toMatch(/Kompletní dokumentace pracovní cesty|Obsah a seznam příloh|Detailní přehled výpočtu|Přehled výdajů|K výdaji není přiložen|program/);
+    expect(p.join(' ')).not.toMatch(/Kompletní dokumentace pracovní cesty|Obsah a seznam příloh|Přehled výdajů|K výdaji není přiložen|program/);
     const acc = p.findIndex((t) => t.includes('Výdaj č. 1 · Ubytování · Účetní doklad · faktura.jpg'));
     const pay = p.findIndex((t) => t.includes('Výdaj č. 1 · Ubytování · Doklad o zaplacení · vypis.pdf'));
     expect(acc).toBeGreaterThan(0);

@@ -110,6 +110,11 @@ describe('kontroly časové osy', () => {
     );
     // 14 h − 4 h soukromě = 10 h → pásmo 5–12 h
     expect(r.perDiem!.days[0]).toMatchObject({ domesticMinutes: 600, domestic: { bandId: '5-12' } });
+    expect(r.perDiem!.days[0]!.intervals).toEqual([
+      { from: '06:00', to: '12:00', country: 'CZ', minutes: 360 },
+      { from: '12:00', to: '16:00', country: 'CZ', minutes: 240, private: true },
+      { from: '16:00', to: '20:00', country: 'CZ', minutes: 240 },
+    ]);
   });
 
   it('cesta mimo období sazeb je blokující chyba', () => {

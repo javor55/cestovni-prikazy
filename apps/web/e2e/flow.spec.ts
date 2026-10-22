@@ -94,6 +94,13 @@ test('celá zahraniční cesta: vyplnění, výpočet, uložení a smazání', a
   await expect(result).toContainText('10 672,00 Kč');
   await shot(page, '07-souhrn');
 
+  // Protokol výpočtu: den po dni se státem, pásmem a krácením; vyúčtování se zaokrouhlením.
+  const day = page.getByRole('listitem', { name: 'Den čt 15. 10. 2026' });
+  await expect(day).toContainText('Rozhodující stát: Rakousko (24 h)');
+  await expect(day).toContainText('krácení: 2 jídla × 25 % × 45,00 = 22,50 EUR');
+  await expect(page.getByRole('region', { name: 'Přepočet na Kč' })).toContainText('72,00 + výdaje ze zálohy 0,00 − záloha 100,00 = −28,00 EUR (přeplatek)');
+  await expect(page.getByRole('region', { name: 'Vyúčtování' })).toContainText('Zaokrouhlení na celé Kč');
+
   // Kontrola je součástí souhrnu: bez chyb
   await expect(page.getByText('Žádné chyby.')).toBeVisible();
 

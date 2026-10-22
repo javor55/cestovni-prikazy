@@ -1,11 +1,11 @@
-// Sestavení kompletní dokumentace (zadání § 19): krycí list, obsah, podepsaný dokument, přehledy,
+// Sestavení kompletní dokumentace (zadání § 19): krycí list, obsah, podepsaný dokument, přehled výdajů,
 // identifikační stránky výdajů a doklady. Doklady se vkládají zmenšené do stránky A4 s okrajem,
 // aby se na každou stranu vešlo záhlaví a průběžné číslování. Originální soubory se nemění.
 
 import fontkit from '@pdf-lib/fontkit';
 import { PDFDocument, PDFHexString, PDFName, rgb, type PDFEmbeddedPage, type PDFFont, type PDFPage } from 'pdf-lib';
 import { createElement, type ReactElement } from 'react';
-import { CalculationOverview, CoverAndToc, ExpenseIdPages, ExpenseOverview, type CoverInfo, type IdPageFile, type TocEntry } from './Appendix.js';
+import { CoverAndToc, ExpenseIdPages, ExpenseOverview, type CoverInfo, type IdPageFile, type TocEntry } from './Appendix.js';
 import type { DocModel } from './model.js';
 
 export type FileKind = 'accounting' | 'payment' | 'supporting' | 'vehicle' | 'signed';
@@ -25,7 +25,6 @@ export interface AssemblyParts {
   /** Krycí list a obsah se seznamem příloh. */
   cover: boolean;
   signed: boolean;
-  calculation: boolean;
   expenseOverview: boolean;
   /** Identifikační stránka před doklady každého výdaje. */
   expenseIdPages: boolean;
@@ -41,7 +40,6 @@ export interface AssemblyParts {
 export const ALL_PARTS: AssemblyParts = {
   cover: true,
   signed: true,
-  calculation: true,
   expenseOverview: true,
   expenseIdPages: true,
   accounting: true,
@@ -151,7 +149,6 @@ export async function assemble(input: AssemblyInput): Promise<{ bytes: Uint8Arra
   if (!parts.signed) signed = [];
 
   // 4.–5. Přehledy a identifikační stránky
-  const calc = parts.calculation ? await ownPages(createElement(CalculationOverview, { m })) : [];
   const overview = parts.expenseOverview ? await ownPages(createElement(ExpenseOverview, { m })) : [];
   const idFiles: Record<string, IdPageFile[]> = {};
   const expenseSources: { n: string; accounting: Source[]; payment: Source[]; supporting: Source[] }[] = [];
@@ -183,7 +180,6 @@ export async function assemble(input: AssemblyInput): Promise<{ bytes: Uint8Arra
     body.push(...pages);
   };
   section('Podepsaný cestovní příkaz a žádost o vyplacení', signed);
-  section('Detailní přehled výpočtu', calc);
   section('Přehled výdajů', overview);
   // Každý výdaj pohromadě: identifikační stránka a za ní všechny jeho přílohy
   // (účetní doklad, doklad o zaplacení, doplňující dokumenty).

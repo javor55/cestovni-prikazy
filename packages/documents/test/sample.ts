@@ -24,8 +24,8 @@ export function sample(): DocModel {
     },
     actual: { start: '14. 10. 2026 6:30', end: '16. 10. 2026 18:30', km: '686 km' },
     segments: [
-      { n: '1', from: 'Praha (CZ)', to: 'Vídeň (AT)', departure: '14. 10. 6:30', arrival: '14. 10. 11:00', transport: 'Soukromé auto', km: '343', border: 'CZ–AT 14. 10. 9:45' },
-      { n: '2', from: 'Vídeň (AT)', to: 'Praha (CZ)', departure: '16. 10. 14:00', arrival: '16. 10. 18:30', transport: 'Soukromé auto', km: '343', border: 'AT–CZ 16. 10. 15:15' },
+      { n: '1', from: 'Praha (CZ)', to: 'Vídeň (AT)', departure: '14. 10. 6:30', arrival: '14. 10. 11:00', transport: 'Soukromé auto', km: '343', border: 'CZ – AT 14. 10. 9:45' },
+      { n: '2', from: 'Vídeň (AT)', to: 'Praha (CZ)', departure: '16. 10. 14:00', arrival: '16. 10. 18:30', transport: 'Soukromé auto', km: '343', border: 'AT – CZ 16. 10. 15:15' },
     ],
     perDiem: {
       days: [

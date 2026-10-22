@@ -104,7 +104,7 @@ export function buildDocModel({ trip, mapped, result, docCounts, documentCount, 
         arrival: formatDateTime(x.arrival),
         transport: transportLabels[x.transport] + (x.private ? ' – soukromá část' : '') + (x.carrier ? `, ${x.carrier}` : ''),
         km: x.km,
-        border: crossingsText(x, formatDateTime),
+        border: crossingsText(x, formatDateTime, '\n', ' – '),
       })),
     perDiem: {
       days: (pd?.days ?? []).map((d) => ({

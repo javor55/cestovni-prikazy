@@ -19,7 +19,7 @@ describe('model dokumentu', () => {
     expect(m).toMatchObject({ number: 'CP-2026-0042', ruleSet: 'CZ-2026 v1.2.0', issued: { place: 'Praha', date: '12. 10. 2026' }, createdAt: '21. 10. 2026 14:05' });
     expect(m.trip.advances).toEqual(['100 EUR (12. 10. 2026)']);
     expect(m.actual).toEqual({ start: '14. 10. 2026 6:30', end: '16. 10. 2026 18:30', km: '686 km' });
-    expect(m.segments[0]!.border).toBe('CZ–AT 14. 10. 2026 9:45');
+    expect(m.segments[0]!.border).toBe('CZ – AT 14. 10. 2026 9:45');
     expect(m.perDiem.days.map((d) => [d.tier, d.meals, d.amount])).toEqual([
       ['2/3', '', '30,00 EUR'],
       ['1/1', 'S + O', '22,50 EUR'],

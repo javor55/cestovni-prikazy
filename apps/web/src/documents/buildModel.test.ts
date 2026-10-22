@@ -6,9 +6,9 @@ import type { TripDoc } from '../model/trip.js';
 import { buildDocModel } from './buildModel.js';
 import { inputHash } from './snapshot.js';
 
-function build(t: TripDoc) {
+function build(t: TripDoc, lang: 'cs' | 'en' = 'cs') {
   const mapped = toInput(t, { h: { accounting: 1, payment: 1 } });
-  const m = buildDocModel({ trip: t, mapped, result: calculate(mapped.input!), docCounts: { h: { accounting: 1, payment: 1 } }, documentCount: 2, now: new Date('2026-10-21T12:05:00Z') });
+  const m = buildDocModel({ trip: t, mapped, result: calculate(mapped.input!), docCounts: { h: { accounting: 1, payment: 1 } }, documentCount: 2, now: new Date('2026-10-21T12:05:00Z'), lang });
   // Formátovač čísel odděluje tisíce nezlomitelnou mezerou; pro porovnání ji nahradíme obyčejnou.
   return JSON.parse(JSON.stringify(m).replace(/\u00a0/g, ' ')) as typeof m;
 }
@@ -50,5 +50,28 @@ describe('model dokumentu', () => {
     expect(build(t).trip.destinations).toBe('Záhřeb (Chorvatsko)');
     t.kind = 'domestic';
     expect(build(t).trip.destinations).toBe('Záhřeb');
+  });
+
+  it('anglická verze: číselníky, státy, dny, měna a poznámky anglicky', () => {
+    const t = vienna();
+    t.destinations = 'Záhřeb';
+    t.destinationCountry = 'HR';
+    const m = build(t, 'en');
+    expect(m.lang).toBe('en');
+    expect(m.trip).toMatchObject({ kind: 'Foreign', destinations: 'Záhřeb (Croatia)' });
+    expect(m.segments[0]!.transport).toBe('Private car');
+    expect(m.employer.sector).toBe('Business sector');
+    expect(m.perDiem.days.map((d) => [d.date, d.country, d.meals])).toEqual([
+      ['Wed 14. 10. 2026', 'Austria', ''],
+      ['Thu 15. 10. 2026', 'Austria', 'B + L'],
+      ['Fri 16. 10. 2026', 'Austria', 'B'],
+    ]);
+    expect(m.perDiem.note).toContain('B/L/D = breakfast/lunch/dinner');
+    expect(m.perDiem.note).toContain('Time in Czechia 3 h 15 min is shorter than 5 hours');
+    expect(m.expenses[0]).toMatchObject({ category: 'Accommodation', rate: '24,422 · bank statement', payment: 'Private card' });
+    expect(m.vehicle).toMatchObject({ fuel: 'Petrol 95', fuelPriceSource: 'price from receipt', requested: 'yes' });
+    expect(m.settlement).toMatchObject({ payout: '12 055,00 CZK', payoutLabel: 'Payable to employee' });
+    expect(m.settlement.rows).toContainEqual({ label: 'Additional payment in EUR × advance rate 24,35', foreign: '16,00 EUR', czk: '389,60' });
+    expect(m.declaration).toMatch(/^I declare/);
   });
 });

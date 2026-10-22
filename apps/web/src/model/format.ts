@@ -53,8 +53,22 @@ export function formatExact(decimal: string, currency: string): string {
 
 const roundingText = { NONE: 'nezaokrouhluje', HALF_UP_UNIT: 'zaokrouhluje matematicky na celé jednotky', CEIL_UNIT: 'zaokrouhluje nahoru na celé jednotky' } as const;
 
-/** Popis zaokrouhlení stravného podle sady pravidel – pro Souhrn a PDF. */
-export function perDiemRoundingNote(rounding: { domesticPerDay: keyof typeof roundingText; foreignPerDay: keyof typeof roundingText }, foreign: boolean): string {
+/** Popis zaokrouhlení stravného podle sady pravidel – pro Souhrn a PDF (česky nebo anglicky). */
+export function perDiemRoundingNote(
+  rounding: { domesticPerDay: keyof typeof roundingText; foreignPerDay: keyof typeof roundingText },
+  foreign: boolean,
+  lang: 'cs' | 'en' = 'cs',
+): string {
+  if (lang === 'en') {
+    const how = { NONE: 'is not rounded', HALF_UP_UNIT: 'is rounded to whole units', CEIL_UNIT: 'is rounded up to whole units' } as const;
+    const domestic = `Domestic meal allowance per day ${how[rounding.domesticPerDay].replace('units', 'CZK')}.`;
+    if (!foreign) return domestic;
+    const abroad =
+      rounding.foreignPerDay === 'NONE'
+        ? 'Foreign meal allowance is not rounded – shown per day to cents, converted to CZK from the exact amount.'
+        : `Foreign meal allowance per day ${how[rounding.foreignPerDay]} of the currency.`;
+    return `${domestic} ${abroad}`;
+  }
   const domestic = `Tuzemské stravné za den se ${roundingText[rounding.domesticPerDay].replace('jednotky', 'Kč')}.`;
   if (!foreign) return domestic;
   const abroad =

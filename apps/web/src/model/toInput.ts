@@ -1,4 +1,5 @@
 import type { Conversion, Expense, ExpensePayer, Issue, PaymentMethod, TripInput } from '@cp/core';
+import { bankAccountProblem } from './bankAccount.js';
 import { normalizeDecimal, toMinor } from './format.js';
 import { missingTransit } from './route.js';
 
@@ -110,16 +111,29 @@ export function toInput(doc: TripDoc, docs?: DocCounts): Mapped {
     });
   });
 
+  // Výdaje ze soukromých prostředků se proplácejí – účetní potřebuje číslo účtu (zadává se v Kdo cestuje i ve Výdajích).
+  const paidPrivately = doc.expenses.some((e) => e.reimbursable && e.amount.trim() && payerOf(e.paymentMethod) === 'EMPLOYEE');
+  const account = doc.employee.bankAccount.trim();
+  if (paidPrivately && !account) {
+    err('FORM_BANK_ACCOUNT', 'Výdaje jste platili ze soukromých prostředků – doplňte číslo účtu pro výplatu.', { step: 'vydaje' });
+  } else if (account && bankAccountProblem(account)) {
+    issues.push({ severity: 'warning', code: 'FORM_BANK_ACCOUNT_FORMAT', message: `Číslo účtu pro výplatu: ${bankAccountProblem(account)}`, ref: { step: paidPrivately ? 'vydaje' : 'kdo' } });
+  }
+
   let vehicle: TripInput['vehicle'];
   const v = doc.vehicle;
   if (v.used) {
     const km = normalizeDecimal(v.km);
     const consumption = v.consumption.map(normalizeDecimal).filter((c): c is string => c !== null);
     const receipt = v.fuelPriceMode === 'receipt' && v.receiptPrice ? toMinor(v.receiptPrice, 'CZK') : undefined;
+    // Ručně zadaná průměrná cena platí u průměrné ceny i jako náhrada, když doklady o tankování chybí.
+    const average = v.fuelPriceMode !== 'receipt' && v.averagePrice.trim() ? toMinor(v.averagePrice, 'CZK') : undefined;
     if (v.ownership === 'private' && (!km || consumption.length === 0)) {
       err('FORM_VEHICLE', 'Soukromé vozidlo: doplňte ujeté kilometry a spotřebu z technického průkazu.', { step: 'vozidlo' });
     } else if (receipt === null) {
       err('FORM_VEHICLE', 'Soukromé vozidlo: cenu paliva z dokladu zadejte jako číslo, např. 38,90.', { step: 'vozidlo' });
+    } else if (average === null || average === 0) {
+      err('FORM_VEHICLE', 'Soukromé vozidlo: průměrnou cenu paliva zadejte jako číslo, např. 35,10, nebo pole nechte prázdné.', { step: 'vozidlo' });
     } else {
       vehicle = {
         type: v.type,
@@ -130,6 +144,7 @@ export function toInput(doc: TripDoc, docs?: DocCounts): Mapped {
         requestedByEmployer: v.requestedByEmployer,
         ...(receipt !== undefined && { receiptPrice: { amount: receipt, date: v.receiptDate || start.slice(0, 10) } }),
         ...(v.fuelPriceMode === 'receipts' && { fuelPriceFromExpenses: true }),
+        ...(average && { averagePriceOverride: { amount: average, source: v.averagePriceSource } }),
       };
     }
   }

@@ -72,6 +72,10 @@ test('celá zahraniční cesta: vyplnění, výpočet, uložení a smazání', a
   await e1.getByLabel('Přepočet na Kč').selectOption('BANK_CONFIRMATION');
   await e1.getByLabel('Stržená částka v Kč').fill('5 812,44');
   await expect(e1).toContainText('kurzu 24,422');
+  // Výdaj ze soukromé karty – číslo účtu pro výplatu je povinné.
+  await expect(page.getByText('Chyba: Doplňte číslo účtu.')).toBeVisible();
+  await page.getByLabel('Číslo účtu pro výplatu').fill('2000145399/0800');
+  await expect(page.getByText('Chyba: Doplňte číslo účtu.')).toHaveCount(0);
   await shot(page, '05-vydaje');
   await next(page);
 
@@ -89,11 +93,9 @@ test('celá zahraniční cesta: vyplnění, výpočet, uložení a smazání', a
   await expect(result).toContainText('K výplatě zaměstnanci');
   await expect(result).toContainText('10 672,00 Kč');
   await shot(page, '07-souhrn');
-  await next(page);
 
-  // 8 Kontrola: bez chyb
+  // Kontrola je součástí souhrnu: bez chyb
   await expect(page.getByText('Žádné chyby.')).toBeVisible();
-  await shot(page, '08-kontrola');
 
   // Data přežijí obnovení stránky (po potvrzení uložení, které uživatel vidí v hlavičce)
   await expect(page.getByText('uloženo v prohlížeči')).toBeVisible();
@@ -123,7 +125,9 @@ test('chyba v časové ose se ukáže v kroku i v kontrole s odkazem na opravu',
   const problems = page.getByRole('list', { name: 'Problémy v tomto kroku' });
   await expect(problems).toContainText('Chyba:');
   await expect(problems).toContainText('Opravte data a časy cesty');
+  // Staré adresy kroku Kontrola vedou na Souhrn, kde je kontrola teď.
   await page.goto(page.url().replace('/prubeh', '/kontrola'));
+  await expect(page).toHaveURL(/\/souhrn$/);
   await expect(page.getByRole('link', { name: 'Opravit v kroku „Průběh cesty“' }).first()).toBeVisible();
 });
 
@@ -131,7 +135,7 @@ test('na šířce stránky nevzniká vodorovný posuvník', async ({ page }) => 
   await page.goto('/');
   await page.getByRole('button', { name: 'Nová pracovní cesta' }).click();
   await page.waitForURL(/\/kdo$/);
-  for (const step of ['kdo', 'cesta', 'prubeh', 'vydaje', 'souhrn', 'kontrola']) {
+  for (const step of ['kdo', 'cesta', 'prubeh', 'vydaje', 'souhrn', 'kompletni']) {
     await page.goto(page.url().replace(/\/[a-z]+$/, `/${step}`));
     await expect(page).toHaveURL(new RegExp(`/cesta/.+/${step}$`));
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible();

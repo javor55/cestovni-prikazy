@@ -1,6 +1,6 @@
 # Etapa 1 – Analýza
 
-> **Poznámka (21. 10. 2026):** toto je původní analýza před implementací. Některé návrhy se během vývoje změnily (např. průvodce má 12 kroků, PDF se vytváří v hlavním vlákně prohlížeče, nepoužívá se React Hook Form, Radix UI, exifr ani WebKit v testech, nasazení je na Cloudflare Workers místo Pages, cena paliva z více dokladů je vážený průměr). Skutečný stav popisují [05 – Technický návrh](05-technicky-navrh.md) a [07 – Nasazení a provoz](07-nasazeni.md).
+> **Poznámka (21. 10. 2026):** toto je původní analýza před implementací. Některé návrhy se během vývoje změnily (např. průvodce má 10 kroků, PDF má jeden vzhled česky nebo anglicky, PDF se vytváří v hlavním vlákně prohlížeče, nepoužívá se React Hook Form, Radix UI, exifr ani WebKit v testech, nasazení je na Cloudflare Workers místo Pages, cena paliva z více dokladů je vážený průměr). Skutečný stav popisují [05 – Technický návrh](05-technicky-navrh.md) a [07 – Nasazení a provoz](07-nasazeni.md).
 
 Stav: **schváleno zadavatelem 21. 10. 2026** (otázky pro účetní zůstávají otevřené)
 Vstup: `zadani_aplikace_cestovni_prikazy.md` (dále „zadání“) a odpovědi zadavatele z 21. 10. 2026.

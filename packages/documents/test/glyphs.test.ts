@@ -20,7 +20,7 @@ describe('znaky v PDF', () => {
 
   it('písmo obsahuje všechny znaky ze šablon', () => {
     // Bez komentářů – v nich znaky nevadí.
-    const text = ['Modern.tsx', 'Conservative.tsx', 'Appendix.tsx'].map(source).join('\n').replace(/\/\/.*$|\/\*[\s\S]*?\*\//gm, '');
+    const text = ['Modern.tsx', 'Appendix.tsx', 'labels.ts'].map(source).join('\n').replace(/\/\/.*$|\/\*[\s\S]*?\*\//gm, '');
     expect(missing(text)).toEqual([]);
   });
 

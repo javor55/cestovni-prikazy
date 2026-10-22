@@ -32,7 +32,7 @@ test('přístupnost: hlavní obrazovky bez závažných nálezů (axe)', async (
   await page.goto('/');
   await check('úvod');
   const base = await tripWithPdf(page);
-  for (const step of ['kdo', 'cesta', 'prubeh', 'jidla', 'vydaje', 'vozidlo', 'souhrn', 'kontrola', 'pdf', 'podpis', 'kompletni', 'export']) {
+  for (const step of ['kdo', 'cesta', 'prubeh', 'jidla', 'vydaje', 'vozidlo', 'souhrn', 'pdf', 'podpis', 'kompletni']) {
     await page.goto(`${base}/${step}`);
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
     await check(step);

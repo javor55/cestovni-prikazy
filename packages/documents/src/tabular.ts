@@ -1,5 +1,6 @@
 // Tabulkové exporty: stejná data jako XLSX (jeden sešit, více listů) i jako CSV (soubor na tabulku).
-// XLSX se skládá ručně ze SpreadsheetML – bez velké knihovny, bez maker a bez vzorců.
+// XLSX se skládá ručně ze SpreadsheetML – bez velké knihovny a bez maker. Vzorce jen tam, kde je tabulka
+// výslovně obsahuje (listy s výpočtem pro kontrolu účetní); text se nikdy jako vzorec nevyhodnotí.
 
 import { strToU8, zipSync, type Zippable } from 'fflate';
 
@@ -8,7 +9,15 @@ import { strToU8, zipSync, type Zippable } from 'fflate';
  * integer = celé číslo, date = „RRRR-MM-DD“, datetime = místní čas „RRRR-MM-DDTHH:mm“.
  */
 export type ColumnType = 'text' | 'amount' | 'number' | 'integer' | 'date' | 'datetime';
-export type Cell = string | number | null;
+/** Vzorec v XLSX s hodnotou spočítanou aplikací (zobrazí se i bez přepočtu, v CSV se zapíše jen hodnota). */
+export interface Formula {
+  /** Vzorec bez úvodního „=“, anglické názvy funkcí a desetinná tečka (tak je XLSX ukládá vždy). */
+  f: string;
+  v: number | string;
+}
+export type Cell = string | number | null | Formula;
+
+export const formula = (f: string, v: number | string): Formula => ({ f, v });
 
 export interface Column {
   /** Název sloupce v záhlaví. */
@@ -35,7 +44,8 @@ function defuse(s: string): string {
   return /^[=+\-@\t\r]/.test(s) ? `'${s}` : s;
 }
 
-function csvValue(v: Cell, type: ColumnType): string {
+function csvValue(cell: Cell, type: ColumnType): string {
+  const v = cell !== null && typeof cell === 'object' ? cell.v : cell;
   if (v === null || v === '') return '';
   if (typeof v === 'number') {
     if (!Number.isFinite(v)) return '';
@@ -105,6 +115,11 @@ const STYLES = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 </styleSheet>`;
 
 function cellXml(ref: string, v: Cell, type: ColumnType): string {
+  if (v !== null && typeof v === 'object') {
+    const s = type === 'amount' ? STYLE.amount : type === 'integer' ? STYLE.integer : 0;
+    const value = typeof v.v === 'number' ? (Number.isFinite(v.v) ? `<v>${v.v}</v>` : '') : `<v>${xmlEscape(v.v)}</v>`;
+    return `<c r="${ref}"${s ? ` s="${s}"` : ''}${typeof v.v === 'string' ? ' t="str"' : ''}><f>${xmlEscape(v.f)}</f>${value}</c>`;
+  }
   if (v === null || v === '') return '';
   if (typeof v === 'number') {
     if (!Number.isFinite(v)) return '';
@@ -151,7 +166,7 @@ export function toXlsx(tables: Table[], created = new Date()): Uint8Array {
     'xl/workbook.xml': strToU8(`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets>${names
       .map((n, i) => `<sheet name="${xmlEscape(n)}" sheetId="${i + 1}" r:id="rId${i + 1}"/>`)
-      .join('')}</sheets></workbook>`),
+      .join('')}</sheets>${tables.some((t) => t.rows.some((r) => r.some((c) => c !== null && typeof c === 'object'))) ? '<calcPr calcId="191029" fullCalcOnLoad="1"/>' : ''}</workbook>`),
     'xl/_rels/workbook.xml.rels': strToU8(`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">${tables
       .map((_, i) => `<Relationship Id="rId${i + 1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet${i + 1}.xml"/>`)

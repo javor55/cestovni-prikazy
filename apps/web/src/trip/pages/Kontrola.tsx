@@ -3,7 +3,7 @@ import { submitDeadline } from '../../model/deadline.js';
 import { formatDay } from '../../model/format.js';
 import { actualTimes } from '../../model/toInput.js';
 import { expiresAt } from '../../storage/db.js';
-import { Icon, icons, LinkButton } from '../../ui/controls.js';
+import { H2, Icon, icons } from '../../ui/controls.js';
 import { useTrip } from '../context.js';
 import { IssueItem } from '../IssueList.js';
 
@@ -13,14 +13,16 @@ const groups: [Severity, string][] = [
   ['info', 'Pro informaci'],
 ];
 
-export function StepKontrola() {
+/** Kontrola vyúčtování (dříve samostatný krok) – chyby, varování a informace; je součástí Souhrnu. */
+export function Kontrola() {
   const { trip, issues } = useTrip();
   const errors = issues.filter((i) => i.severity === 'error');
   const expiry = expiresAt(trip).toLocaleDateString('cs-CZ');
   const deadline = submitDeadline(actualTimes(trip).end);
 
   return (
-    <>
+    <section className="flex flex-col gap-3" aria-label="Kontrola">
+      <H2>Kontrola</H2>
       {errors.length === 0 ? (
         <p className="flex items-center gap-2 text-[15px] font-semibold text-ok">
           <Icon d={icons.check} /> Žádné chyby. Vyúčtování je připravené k vytvoření PDF.
@@ -42,9 +44,9 @@ export function StepKontrola() {
         if (!list.length && !extra.length) return null;
         return (
           <section key={sev} className="flex flex-col gap-2">
-            <h2 className="text-base font-bold">
+            <h3 className="text-base font-bold">
               {title} ({list.length + extra.length})
-            </h2>
+            </h3>
             <ul className="flex flex-col gap-2">
               {list.map((i, n) => (
                 <IssueItem key={n} issue={i} showLink={sev !== 'info'} />
@@ -56,11 +58,6 @@ export function StepKontrola() {
           </section>
         );
       })}
-      {errors.length === 0 && (
-        <LinkButton to={`/cesta/${trip.id}/pdf`} className="self-start">
-          Pokračovat k PDF
-        </LinkButton>
-      )}
-    </>
+    </section>
   );
 }

@@ -5,15 +5,13 @@ import { countryName } from '../../model/countries.js';
 import { formatExact, formatMinor, formatRate, perDiemRoundingNote } from '../../model/format.js';
 import { CnbButton } from '../../rates/CnbButton.js';
 import { actualTimes } from '../../model/toInput.js';
-import { Card, H2, Icon, icons, Notice, NumberField } from '../../ui/controls.js';
+import { Card, H2, Notice, NumberField } from '../../ui/controls.js';
 import { useTrip } from '../context.js';
-import { StepIssues } from '../IssueList.js';
+import { Kontrola } from './Kontrola.js';
 
 export function StepSouhrn() {
   const { trip, update, result, issues } = useTrip();
   const s = result?.settlement;
-  const errors = issues.filter((i) => i.severity === 'error').length;
-  const warnings = issues.filter((i) => i.severity === 'warning').length;
   const missingRates = issues.filter((i) => i.code === 'PER_DIEM_MISSING_RATE').map((i) => i.ref?.currency).filter(Boolean) as string[];
   const perDiemCurrencies = [...new Set([...missingRates, ...Object.keys(trip.perDiemRates)])];
   // Ruční sazba: stát bez sazby, stát se sazbou „ostatní země“ (Ú-28) a státy, kde už ji uživatel zadal.
@@ -22,8 +20,6 @@ export function StepSouhrn() {
 
   return (
     <>
-      <StepIssues slug="souhrn" />
-
       {(perDiemCurrencies.length > 0 || ownCountries.length > 0) && (
         <Card>
           <H2>Doplňte pro výpočet</H2>
@@ -73,19 +69,10 @@ export function StepSouhrn() {
           </span>
         </section>
       ) : (
-        <Notice tone="warn">Výpočet zatím nelze provést. Doplňte údaje podle chyb v kroku Kontrola.</Notice>
+        <Notice tone="warn">Výpočet zatím nelze provést. Doplňte údaje podle chyb v kontrole níže.</Notice>
       )}
 
-      <Link
-        to={`/cesta/${trip.id}/kontrola`}
-        className={`flex min-h-11 items-center gap-2 rounded-xl border px-4 py-2 text-sm font-semibold no-underline ${errors ? 'border-danger-line bg-danger-soft text-danger' : warnings ? 'border-warn-line bg-warn-soft text-warn' : 'border-line bg-white text-ok'}`}
-      >
-        <Icon d={errors || warnings ? icons.warn : icons.check} />
-        <span className="grow">
-          {errors} {errors === 1 ? 'chyba' : errors >= 2 && errors <= 4 ? 'chyby' : 'chyb'} · {warnings} {warnings === 1 ? 'varování' : 'varování'} ke kontrole
-        </span>
-        <span aria-hidden="true">›</span>
-      </Link>
+      <Kontrola />
 
       {result?.perDiem && (
         <Card>
@@ -163,36 +150,7 @@ export function StepSouhrn() {
         </Card>
       )}
 
-      {result?.ruleSet && (
-        <details className="rounded-2xl border border-line bg-white p-4 text-sm">
-          <summary className="min-h-11 cursor-pointer font-semibold text-accent">
-            Pravidla výpočtu: {result.ruleSet.id} v{result.ruleSet.version}
-          </summary>
-          <div className="mt-2 flex flex-col gap-2 leading-relaxed text-muted">
-            <p>{result.ruleSet.verification}</p>
-            <p>Předpoklady, které ještě potvrzuje účetní:</p>
-            <ul className="list-disc pl-5">
-              {result.ruleSet.assumptions.map((a) => (
-                <li key={a.code}>{a.text}</li>
-              ))}
-            </ul>
-            <p>Předpisy, ze kterých sazby pocházejí:</p>
-            <ul className="list-disc pl-5">
-              {(ruleSets.find((x) => x.id === result.ruleSet!.id)?.sources ?? []).map((x) => (
-                <li key={x.id}>
-                  {x.url ? (
-                    <a href={x.url} target="_blank" rel="noopener noreferrer" className="text-accent underline">
-                      {x.title}
-                    </a>
-                  ) : (
-                    x.title
-                  )}
-                </li>
-              ))}
-            </ul>
-          </div>
-        </details>
-      )}
+      <HowCalculated tripId={trip.id} ruleSetLabel={result?.ruleSet ? `${result.ruleSet.id} v${result.ruleSet.version}` : ''} />
     </>
   );
 }
@@ -203,5 +161,56 @@ function Row({ label, value }: { label: string; value: string }) {
       <dt className="text-muted">{label}</dt>
       <dd className="text-right whitespace-nowrap">{value}</dd>
     </>
+  );
+}
+
+/**
+ * Postup výpočtu slovy i se sazbami ze sady pravidel – aby účetní mohla každou částku přepočítat.
+ * Konkrétní čísla cesty jsou výše (stravné po dnech, vyúčtování), všechny uložené hodnoty na stránce Sazby.
+ */
+function HowCalculated({ tripId, ruleSetLabel }: { tripId: string; ruleSetLabel: string }) {
+  const r = ruleSets[0]!;
+  const bands = r.domestic.bands;
+  const tiers = r.foreign.tiers;
+  const h = (min: number) => `${Math.round(min / 60)} h`;
+  return (
+    <Card aria-label="Jak se počítá">
+      <H2>Jak se počítá</H2>
+      <ol className="flex list-decimal flex-col gap-2 pl-5 text-[15px] leading-relaxed">
+        <li>
+          <strong>Doba po dnech.</strong> Každý kalendářní den zvlášť: čas v Česku a v zahraničí podle odjezdů, příjezdů a přechodů hranic. Soukromé části cesty se nepočítají.
+        </li>
+        <li>
+          <strong>Tuzemské stravné</strong> = sazba pásma podle doby v Česku ({bands.map((b) => `${b.id} h: ${formatMinor(b.business.min)}`).join(', ')} – zákonné minimum, případně
+          sazba firmy) − za každé bezplatné jídlo {bands.map((b) => `${b.mealReductionPct} %`).join(' / ')} sazby. Zaokrouhlení nahoru na celé Kč.
+        </li>
+        <li>
+          <strong>Zahraniční stravné</strong> = základní sazba státu, kde zaměstnanec ten den strávil nejvíc času × část podle doby v zahraničí (
+          {tiers.map((t) => `${t.id === '1/1' ? 'nad' : 'do'} ${h(t.id === '1/1' ? t.minMinutes - 1 : t.maxMinutes!)}: ${t.id === '1/1' ? 'plná' : t.id}`).join(', ')}) − za každé
+          bezplatné jídlo {tiers.map((t) => `${t.mealReductionPct} %`).join(' / ')} z této částky. Pod {h(r.foreign.minAbroadMinutes)} v zahraničí se den počítá jako tuzemský.
+          Nezaokrouhluje se; kapesné je procento z výsledku.
+        </li>
+        <li>
+          <strong>Přepočet na Kč</strong> = součet zahraničního stravného × kurz ÷ množství (kurz ČNB ke dni začátku cesty). Se zálohou v cizí měně: (stravné + výdaje ze zálohy −
+          záloha) × kurz zálohy. Zaokrouhlení na haléře.
+        </li>
+        <li>
+          <strong>Výdaje</strong> = částka × kurz (ČNB ke dni výdaje, kurz z dokladu o směně, nebo skutečně stržená částka podle banky). Výdaje uhrazené zaměstnavatelem a
+          neproplácené výdaje se nevyplácejí.
+        </li>
+        <li>
+          <strong>Soukromé vozidlo</strong> = km × sazba za km ({formatMinor(r.vehicle.ratesPerKm.car?.amount ?? 0)} u auta) + km × spotřeba z technického průkazu ÷ 100 × cena paliva
+          (z dokladů o tankování, z jednoho dokladu, nebo průměrná cena podle vyhlášky). Na haléře.
+        </li>
+        <li>
+          <strong>K výplatě</strong> = tuzemské stravné + přepočtené zahraniční stravné + výdaje zaměstnance + náhrada za vozidlo − záloha v Kč ± doplatek / přeplatek zálohy v cizí
+          měně. Zaokrouhlení matematicky na celé Kč.
+        </li>
+      </ol>
+      <Link to={`/sazby?zpet=/cesta/${tripId}/souhrn`} className="self-start font-semibold text-accent underline">
+        Sazby a hodnoty, se kterými aplikace počítá{ruleSetLabel ? ` (${ruleSetLabel})` : ''}
+      </Link>
+      <p className="text-[13px] text-subtle">Celý výpočet se vzorci, které si lze přepočítat v Excelu, je v exportu XLSX v kroku Odevzdání a exporty.</p>
+    </Card>
   );
 }

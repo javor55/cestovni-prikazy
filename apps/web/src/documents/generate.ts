@@ -1,4 +1,4 @@
-import type { DocModel, DocPart, Layout } from '@cp/documents/model';
+import type { DocModel, DocPart } from '@cp/documents/model';
 
 /** Načte knihovnu PDF a zaregistruje písma (OFL). Vše se stahuje až při prvním použití. */
 export async function loadDocuments() {
@@ -13,9 +13,9 @@ export async function loadDocuments() {
 }
 
 /** Vytvoří PDF v prohlížeči. */
-export async function generatePdf(model: DocModel, layout: Layout, part: DocPart): Promise<Blob> {
+export async function generatePdf(model: DocModel, part: DocPart): Promise<Blob> {
   const { docs } = await loadDocuments();
-  return docs.renderPdf(model, layout, part);
+  return docs.renderPdf(model, part);
 }
 
 export { fileName } from '@cp/documents/model';

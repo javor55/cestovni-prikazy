@@ -28,7 +28,7 @@ Počítat stejně i pro dohody (DPP, DPČ)?\
 **Ú-15 – Lhůty a vnitřní předpis**
 Platí zákonná lhůta 10 pracovních dnů pro předložení vyúčtování, nebo jiná podle vnitřního předpisu?\
 *Návrh:* aplikace zobrazí informativní upozornění s datem podle zákonné lhůty.\
-*Jak je to teď v aplikaci:* V kroku Kontrola aplikace ukáže datum, do kdy je potřeba vyúčtování předložit: 10 pracovních dnů po skončení cesty, bez víkendů a státních svátků. Jinou lhůtu podle vnitřního předpisu zatím nastavit nejde.
+*Jak je to teď v aplikaci:* V kontrole v kroku Souhrn a kontrola aplikace ukáže datum, do kdy je potřeba vyúčtování předložit: 10 pracovních dnů po skončení cesty, bez víkendů a státních svátků. Jinou lhůtu podle vnitřního předpisu zatím nastavit nejde.
 
 **Ú-16 – Požadované doklady**
 Které doklady vyžadujete? Stačí účtenka, nebo chcete u plateb soukromou kartou i potvrzení o zaplacení (výpis transakce)? Vyžadujete jízdenky u MHD?\
@@ -114,7 +114,7 @@ Jak zaokrouhlujete?\
 3. Spotřeba z technického průkazu: při třech údajích (město / mimo město / kombinovaná) průměr tří hodnot, nebo kombinovaná?
 
 *Návrh:* cena z dokladů o tankování, pokud jsou, jinak průměrná cena z vyhlášky. Při více dokladech vážený průměr (Ú-26). Kombinovaná spotřeba, jinak průměr tří hodnot.\
-*Jak je to teď v aplikaci:* Způsob ceny paliva volí uživatel: vážený průměr ze všech dokladů o tankování (viz Ú-26), cena z jednoho dokladu, nebo průměrná cena z vyhlášky. Výchozí je průměrná cena z vyhlášky. Když technický průkaz uvádí tři spotřeby, počítá se průměr všech tří hodnot.
+*Jak je to teď v aplikaci:* Způsob ceny paliva volí uživatel: vážený průměr ze všech dokladů o tankování (viz Ú-26), cena z jednoho dokladu, nebo průměrná cena z vyhlášky. Výchozí je průměrná cena z vyhlášky; aplikace ji ukazuje i s obdobím platnosti. Když se průměrná cena změní novelou, kterou aplikace ještě nezná, jde zadat ručně i se zdrojem – výpočet i PDF to uvedou a kontrola upozorní. Když technický průkaz uvádí tři spotřeby, počítá se průměr všech tří hodnot.
 
 **Ú-13 – Elektromobil a plug-in hybrid**
 Máte zaměstnance, kteří jezdí soukromým elektromobilem nebo plug-in hybridem? Jak postupujete?\
@@ -128,7 +128,7 @@ Máte zaměstnance, kteří jezdí soukromým elektromobilem nebo plug-in hybrid
 **Ú-19 – Co potřebujete v PDF**
 Používáte konkrétní tiskopis cestovního příkazu (např. tiskopis SEVT), na který jste zvyklá? Chybí v něm něco, co potřebujete pro zaúčtování (nákladové středisko, zakázka, číslo účtu pro výplatu)?\
 *Návrh:* vlastní přehledný formát se vším ze zadání. Pokud preferujete známý tiskopis, uděláme konzervativní variantu co nejblíže jemu.\
-*Jak je to teď v aplikaci:* PDF jde vytvořit ve dvou vzhledech: „Moderní“ a „Konzervativní“ (blízký tradičnímu tiskopisu). Obsahuje nákladové středisko a projekt/zakázku. Číslo účtu pro výplatu se zadává u zaměstnance a ve vyúčtování se zobrazí u částky k výplatě.
+*Jak je to teď v aplikaci:* Jeden přehledný vzhled PDF, česky nebo anglicky (pro zahraničního nadřízeného; údaje zadané uživatelem se nepřekládají, kompletní dokumentace pro účetní je česky). Obsahuje nákladové středisko a projekt/zakázku. Číslo účtu pro výplatu se zadává u zaměstnance nebo v kroku Výdaje (povinné, pokud zaměstnanec platil ze soukromých prostředků) a ve vyúčtování je u částky k výplatě; bez něj je v PDF řádek k doplnění. Pro ověření výpočtu slouží export XLSX s celým výpočtem jako vzorci.
 
 ---
 

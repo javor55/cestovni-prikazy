@@ -8,15 +8,16 @@ Webová aplikace pro zaměstnance: vyplní pracovní cestu, nechá si spočítat
 
 ## Co aplikace umí
 
-- **Průvodce ve 12 krocích** – od zaměstnance a plánu cesty přes průběh, jídla, výdaje a vozidlo až po PDF, podpis a exporty. U každého kroku je vidět, co je hotové a kde je chyba nebo varování.
+- **Průvodce v 10 krocích** – od zaměstnance a plánu cesty přes průběh, jídla, výdaje a vozidlo, souhrn s kontrolou až po PDF, podpis, kompletní dokumentaci a exporty. U každého kroku je vidět, co je hotové a kde je chyba nebo varování.
 - **Tuzemské i zahraniční cesty** – stravné po dnech podle doby v Česku a v zahraničí, krácení za bezplatně poskytnutá jídla, kapesné, sazby podle vnitřního předpisu, podnikatelská i platová sféra.
 - **Více států na jedné cestě** – v jednom úseku může být víc přechodů hranic (např. Ústí → Rakousko → Slovinsko → Záhřeb). Aplikace pozná, když po zemi „přeskočíte“ stát, se kterým výchozí stát nesousedí. Rozhodující stát dne je ten, kde jste strávili nejvíc času.
 - **Plán a průběh** – plán (cestovní příkaz schválený předem) s trasou, zastávkami a dopravními prostředky jde jedním kliknutím převzít do skutečného průběhu, včetně zpáteční cesty.
 - **Výdaje ve více měnách** – kurz ČNB ke dni výdaje jedním tlačítkem, skutečně stržená částka podle potvrzení banky, kurz zálohy u výdajů placených ze zálohy, vyrovnání zálohy v cizí měně.
 - **Doklady** – focení mobilem, PDF, JPG, PNG i HEIC. Otočení a ořez, kontrola skutečného formátu souboru, upozornění na duplicitní doklad. Originál se nikdy nemění.
-- **Soukromé vozidlo** – základní náhrada za km a náhrada za palivo. Cena paliva podle dokladů o tankování (vážený průměr z více tankování), z jednoho dokladu, nebo průměrná cena z vyhlášky. Přiložení technického průkazu.
-- **PDF k podpisu** ve dvou vzhledech (moderní a konzervativní). Podpis jako nahraný sken, nebo vložený obrázek podpisu s razítkem.
-- **Kompletní dokumentace** – jedno PDF s krycím listem, obsahem, podepsaným dokumentem, rozpisem výpočtu a všemi doklady seřazenými podle výdajů, s čísly stran a záložkami.
+- **Soukromé vozidlo** – základní náhrada za km a náhrada za palivo. Cena paliva podle dokladů o tankování (vážený průměr z více tankování), z jednoho dokladu, nebo průměrná cena z vyhlášky (zobrazená v aplikaci; po změně vyhlášky jde zadat ručně se zdrojem). Přiložení technického průkazu.
+- **PDF k podpisu česky nebo anglicky** (pro zahraničního nadřízeného). Podpis jako nahraný sken, nebo vložený obrázek podpisu s razítkem. Číslo účtu pro výplatu je ve vyúčtování a při výdajích ze soukromých prostředků je povinné.
+- **Kompletní dokumentace** – jedno PDF s krycím listem, obsahem, podepsaným dokumentem, rozpisem výpočtu a všemi doklady seřazenými podle výdajů, s čísly stran a záložkami. Jde zvolit, které části obsahuje (např. jen podepsaný dokument a doklady k výdajům).
+- **Ověřitelný výpočet** – Souhrn popisuje vzorce a odkazuje na stránku se všemi uloženými sazbami (stravné, 227 států, náhrada za km, ceny paliv). XLSX obsahuje celý výpočet jako vzorce Excelu se sloupcem „Kontrola“ proti výsledku aplikace.
 - **Exporty** – XLSX a CSV pro účetní, JSON s úplnými daty, ZIP s originály dokladů a pracovní projekt (ZIP), který jde načíst v jiném prohlížeči nebo zařízení.
 - **Zaměstnavatel z ARES** – vyhledání firmy podle IČO nebo názvu doplní název, IČO a sídlo. U státu, obce, kraje nebo příspěvkové organizace nastaví platovou sféru.
 - **Hlídá formality** – dotaz na snídani v ceně ubytování, upozornění na doklad bez potvrzení o zaplacení, lhůta 10 pracovních dnů pro předložení vyúčtování, číslo účtu pro výplatu ve vyúčtování.
@@ -30,8 +31,7 @@ Webová aplikace pro zaměstnance: vyplní pracovní cestu, nechá si spočítat
 | ![Úvodní stránka](docs/img/01-uvod.png) Úvod – rozpracované cesty v prohlížeči, načtení projektu | ![Plán cesty](docs/img/02-plan.png) Plán cesty – trasa, dopravní prostředky, záloha |
 | ![Průběh cesty](docs/img/03-prubeh.png) Průběh – úseky a přechody hranic, převzetí z plánu | ![Bezplatná jídla](docs/img/04-jidla.png) Jídla – krácení stravného je vidět hned u dne |
 | ![Výdaje](docs/img/05-vydaje.png) Výdaje – měny, kurzy, doklady, upozornění | ![Vozidlo](docs/img/06-vozidlo.png) Vozidlo – náhrada za km a palivo |
-| ![PDF k podpisu](docs/img/08-pdf.png) PDF k podpisu – dva vzhledy, snímek výpočtu | ![Kompletní PDF](docs/img/09-kompletni.png) Kompletní PDF – kontrola před stažením |
-| ![Exporty](docs/img/10-export.png) Exporty – projekt, XLSX, CSV, JSON, originály dokladů | |
+| ![PDF k podpisu](docs/img/08-pdf.png) PDF k podpisu – česky nebo anglicky, snímek výpočtu | ![Odevzdání](docs/img/09-kompletni.png) Odevzdání – kompletní PDF, XLSX se vzorci, CSV, JSON, projekt |
 
 Na telefonu:
 

@@ -2,6 +2,7 @@
 // Pozor: lineHeight na úrovni stránky v @react-pdf/renderer skryje pevné zápatí – nastavuje se jen u textů.
 import { Document, Page, StyleSheet, Text, View } from '@react-pdf/renderer';
 import type { ReactNode } from 'react';
+import { labelsFor } from './labels.js';
 import type { DocModel, DocPart } from './model.js';
 import { SignatureMark } from './SignatureMark.js';
 
@@ -50,13 +51,20 @@ const Header = ({ m, part }: { m: DocModel; part: string }) => (
   </View>
 );
 
-const Footer = ({ m }: { m: DocModel }) => (
-  <View style={s.footer} fixed>
-    <Text>Pravidla: {m.ruleSet}</Text>
-    <Text>Vytvořeno {m.createdAt}</Text>
-    <Text render={({ pageNumber, totalPages }) => `${m.number} · strana ${pageNumber}/${totalPages}`} />
-  </View>
-);
+const Footer = ({ m }: { m: DocModel }) => {
+  const L = labelsFor(m);
+  return (
+    <View style={s.footer} fixed>
+      <Text>
+        {L.ruleSet}: {m.ruleSet}
+      </Text>
+      <Text>
+        {L.created} {m.createdAt}
+      </Text>
+      <Text render={({ pageNumber, totalPages }) => `${m.number} · ${L.page(pageNumber, totalPages)}`} />
+    </View>
+  );
+};
 
 const KV = ({ items }: { items: [string, string][] }) => (
   <View>
@@ -130,60 +138,61 @@ const Section = ({ title, children }: { title: string; children: ReactNode }) =>
 );
 
 export function PartA({ m }: { m: DocModel }) {
+  const L = labelsFor(m);
   return (
     <Page size="A4" style={s.page}>
-      <Header m={m} part="Část A · Cestovní příkaz" />
+      <Header m={m} part={L.partA} />
       <Footer m={m} />
-      <Text style={s.kicker}>{m.trip.kind.toUpperCase()} PRACOVNÍ CESTA</Text>
-      <Text style={s.h1}>Cestovní příkaz</Text>
+      <Text style={s.kicker}>{L.tripKicker(m.trip.kind)}</Text>
+      <Text style={s.h1}>{L.travelOrder}</Text>
       <View style={s.row}>
-        <Card label="Cíl" value={m.trip.destinations} sub={m.trip.via ? `přes ${m.trip.via}` : undefined} />
-        <Card label="Termín (plán)" value={m.trip.plannedStart} sub={`do ${dash(m.trip.plannedEnd)}`} />
-        <Card label="Záloha" value={m.trip.advances.join(', ') || 'bez zálohy'} last />
+        <Card label={L.destination} value={m.trip.destinations} sub={m.trip.via ? L.via(m.trip.via) : undefined} />
+        <Card label={L.plannedTerm} value={m.trip.plannedStart} sub={L.until(dash(m.trip.plannedEnd))} />
+        <Card label={L.advance} value={m.trip.advances.join(', ') || L.noAdvance} last />
       </View>
-      <Text style={s.h2}>Zaměstnanec</Text>
+      <Text style={s.h2}>{L.employee}</Text>
       <KV
         items={[
-          ['Jméno a příjmení', dash(m.employee.name)],
-          ['Osobní číslo', m.employee.personalNumber],
-          ['Pracovní pozice', m.employee.position],
-          ['Útvar', m.employee.department],
-          ['Pravidelné pracoviště', dash(m.employee.regularWorkplace)],
-          ['Adresa', m.employee.address],
+          [L.name, dash(m.employee.name)],
+          [L.personalNumber, m.employee.personalNumber],
+          [L.position, m.employee.position],
+          [L.department, m.employee.department],
+          [L.regularWorkplace, dash(m.employee.regularWorkplace)],
+          [L.address, m.employee.address],
         ]}
       />
-      <Text style={s.h2}>Zaměstnavatel</Text>
+      <Text style={s.h2}>{L.employer}</Text>
       <KV
         items={[
-          ['Název', dash(m.employer.name)],
-          ['IČO', m.employer.ico],
-          ['Sídlo', m.employer.seat],
-          ['Organizační jednotka', m.employer.unit],
-          ['Nákladové středisko', m.employer.costCenter],
-          ['Projekt / zakázka', m.employer.project],
-          ['Režim náhrad', m.employer.sector],
+          [L.employerName, dash(m.employer.name)],
+          [L.ico, m.employer.ico],
+          [L.seat, m.employer.seat],
+          [L.unit, m.employer.unit],
+          [L.costCenter, m.employer.costCenter],
+          [L.project, m.employer.project],
+          [L.sector, m.employer.sector],
         ]}
       />
-      <Text style={s.h2}>Pracovní cesta</Text>
+      <Text style={s.h2}>{L.trip}</Text>
       <KV
         items={[
-          ['Účel', dash(m.trip.purpose)],
-          ['Místo nástupu', dash(m.trip.startPlace)],
-          ['Místo ukončení', dash(m.trip.endPlace)],
-          ['Plánovaný začátek', dash(m.trip.plannedStart)],
-          ['Plánovaný konec', dash(m.trip.plannedEnd)],
-          ['Cílová místa', dash(m.trip.destinations)],
-          ['Průjezdní místa', m.trip.via],
-          ['Dopravní prostředek', dash(m.trip.transport)],
-          ['Poznámka', m.trip.note],
-          ['Vystaveno', [m.issued.place, m.issued.date].filter(Boolean).join(', ')],
+          [L.purpose, dash(m.trip.purpose)],
+          [L.startPlace, dash(m.trip.startPlace)],
+          [L.endPlace, dash(m.trip.endPlace)],
+          [L.plannedStart, dash(m.trip.plannedStart)],
+          [L.plannedEnd, dash(m.trip.plannedEnd)],
+          [L.destinations, dash(m.trip.destinations)],
+          [L.viaPlaces, m.trip.via],
+          [L.transport, dash(m.trip.transport)],
+          [L.note, m.trip.note],
+          [L.issued, [m.issued.place, m.issued.date].filter(Boolean).join(', ')],
         ]}
       />
-      <Section title="Podpisy">
+      <Section title={L.signatures}>
         <Signs
           items={[
-            ['Zaměstnanec', 'Datum a podpis', <SignatureMark sig={m.signature} />],
-            ['Schválil – zaměstnavatel / nadřízený', 'Jméno, datum a podpis'],
+            [L.employee, L.dateSignature, <SignatureMark sig={m.signature} label={L.signed} />],
+            [L.approvedEmployer, L.nameDateSignature],
           ]}
         />
       </Section>
@@ -193,12 +202,13 @@ export function PartA({ m }: { m: DocModel }) {
 
 export function PartB({ m }: { m: DocModel }) {
   const pd = m.perDiem;
+  const L = labelsFor(m);
   return (
     <Page size="A4" style={s.page}>
-      <Header m={m} part="Část B · Vyúčtování a žádost o vyplacení" />
+      <Header m={m} part={L.partB} />
       <Footer m={m} />
-      <Text style={s.kicker}>ŽÁDOST O VYPLACENÍ NÁHRAD</Text>
-      <Text style={s.h1}>Vyúčtování pracovní cesty</Text>
+      <Text style={s.kicker}>{L.claimKicker}</Text>
+      <Text style={s.h1}>{L.settlementTitle}</Text>
       <View style={s.hero} wrap={false}>
         <View>
           <Text style={{ fontSize: 8, color: MUTED }}>{m.settlement.payoutLabel}</Text>
@@ -214,35 +224,35 @@ export function PartB({ m }: { m: DocModel }) {
       </View>
 
       <Text style={s.h2}>
-        Průběh cesty · {m.actual.start} – {m.actual.end}
+        {L.course} · {m.actual.start} – {m.actual.end}
         {m.actual.km ? ` · ${m.actual.km}` : ''}
       </Text>
       <Table
-        cols={[{ h: '#', w: 4 }, { h: 'Odkud – kam', w: 26 }, { h: 'Odjezd', w: 13 }, { h: 'Příjezd', w: 13 }, { h: 'Doprava', w: 14 }, { h: 'km', w: 6, right: true }, { h: 'Přechod hranice', w: 24 }]}
+        cols={[{ h: '#', w: 4 }, { h: L.segFromTo, w: 26 }, { h: L.departure, w: 13 }, { h: L.arrival, w: 13 }, { h: L.transportShort, w: 14 }, { h: 'km', w: 6, right: true }, { h: L.border, w: 24 }]}
         rows={m.segments.map((x) => [x.n, `${x.from} – ${x.to}`, x.departure, x.arrival, x.transport, x.km, dash(x.border)])}
       />
 
-      <Text style={s.h2}>Stravné po dnech</Text>
+      <Text style={s.h2}>{L.perDiemDays}</Text>
       {pd.hasForeign ? (
         <Table
-          cols={[{ h: 'Den', w: 13 }, { h: 'ČR', w: 9 }, { h: 'Tuzemské', w: 10, right: true }, { h: 'Zahraničí', w: 10 }, { h: 'Stát · sazba', w: 15 }, { h: 'Pásmo', w: 8 }, { h: 'Jídla', w: 7 }, { h: 'Krácení', w: 14, right: true }, { h: 'Zahraniční', w: 14, right: true }]}
+          cols={[{ h: L.day, w: 13 }, { h: L.czShort, w: 9 }, { h: L.domestic, w: 10, right: true }, { h: L.abroad, w: 10 }, { h: L.countryRate, w: 15 }, { h: L.tier, w: 8 }, { h: L.meals, w: 7 }, { h: L.reduction, w: 14, right: true }, { h: L.foreign, w: 14, right: true }]}
           rows={pd.days.map((d) => [d.date, d.domesticTime, dash(d.domesticAmount), d.foreignTime, d.country ? `${d.country} · ${d.base}` : '–', dash(d.tier), dash(d.meals), dash(d.reduction), dash(d.amount)])}
-          foot={['Celkem', '', pd.domesticTotal, '', '', '', '', pd.reductionTotal, pd.foreignTotal]}
+          foot={[L.total, '', pd.domesticTotal, '', '', '', '', pd.reductionTotal, pd.foreignTotal]}
         />
       ) : (
         <Table
-          cols={[{ h: 'Den', w: 18 }, { h: 'Doba', w: 14 }, { h: 'Pásmo a sazba', w: 34 }, { h: 'Jídla', w: 10 }, { h: 'Stravné', w: 24, right: true }]}
+          cols={[{ h: L.day, w: 18 }, { h: L.duration, w: 14 }, { h: L.bandRate, w: 34 }, { h: L.meals, w: 10 }, { h: L.perDiem, w: 24, right: true }]}
           rows={pd.days.map((d) => [d.date, d.domesticTime, dash(d.domestic), dash(d.meals), dash(d.domesticAmount)])}
-          foot={['Celkem', '', '', '', pd.domesticTotal]}
+          foot={[L.total, '', '', '', pd.domesticTotal]}
         />
       )}
       <Text style={s.note}>{pd.note}</Text>
 
       {m.expenses.length > 0 && (
         <>
-          <Text style={s.h2}>Výdaje</Text>
+          <Text style={s.h2}>{L.expenses}</Text>
           <Table
-            cols={[{ h: '#', w: 4 }, { h: 'Výdaj', w: 34 }, { h: 'Částka', w: 13, right: true }, { h: 'Kurz · zdroj', w: 17 }, { h: 'Kč', w: 12, right: true }, { h: 'Úhrada', w: 13 }, { h: 'Dokl.', w: 7, right: true }]}
+            cols={[{ h: '#', w: 4 }, { h: L.expense, w: 34 }, { h: L.amount, w: 13, right: true }, { h: L.rateSource, w: 17 }, { h: L.czk, w: 12, right: true }, { h: L.payment, w: 13 }, { h: L.docs, w: 7, right: true }]}
             rows={m.expenses.map((e) => [e.n, [`${e.category}${e.supplier ? ` – ${e.supplier}` : ''}, ${e.date}`, e.description, e.note].filter(Boolean).join(' · '), e.amount, dash(e.rate), e.czk, e.payment, e.docs])}
           />
           <Text style={s.note}>{m.expensesNote}</Text>
@@ -250,37 +260,35 @@ export function PartB({ m }: { m: DocModel }) {
       )}
 
       {m.vehicle && (
-        <Section title={`Soukromé vozidlo · ${m.vehicle.vehicle}`}>
+        <Section title={L.vehicle(m.vehicle.vehicle)}>
           <Table
-            cols={[{ h: 'Složka náhrady', w: 40 }, { h: 'Výpočet', w: 40 }, { h: 'Kč', w: 20, right: true }]}
+            cols={[{ h: L.component, w: 40 }, { h: L.calculation, w: 40 }, { h: L.czk, w: 20, right: true }]}
             rows={[
-              ['Základní náhrada', m.vehicle.basicCalc, m.vehicle.basic],
-              [`Pohonné hmoty (spotřeba ${m.vehicle.consumption})`, `${m.vehicle.fuelCalc} · ${m.vehicle.fuelPriceSource}`, m.vehicle.fuelComp],
+              [L.basic, m.vehicle.basicCalc, m.vehicle.basic],
+              [L.fuel(m.vehicle.consumption), `${m.vehicle.fuelCalc} · ${m.vehicle.fuelPriceSource}`, m.vehicle.fuelComp],
             ]}
-            foot={['Celkem', '', m.vehicle.total]}
+            foot={[L.total, '', m.vehicle.total]}
           />
-          <Text style={s.note}>
-            Vlastník: {dash(m.vehicle.owner)} · palivo: {m.vehicle.fuel} · použito na žádost zaměstnavatele: {m.vehicle.requested}
-          </Text>
+          <Text style={s.note}>{L.vehicleNote(dash(m.vehicle.owner), m.vehicle.fuel, m.vehicle.requested)}</Text>
         </Section>
       )}
 
-      <Section title="Vyúčtování">
+      <Section title={L.settlement}>
         <Table
-          cols={[{ h: 'Položka', w: 60 }, { h: 'Cizí měna', w: 20, right: true }, { h: 'Kč', w: 20, right: true }]}
+          cols={[{ h: L.item, w: 60 }, { h: L.foreignCurrency, w: 20, right: true }, { h: L.czk, w: 20, right: true }]}
           rows={m.settlement.rows.map((r) => [r.label, r.foreign, r.czk])}
-          foot={[`${m.settlement.payoutLabel} (zaokrouhleno na celé Kč)`, '', m.settlement.payout]}
+          foot={[L.rounded(m.settlement.payoutLabel), '', m.settlement.payout]}
         />
-        {m.employee.bankAccount ? <Text style={s.note}>Číslo účtu zaměstnance pro výplatu: {m.employee.bankAccount}</Text> : null}
+        <Text style={[s.note, { color: INK, fontSize: 8 }]}>{m.employee.bankAccount ? L.bankAccount(m.employee.bankAccount) : L.bankAccountMissing}</Text>
       </Section>
 
-      <Section title="Prohlášení a schválení">
+      <Section title={L.declarationTitle}>
         <Text style={{ marginBottom: 3, lineHeight: 1.3 }}>{m.declaration}</Text>
-        <Text style={{ marginBottom: 6, color: MUTED }}>Připojeno dokladů: {m.documentCount}</Text>
+        <Text style={{ marginBottom: 6, color: MUTED }}>{L.attached(m.documentCount)}</Text>
         <Signs
           items={[
-            ['Zaměstnanec', 'Datum a podpis', <SignatureMark sig={m.signature} />],
-            ['Schválil – nadřízený', 'Jméno, datum a podpis'],
+            [L.employee, L.dateSignature, <SignatureMark sig={m.signature} label={L.signed} />],
+            [L.approvedSupervisor, L.nameDateSignature],
           ]}
         />
       </Section>
@@ -289,8 +297,9 @@ export function PartB({ m }: { m: DocModel }) {
 }
 
 export function ModernDocument({ m, part }: { m: DocModel; part: DocPart }) {
+  const L = labelsFor(m);
   return (
-    <Document title={`${m.number} Cestovní příkaz${part === 'full' ? ' a žádost o vyplacení' : ''}`} author={m.employee.name} language="cs" creator="Cestovní příkazy" producer="Cestovní příkazy">
+    <Document title={L.title(m.number, part)} author={m.employee.name} language={m.lang ?? 'cs'} creator="Cestovní příkazy" producer="Cestovní příkazy">
       <PartA m={m} />
       {part === 'full' && <PartB m={m} />}
     </Document>

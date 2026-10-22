@@ -4,7 +4,8 @@ import { currencyOptions } from '../../model/countries.js';
 import { convertToCzk, impliedRate } from '@cp/core';
 import { formatDay, formatMinor, formatRate, normalizeDecimal, toMinor } from '../../model/format.js';
 import { datesOf, markBreakfasts } from '../../model/meals.js';
-import { actualTimes, FUEL_CATEGORIES } from '../../model/toInput.js';
+import { bankAccountProblem } from '../../model/bankAccount.js';
+import { actualTimes, FUEL_CATEGORIES, payerOf } from '../../model/toInput.js';
 import { CnbButton } from '../../rates/CnbButton.js';
 import { AttachmentList } from '../../attachments/AttachmentList.js';
 import { deleteForExpense } from '../../attachments/store.js';
@@ -26,6 +27,8 @@ export function StepVydaje() {
   const [open, setOpen] = useState<string | null>(null);
   const attachments = useLiveQuery(() => db.attachments.where('tripId').equals(trip.id).toArray(), [trip.id]) ?? [];
   const total = result?.expenses.reduce((s, e) => s + (e.reimbursable ? e.czk : 0), 0) ?? 0;
+
+  const paidPrivately = trip.expenses.some((e) => e.reimbursable && e.amount.trim() && payerOf(e.paymentMethod) === 'EMPLOYEE');
 
   const set = <K extends keyof ExpenseDoc>(i: number, k: K) => (v: ExpenseDoc[K]) => update((d) => void (d.expenses[i]![k] = v));
 
@@ -197,6 +200,19 @@ export function StepVydaje() {
       >
         <Icon d={icons.plus} /> Přidat výdaj
       </Button>
+
+      {paidPrivately && (
+        <Card aria-label="Výplata na účet">
+          <TextField
+            label="Číslo účtu pro výplatu"
+            value={trip.employee.bankAccount}
+            onChange={(v) => update((d) => void (d.employee.bankAccount = v))}
+            placeholder="123456789/0800"
+            hint="Některé výdaje jste platili ze soukromých prostředků. Na tento účet vám je účetní pošle – číslo bude ve vyúčtování v PDF."
+            error={trip.employee.bankAccount.trim() ? bankAccountProblem(trip.employee.bankAccount) : 'Doplňte číslo účtu.'}
+          />
+        </Card>
+      )}
     </>
   );
 }

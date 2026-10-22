@@ -93,6 +93,7 @@ test('ukázková cesta do Vídně', async ({ page }) => {
   await parking.getByLabel('Částka', { exact: true }).fill('36');
   await parking.getByLabel('Způsob úhrady').selectOption('ADVANCE');
   await parking.getByRole('button', { name: 'Hotovo' }).click();
+  await page.getByLabel('Číslo účtu pro výplatu').fill('2000145399/0800');
   await page.getByRole('heading', { name: 'Výdaje', level: 1 }).scrollIntoViewIfNeeded();
   await shot(page, '05-vydaje');
 
@@ -129,10 +130,9 @@ test('ukázková cesta do Vídně', async ({ page }) => {
     const [pdf] = await Promise.all([page.waitForEvent('download'), done.getByRole('link', { name: 'Stáhnout kompletní PDF' }).click()]);
     await pdf.saveAs(`${dir}/ukazka-kompletni-dokumentace.pdf`);
   }
+  await page.getByRole('heading', { name: 'Odevzdání a exporty', level: 1 }).scrollIntoViewIfNeeded();
   await shot(page, '09-kompletni');
 
-  await page.goto(`${base}/export`);
-  await shot(page, '10-export');
 
   await page.goto('/');
   await shot(page, '01-uvod');

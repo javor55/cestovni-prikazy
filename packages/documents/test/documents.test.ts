@@ -1,7 +1,7 @@
 import { renderToBuffer } from '@react-pdf/renderer';
 import { getDocument } from 'pdfjs-dist/legacy/build/pdf.mjs';
 import { beforeAll, describe, expect, it } from 'vitest';
-import { documentElement, fileName, registerFonts, type DocModel, type DocPart, type Layout } from '../src/index.js';
+import { documentElement, fileName, registerFonts, type DocModel, type DocPart } from '../src/index.js';
 import { sample } from './sample.js';
 
 const font = (f: string) => new URL(`../fonts/${f}`, import.meta.url).pathname;
@@ -9,8 +9,8 @@ const font = (f: string) => new URL(`../fonts/${f}`, import.meta.url).pathname;
 beforeAll(() => registerFonts({ regular: font('NotoSans-Regular.ttf'), bold: font('NotoSans-Bold.ttf'), serifBold: font('NotoSerif-Bold.ttf') }));
 
 /** Vyrenderuje PDF a vrátí text jednotlivých stran. */
-async function pages(m: DocModel, layout: Layout, part: DocPart): Promise<string[]> {
-  const buf = await renderToBuffer(documentElement(m, layout, part) as Parameters<typeof renderToBuffer>[0]);
+async function pages(m: DocModel, part: DocPart): Promise<string[]> {
+  const buf = await renderToBuffer(documentElement(m, part) as Parameters<typeof renderToBuffer>[0]);
   expect(buf.subarray(0, 5).toString()).toBe('%PDF-');
   const task = getDocument({ data: new Uint8Array(buf), useSystemFonts: false });
   const doc = await task.promise;
@@ -23,13 +23,13 @@ async function pages(m: DocModel, layout: Layout, part: DocPart): Promise<string
   return out;
 }
 
-describe.each(['modern', 'conservative'] as const)('šablona %s', (layout) => {
+describe('dokument k podpisu', () => {
   it('celý dokument: části A i B, číslo příkazu a číslování na každé straně', async () => {
-    const p = await pages(sample(), layout, 'full');
+    const p = await pages(sample(), 'full');
     expect(p.length).toBeGreaterThanOrEqual(2);
     p.forEach((text, i) => {
       expect(text).toContain('CP-2026-0042');
-      expect(text).toMatch(layout === 'modern' ? new RegExp(`strana ${i + 1}/${p.length}`) : new RegExp(`Strana ${i + 1} z ${p.length}`));
+      expect(text).toMatch(new RegExp(`strana ${i + 1}/${p.length}`));
     });
     const all = p.join(' ');
     expect(all).toMatch(/cestovní příkaz/i);
@@ -41,15 +41,15 @@ describe.each(['modern', 'conservative'] as const)('šablona %s', (layout) => {
     expect(all).toContain('CZ-2026 v1.0.0');
   });
 
-  it('číslo účtu pro výplatu je ve vyúčtování, jen když je zadané', async () => {
+  it('číslo účtu pro výplatu je ve vyúčtování; bez něj je tam řádek k doplnění', async () => {
     const m = sample();
-    expect((await pages(m, layout, 'full')).join(' ')).not.toContain('Číslo účtu zaměstnance');
+    expect((await pages(m, 'full')).join(' ')).toContain('Číslo účtu pro výplatu: ……');
     m.employee.bankAccount = '123456789/0800';
-    expect((await pages(m, layout, 'full')).join(' ')).toContain('Číslo účtu zaměstnance pro výplatu: 123456789/0800');
+    expect((await pages(m, 'full')).join(' ')).toContain('Číslo účtu zaměstnance pro výplatu: 123456789/0800');
   });
 
   it('jen část A má jednu stranu bez vyúčtování', async () => {
-    const p = await pages(sample(), layout, 'A');
+    const p = await pages(sample(), 'A');
     expect(p).toHaveLength(1);
     expect(p[0]).not.toMatch(/vyúčtování pracovní cesty/i);
   });
@@ -59,7 +59,7 @@ describe.each(['modern', 'conservative'] as const)('šablona %s', (layout) => {
     m.trip.purpose = 'Jednání ' + 'o dlouhodobé spolupráci a technických podmínkách dodávky '.repeat(12);
     m.employee.name = 'Žofie Šťastná-Øster Großmann';
     m.segments = Array.from({ length: 40 }, (_, i) => ({ ...m.segments[0]!, n: String(i + 1), to: i % 2 ? 'Łódź (PL)' : 'Győr (HU)' }));
-    const p = await pages(m, layout, 'full');
+    const p = await pages(m, 'full');
     expect(p.length).toBeGreaterThanOrEqual(3);
     expect(p.join(' ')).toContain('Žofie Šťastná-Øster Großmann');
     expect(p.join(' ')).toContain('Łódź');
@@ -80,9 +80,24 @@ describe.each(['modern', 'conservative'] as const)('šablona %s', (layout) => {
     };
     m.expenses = [];
     delete m.vehicle;
-    const all = (await pages(m, layout, 'full')).join(' ');
+    const all = (await pages(m, 'full')).join(' ');
     expect(all).toContain('47,00 Kč');
     expect(all).not.toContain('Soukromé vozidlo ·');
+  });
+});
+
+describe('dokument v angličtině', () => {
+  it('pevné popisky jsou anglicky, údaje z modelu zůstávají', async () => {
+    const m = { ...sample(), lang: 'en' as const };
+    m.employee = { ...m.employee, bankAccount: '123456789/0800' };
+    const all = (await pages(m, 'full')).join(' ');
+    expect(all).toContain('Travel order');
+    expect(all).toContain('Business trip expense claim');
+    expect(all).toContain('Meal allowance by day');
+    expect(all).toContain("Employee's bank account for payment: 123456789/0800");
+    expect(all).toContain('Approved by – supervisor');
+    expect(all).toMatch(/page 1\/\d/);
+    expect(all).not.toMatch(/Cestovní příkaz|Vyúčtování pracovní cesty|Stravné po dnech|strana \d/);
   });
 });
 
@@ -95,31 +110,17 @@ describe('název souboru', () => {
   });
 });
 
-describe('konzervativní šablona', () => {
-  it('čísluje oddíly průběžně, i když výdaje a vozidlo chybí', async () => {
-    const m = sample();
-    m.expenses = [];
-    delete m.vehicle;
-    const all = (await pages(m, 'conservative', 'full')).join(' ');
-    expect(all).toContain('7. Souhrn vyúčtování');
-    expect(all).toContain('8. Prohlášení zaměstnance');
-    expect(all).not.toContain('9.');
-  });
-});
-
 describe('vložený podpis', () => {
   it('obrázek podpisu a razítko se objeví jen v podpisových polích zaměstnance', async () => {
     const { readFile } = await import('node:fs/promises');
     const png = await readFile(new URL('./fixtures/podpis.png', import.meta.url));
     const m = sample();
     m.signature = { image: `data:image/png;base64,${png.toString('base64')}`, widthPct: 80, stamp: { name: 'Jana Ukázková', date: '17. 10. 2026' } };
-    for (const layout of ['modern', 'conservative'] as const) {
-      const buf = await renderToBuffer(documentElement(m, layout, 'full') as Parameters<typeof renderToBuffer>[0]);
-      expect(buf.includes('/Subtype /Image')).toBe(true);
-      const text = (await pages(m, layout, 'full')).join(' ');
-      // razítko v části A i B
-      expect(text.match(/Podepsáno/g)).toHaveLength(2);
-      expect(text).toContain('17. 10. 2026');
-    }
+    const buf = await renderToBuffer(documentElement(m, 'full') as Parameters<typeof renderToBuffer>[0]);
+    expect(buf.includes('/Subtype /Image')).toBe(true);
+    const text = (await pages(m, 'full')).join(' ');
+    // razítko v části A i B
+    expect(text.match(/Podepsáno/g)).toHaveLength(2);
+    expect(text).toContain('17. 10. 2026');
   });
 });

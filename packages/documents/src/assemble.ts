@@ -20,8 +20,41 @@ export interface AssemblyFile {
   failed?: string;
 }
 
+/** Části kompletní dokumentace, které má PDF obsahovat (výchozí: všechny). */
+export interface AssemblyParts {
+  /** Krycí list a obsah se seznamem příloh. */
+  cover: boolean;
+  signed: boolean;
+  calculation: boolean;
+  expenseOverview: boolean;
+  /** Identifikační stránka před doklady každého výdaje. */
+  expenseIdPages: boolean;
+  accounting: boolean;
+  payment: boolean;
+  /** Doplňující dokumenty u výdajů. */
+  expenseSupporting: boolean;
+  vehicle: boolean;
+  /** Doplňující přílohy k celé cestě. */
+  supporting: boolean;
+}
+
+export const ALL_PARTS: AssemblyParts = {
+  cover: true,
+  signed: true,
+  calculation: true,
+  expenseOverview: true,
+  expenseIdPages: true,
+  accounting: true,
+  payment: true,
+  expenseSupporting: true,
+  vehicle: true,
+  supporting: true,
+};
+
 export interface AssemblyInput {
   model: DocModel;
+  /** Které části dokument obsahuje; chybí-li, všechny. */
+  parts?: AssemblyParts;
   /** Podepsaný dokument: sken (stránky/soubory v daném pořadí), nebo vygenerované PDF. */
   signed: { source: 'scan'; files: AssemblyFile[] } | { source: 'generated'; pdf: Uint8Array; visualSignature: boolean };
   /** Výdaje v pořadí; `n` odpovídá číslu výdaje v modelu. */
@@ -70,6 +103,8 @@ async function pdfPageCount(bytes: Uint8Array): Promise<number> {
 
 export async function assemble(input: AssemblyInput): Promise<{ bytes: Uint8Array; stats: AssemblyStats }> {
   const { model: m } = input;
+  const parts = input.parts ?? ALL_PARTS;
+  const kindOn: Record<Exclude<FileKind, 'signed' | 'vehicle'>, boolean> = { accounting: parts.accounting, payment: parts.payment, supporting: parts.expenseSupporting };
   const out = await PDFDocument.create();
   out.registerFontkit(fontkit);
   // Celé písmo: podmnožina (subset) z @pdf-lib/fontkit u Noto Sans vykresluje rozsypané znaky.
@@ -102,7 +137,7 @@ export async function assemble(input: AssemblyInput): Promise<{ bytes: Uint8Arra
   let signed: Source[] = [];
   let signature: string;
   if (input.signed.source === 'scan' && input.signed.files.length) {
-    for (const [i, f] of input.signed.files.entries()) signed.push(...(await fileSources(f, `Podepsaný dokument – ${f.name} (${i + 1}/${input.signed.files.length})`)));
+    if (parts.signed) for (const [i, f] of input.signed.files.entries()) signed.push(...(await fileSources(f, `Podepsaný dokument – ${f.name} (${i + 1}/${input.signed.files.length})`)));
     signature = 'podepsaný dokument nahrán jako sken';
   } else if (input.signed.source === 'generated') {
     const doc = await PDFDocument.load(input.signed.pdf);
@@ -112,11 +147,12 @@ export async function assemble(input: AssemblyInput): Promise<{ bytes: Uint8Arra
     signature = 'NEPODEPSÁNO';
   }
   const unsigned = signature.startsWith('NEPODEPSÁNO');
-  if (unsigned) problems.push('Cestovní příkaz a vyúčtování nejsou podepsané.');
+  if (unsigned && parts.signed) problems.push('Cestovní příkaz a vyúčtování nejsou podepsané.');
+  if (!parts.signed) signed = [];
 
   // 4.–5. Přehledy a identifikační stránky
-  const calc = await ownPages(createElement(CalculationOverview, { m }));
-  const overview = await ownPages(createElement(ExpenseOverview, { m }));
+  const calc = parts.calculation ? await ownPages(createElement(CalculationOverview, { m })) : [];
+  const overview = parts.expenseOverview ? await ownPages(createElement(ExpenseOverview, { m })) : [];
   const idFiles: Record<string, IdPageFile[]> = {};
   const expenseSources: { n: string; accounting: Source[]; payment: Source[]; supporting: Source[] }[] = [];
   for (const e of input.expenses) {
@@ -125,18 +161,18 @@ export async function assemble(input: AssemblyInput): Promise<{ bytes: Uint8Arra
     const group = { n: e.n, accounting: [] as Source[], payment: [] as Source[], supporting: [] as Source[] };
     idFiles[e.n] = [];
     for (const f of e.files) {
-      if (f.kind === 'signed' || f.kind === 'vehicle') continue;
+      if (f.kind === 'signed' || f.kind === 'vehicle' || !kindOn[f.kind]) continue;
       const src = await fileSources(f, `${title} · ${kindLabel[f.kind]} · ${f.name}`);
       group[f.kind].push(...src);
       idFiles[e.n]!.push({ kind: kindLabel[f.kind], name: f.name, pages: src.length });
     }
     expenseSources.push(group);
   }
-  const idPages = m.expenses.length ? await ownPages(createElement(ExpenseIdPages, { m, files: idFiles })) : [];
+  const idPages = m.expenses.length && parts.expenseIdPages ? await ownPages(createElement(ExpenseIdPages, { m, files: idFiles })) : [];
   const supporting: Source[] = [];
-  for (const f of input.supporting) supporting.push(...(await fileSources(f, `${kindLabel.supporting} · ${f.name}`)));
+  if (parts.supporting) for (const f of input.supporting) supporting.push(...(await fileSources(f, `${kindLabel.supporting} · ${f.name}`)));
   const vehicle: Source[] = [];
-  for (const f of input.vehicle ?? []) vehicle.push(...(await fileSources(f, `${kindLabel.vehicle} · ${f.name}`)));
+  if (parts.vehicle) for (const f of input.vehicle ?? []) vehicle.push(...(await fileSources(f, `${kindLabel.vehicle} · ${f.name}`)));
 
   // Pořadí těla dokumentu a položky obsahu (čísla stran zatím relativně od začátku těla).
   const body: Source[] = [];
@@ -151,36 +187,38 @@ export async function assemble(input: AssemblyInput): Promise<{ bytes: Uint8Arra
   section('Přehled výdajů', overview);
   // Každý výdaj pohromadě: identifikační stránka a za ní všechny jeho přílohy
   // (účetní doklad, doklad o zaplacení, doplňující dokumenty).
-  if (expenseSources.length) toc.push({ title: 'Výdaje a jejich doklady', page: 0, level: 0, rel: body.length });
-  expenseSources.forEach((g, i) => {
-    toc.push({ title: `Výdaj č. ${g.n}${g.accounting.length ? '' : ' – bez účetního dokladu'}`, page: 0, level: 1, rel: body.length });
-    body.push(idPages[i]!, ...g.accounting, ...g.payment, ...g.supporting);
-  });
+  const groups = expenseSources.map((g, i) => ({ g, pages: [...(idPages[i] ? [idPages[i]] : []), ...g.accounting, ...g.payment, ...g.supporting] })).filter((x) => x.pages.length);
+  if (groups.length) toc.push({ title: 'Výdaje a jejich doklady', page: 0, level: 0, rel: body.length });
+  for (const { g, pages } of groups) {
+    toc.push({ title: `Výdaj č. ${g.n}${g.accounting.length || !parts.accounting ? '' : ' – bez účetního dokladu'}`, page: 0, level: 1, rel: body.length });
+    body.push(...pages);
+  }
   section('Doklady k vozidlu', vehicle);
   section('Doplňující přílohy', supporting);
 
-  const count = (k: FileKind) => input.expenses.reduce((s, e) => s + e.files.filter((f) => f.kind === k).length, 0);
+  const count = (k: Exclude<FileKind, 'signed' | 'vehicle'>) => (kindOn[k] ? input.expenses.reduce((s, e) => s + e.files.filter((f) => f.kind === k).length, 0) : 0);
   const info = (totalPages: number): CoverInfo => ({
     totalPages,
     signature,
     accountingDocs: count('accounting'),
     paymentDocs: count('payment'),
-    supportingDocs: count('supporting') + input.supporting.length,
-    vehicleDocs: input.vehicle?.length ?? 0,
+    supportingDocs: count('supporting') + (parts.supporting ? input.supporting.length : 0),
+    vehicleDocs: parts.vehicle ? (input.vehicle?.length ?? 0) : 0,
     expensesWithoutDocs: input.expenses.filter((e) => !e.files.some((f) => f.kind === 'accounting')).length,
     problems,
   });
 
+  if (!body.length && !parts.cover) throw new Error('Vyberte alespoň jednu část dokumentu.');
   // Krycí list a obsah: počet jejich stran ovlivňuje čísla v obsahu, proto se počítá iterativně.
-  let front = 2;
+  let front = parts.cover ? 2 : 0;
   let frontDoc: PDFDocument | undefined;
-  for (let attempt = 0; attempt < 4; attempt++) {
+  for (let attempt = 0; parts.cover && attempt < 4; attempt++) {
     const entries = toc.map(({ rel, ...e }) => ({ ...e, page: front + rel + 1 }));
     frontDoc = await PDFDocument.load(await input.render(createElement(CoverAndToc, { m, toc: entries, info: info(front + body.length) })));
     if (frontDoc.getPageCount() === front) break;
     front = frontDoc.getPageCount();
   }
-  const all: Source[] = [...frontDoc!.getPageIndices().map((index): Source => ({ type: 'own', doc: frontDoc!, index })), ...body];
+  const all: Source[] = [...(frontDoc ? frontDoc.getPageIndices().map((index): Source => ({ type: 'own', doc: frontDoc, index })) : []), ...body];
 
   // Vložení stránek
   const labels: string[] = [];
@@ -216,7 +254,7 @@ export async function assemble(input: AssemblyInput): Promise<{ bytes: Uint8Arra
   });
 
   // Záložky
-  const marks = [{ title: 'Krycí list a obsah', page: 0 }, ...toc.map((e) => ({ title: e.level ? `  ${e.title}` : e.title, page: front + e.rel }))];
+  const marks = [...(parts.cover ? [{ title: 'Krycí list a obsah', page: 0 }] : []), ...toc.map((e) => ({ title: e.level ? `  ${e.title}` : e.title, page: front + e.rel }))];
   addOutline(out, marks);
 
   out.setTitle(`${m.number} Kompletní dokumentace`);

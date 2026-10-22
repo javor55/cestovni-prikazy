@@ -6,7 +6,8 @@ import { db, expiresAt } from '../../storage/db.js';
 import { Button, Card, H2, Icon, icons, Notice } from '../../ui/controls.js';
 import { useTrip } from '../context.js';
 
-export function StepExport() {
+/** Exporty pro účetní a pracovní projekt – součást kroku Odevzdání. */
+export function Exports() {
   const { trip, mapped, result, docCounts, issues } = useTrip();
   const attachments = useLiveQuery(() => db.attachments.where('tripId').equals(trip.id).toArray(), [trip.id]);
   const [busy, setBusy] = useState('');

@@ -1,6 +1,6 @@
 // Sestavení kompletní dokumentace v prohlížeči z uloženého snímku a příloh v IndexedDB.
 
-import type { AssemblyFile, AssemblyStats } from '@cp/documents';
+import type { AssemblyFile, AssemblyParts, AssemblyStats } from '@cp/documents';
 import type { DocModel } from '@cp/documents/model';
 import type { Attachment } from '../attachments/model.js';
 import { getBlob } from '../attachments/store.js';
@@ -51,7 +51,7 @@ export async function withSignature(model: DocModel, trip: TripDoc, now: Date): 
   };
 }
 
-export async function buildComplete(trip: TripDoc, snapshot: Snapshot, now: Date): Promise<{ blob: Blob; stats: AssemblyStats }> {
+export async function buildComplete(trip: TripDoc, snapshot: Snapshot, now: Date, parts?: AssemblyParts): Promise<{ blob: Blob; stats: AssemblyStats }> {
   const { docs, fontUrls } = await loadDocuments();
   const fetchBytes = async (url: string) => new Uint8Array(await (await fetch(url)).arrayBuffer());
   // Pro záhlaví a číslování stran (pdf-lib) jsou potřeba data písem, ne jen jejich adresy.
@@ -66,7 +66,7 @@ export async function buildComplete(trip: TripDoc, snapshot: Snapshot, now: Date
     signed = { source: 'scan', files: await Promise.all(scan.map(toFile)) };
   } else {
     const signedModel = await withSignature(model, trip, now);
-    const pdf = await generatePdf(signedModel ?? model, snapshot.layout, 'full');
+    const pdf = await generatePdf(signedModel ?? model, 'full');
     signed = { source: 'generated', pdf: await bytes(pdf), visualSignature: Boolean(signedModel) };
   }
 
@@ -81,6 +81,7 @@ export async function buildComplete(trip: TripDoc, snapshot: Snapshot, now: Date
 
   const { bytes: out, stats } = await docs.assemble({
     model,
+    ...(parts && { parts }),
     signed,
     expenses,
     supporting,

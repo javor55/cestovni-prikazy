@@ -8,15 +8,16 @@ export const steps = [
   { slug: 'jidla', title: 'Bezplatná jídla' },
   { slug: 'vydaje', title: 'Výdaje' },
   { slug: 'vozidlo', title: 'Vozidlo' },
-  { slug: 'souhrn', title: 'Souhrn' },
-  { slug: 'kontrola', title: 'Kontrola' },
+  { slug: 'souhrn', title: 'Souhrn a kontrola' },
   { slug: 'pdf', title: 'PDF k podpisu' },
   { slug: 'podpis', title: 'Podpis' },
-  { slug: 'kompletni', title: 'Kompletní PDF' },
-  { slug: 'export', title: 'Exporty' },
+  { slug: 'kompletni', title: 'Odevzdání a exporty' },
 ] as const;
 
 export type StepSlug = (typeof steps)[number]['slug'];
+
+/** Kroky ze starších verzí: Kontrola je součástí Souhrnu, Exporty kroku Odevzdání. */
+export const legacySteps: Record<string, StepSlug> = { kontrola: 'souhrn', export: 'kompletni' };
 
 const prefixes: [RegExp, StepSlug][] = [
   [/^(SEGMENT_|CROSSING_|MISSING_BORDER|TRIP_|KIND_|INVALID_TIME)/, 'prubeh'],
@@ -47,5 +48,5 @@ export function stepState(slug: StepSlug, trip: TripDoc, issues: Issue[]): StepS
   };
   if (filled[slug] === false) return 'todo';
   if (mine.some((i) => i.severity === 'warning')) return 'warning';
-  return slug === 'pdf' || slug === 'podpis' || slug === 'kompletni' || slug === 'export' ? 'todo' : 'done';
+  return slug === 'pdf' || slug === 'podpis' || slug === 'kompletni' ? 'todo' : 'done';
 }

@@ -70,6 +70,7 @@ export async function tripWithPdf(page: Page): Promise<string> {
   await e1.getByLabel('Částka', { exact: true }).fill('120');
   await e1.getByLabel('Vybrat soubory dokladů').setInputFiles({ name: 'jizdenka.jpg', mimeType: 'image/jpeg', buffer: await image(page, 'image/jpeg') });
   await expect(e1).toContainText('✓ 1 účetní doklad');
+  await page.getByLabel('Číslo účtu pro výplatu').fill('2000145399/0800');
   await go(page, `${base}/pdf`);
   await page.getByRole('button', { name: 'Vytvořit PDF' }).click();
   await expect(page.getByRole('region', { name: 'Vytvořené PDF' })).toBeVisible({ timeout: 20_000 });

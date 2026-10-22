@@ -6,12 +6,16 @@ import type { Attachment } from '../attachments/model.js';
 import { SCHEMA_VERSION } from '../model/trip.js';
 import { APP_VERSION } from '../version.js';
 import { slug } from './names.js';
+import { formulaTables } from './formulas.js';
 import { buildTables, type TablesInput } from './tables.js';
 
 const base = (input: TablesInput) => slug(input.trip.number, 'CP');
 
+/** XLSX: souhrn, listy s celým výpočtem jako vzorci (pro kontrolu účetní) a datové listy jako v CSV. */
 export function xlsxFile(input: TablesInput, now = new Date()) {
-  return { name: `${base(input)}_Vyuctovani.xlsx`, bytes: toXlsx(buildTables(input), now), type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' };
+  const [summary, ...data] = buildTables(input);
+  const tables = [summary!, ...formulaTables(input), ...data];
+  return { name: `${base(input)}_Vyuctovani.xlsx`, bytes: toXlsx(tables, now), type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' };
 }
 
 export function csvZipFile(input: TablesInput, now = new Date()) {

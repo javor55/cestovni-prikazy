@@ -3,7 +3,7 @@ import { readFile } from 'node:fs/promises';
 import { PDFDocument, PDFName } from 'pdf-lib';
 import { getDocument } from 'pdfjs-dist/legacy/build/pdf.mjs';
 import { beforeAll, describe, expect, it } from 'vitest';
-import { assemble, documentElement, registerFonts, type AssemblyInput } from '../src/index.js';
+import { ALL_PARTS, assemble, documentElement, registerFonts, type AssemblyInput } from '../src/index.js';
 import { sample } from './sample.js';
 
 const font = (f: string) => new URL(`../fonts/${f}`, import.meta.url).pathname;
@@ -30,8 +30,8 @@ async function input(over: Partial<AssemblyInput> = {}): Promise<AssemblyInput> 
     { ...m.expenses[0]!, n: '1' },
     { ...m.expenses[0]!, n: '2', category: 'Parkovné', supplier: 'Garáž' },
   ];
-  const signedPdf = await render(documentElement(m, 'modern', 'full') as Parameters<typeof renderToBuffer>[0]);
-  const vypis = await render(documentElement(m, 'conservative', 'A') as Parameters<typeof renderToBuffer>[0]); // libovolné jednostránkové PDF
+  const signedPdf = await render(documentElement(m, 'full') as Parameters<typeof renderToBuffer>[0]);
+  const vypis = await render(documentElement(m, 'A') as Parameters<typeof renderToBuffer>[0]); // libovolné jednostránkové PDF
   return {
     model: m,
     signed: { source: 'generated', pdf: signedPdf, visualSignature: true },
@@ -131,6 +131,22 @@ describe('kompletní dokumentace', () => {
     expect(pay).toBeGreaterThan(0);
     expect(veh).toBeGreaterThan(pay);
     expect(sup).toBeGreaterThan(veh);
+  });
+
+  it('jen vybrané části: podepsaný dokument a doklady k výdajům', async () => {
+    const parts = { ...ALL_PARTS, cover: false, calculation: false, expenseOverview: false, expenseIdPages: false, expenseSupporting: false, vehicle: false, supporting: false };
+    const { bytes, stats } = await assemble(await input({ parts }));
+    const p = await texts(bytes);
+    expect(p[0]).toContain('Část A · Cestovní příkaz');
+    expect(p.join(' ')).not.toMatch(/Kompletní dokumentace pracovní cesty|Obsah a seznam příloh|Detailní přehled výpočtu|Přehled výdajů|K výdaji není přiložen|program/);
+    const acc = p.findIndex((t) => t.includes('Výdaj č. 1 · Ubytování · Účetní doklad · faktura.jpg'));
+    const pay = p.findIndex((t) => t.includes('Výdaj č. 1 · Ubytování · Doklad o zaplacení · vypis.pdf'));
+    expect(acc).toBeGreaterThan(0);
+    expect(pay).toBe(acc + 1);
+    expect(p).toHaveLength(pay + 1);
+    p.forEach((t, i) => expect(t).toContain(`strana ${i + 1} z ${p.length}`));
+    expect(stats).toMatchObject({ accountingDocs: 1, paymentDocs: 1, supportingDocs: 0, pages: p.length });
+    await expect(assemble(await input({ parts: Object.fromEntries(Object.keys(ALL_PARTS).map((k) => [k, false])) as unknown as typeof ALL_PARTS }))).rejects.toThrow('Vyberte alespoň jednu část');
   });
 
   it('velikost zůstane rozumná', async () => {

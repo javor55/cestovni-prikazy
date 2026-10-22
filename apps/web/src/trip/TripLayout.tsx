@@ -1,14 +1,14 @@
 import { calculate } from '@cp/core';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Link, useNavigate, useParams, useSearchParams } from 'react-router';
+import { Link, Navigate, useNavigate, useParams, useSearchParams } from 'react-router';
 import { toInput, type DocCounts } from '../model/toInput.js';
 import type { TripDoc } from '../model/trip.js';
 import { db, deleteTrip, getTrip, saveTrip, touchTrip } from '../storage/db.js';
 import { ConfirmDialog } from '../ui/ConfirmDialog.js';
 import { Icon, icons, LinkButton, Notice } from '../ui/controls.js';
 import { TripContext, type TripCtx } from './context.js';
-import { stepState, steps, type StepSlug, type StepState } from './steps.js';
+import { legacySteps, stepState, steps, type StepSlug, type StepState } from './steps.js';
 import { StepPages } from './pages/index.js';
 
 const stateLabel: Record<StepState, [string, string]> = {
@@ -95,6 +95,7 @@ export function TripLayout() {
   const mapped = useMemo(() => (trip ? toInput(trip, attachments ? docCounts : undefined) : undefined), [trip, attachments, docCounts]);
   const result = useMemo(() => (mapped?.input ? calculate(mapped.input) : undefined), [mapped]);
 
+  if (legacySteps[step]) return <Navigate to={`/cesta/${id}/${legacySteps[step]}`} replace />;
   if (trip === undefined) return <p className="p-6 text-muted">Načítám…</p>;
   if (trip === null)
     return (

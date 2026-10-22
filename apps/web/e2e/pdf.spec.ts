@@ -51,7 +51,6 @@ async function domesticTrip(page: Page) {
 
 test('PDF k podpisu: vytvoření, stažení, obsah a upozornění na změnu údajů', async ({ page }) => {
   const base = await domesticTrip(page);
-  await page.getByText('Konzervativní', { exact: true }).click();
   await page.getByRole('button', { name: 'Vytvořit PDF' }).click();
   const ready = page.getByRole('region', { name: 'Vytvořené PDF' });
   await expect(ready).toBeVisible({ timeout: 20_000 });
@@ -64,10 +63,10 @@ test('PDF k podpisu: vytvoření, stažení, obsah a upozornění na změnu úda
   expect(pages.length).toBeGreaterThanOrEqual(2);
   pages.forEach((p, i) => {
     expect(p).toContain('CP-2026-0007');
-    expect(p).toContain(`Strana ${i + 1} z ${pages.length}`);
+    expect(p).toContain(`strana ${i + 1}/${pages.length}`);
   });
   const all = pages.join(' ');
-  expect(all).toContain('CESTOVNÍ PŘÍKAZ');
+  expect(all).toContain('Cestovní příkaz');
   expect(all).toContain('Žofie Šťastná');
   expect(all).toContain('Školení bezpečnosti práce');
   expect(all).toContain('9. 3. 2026'); // datum vystavení
@@ -98,4 +97,20 @@ test('jen cestovní příkaz (část A) má jednu stranu a jde vytvořit i s chy
   const pages = await pdfText(await download.path());
   expect(pages).toHaveLength(1);
   expect(pages[0]).toContain('Cestovní příkaz');
+});
+
+test('PDF k podpisu v angličtině pro zahraničního nadřízeného', async ({ page }) => {
+  await domesticTrip(page);
+  await page.getByText('English', { exact: true }).click();
+  await page.getByRole('button', { name: 'Vytvořit PDF' }).click();
+  const ready = page.getByRole('region', { name: 'Vytvořené PDF' });
+  await expect(ready).toBeVisible({ timeout: 20_000 });
+  const [download] = await Promise.all([page.waitForEvent('download'), ready.getByRole('link', { name: 'Stáhnout PDF' }).click()]);
+  const all = (await pdfText(await download.path())).join(' ');
+  expect(all).toContain('Travel order');
+  expect(all).toContain('Business trip expense claim');
+  expect(all).toContain('Payable to employee');
+  expect(all).toContain('47,00 CZK');
+  expect(all).toContain('Školení bezpečnosti práce'); // údaje zadané uživatelem se nepřekládají
+  expect(all).not.toContain('Vyúčtování pracovní cesty');
 });

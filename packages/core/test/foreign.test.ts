@@ -39,10 +39,10 @@ describe('zahraniční cesta', () => {
     const days = r.perDiem!.days.map((d) => [d.domesticMinutes, d.foreignMinutes, d.foreign?.tierId, d.foreign?.amount, d.domestic?.amount ?? 0]);
     expect(days).toEqual([
       [195, 855, '2/3', m(30), 0], // 2/3 × 45 = 30
-      [0, 1440, '1/1', m(23), 0], // 45 − 2 × 25 % × 45 = 22,50 → 23
-      [195, 915, '2/3', m(20), 0], // 30 − 35 % × 30 = 19,50 → 20
+      [0, 1440, '1/1', m(22.5), 0], // 45 − 2 × 25 % × 45 = 22,50 (nezaokrouhluje se, Ú-8)
+      [195, 915, '2/3', m(19.5), 0], // 30 − 35 % × 30 = 19,50
     ]);
-    expect(r.perDiem!.foreignTotals).toEqual({ EUR: m(73) });
+    expect(r.perDiem!.foreignTotals).toEqual({ EUR: m(72) });
 
     expect(r.expenses.map((e) => [e.id, e.czk])).toEqual([
       ['x1', m(5812.44)],
@@ -57,14 +57,14 @@ describe('zahraniční cesta', () => {
     expect(r.vehicle).toMatchObject({ basic: m(4047.4), fuelCompensation: m(1494.38), total: m(5541.78), fuelPriceSource: 'RECEIPT' });
 
     const s = r.settlement!;
-    // EUR: stravné 73 + ze zálohy 44 = 117 − záloha 100 = doplatek 17 EUR × 24,35 = 413,95 Kč
+    // EUR: stravné 72 + ze zálohy 44 = 116 − záloha 100 = doplatek 16 EUR × 24,35 = 389,60 Kč
     expect(s.currencies).toEqual([
-      expect.objectContaining({ currency: 'EUR', perDiem: m(73), fromAdvance: m(44), claim: m(117), advance: m(100), balance: m(17), balanceCzk: m(413.95) }),
+      expect.objectContaining({ currency: 'EUR', perDiem: m(72), fromAdvance: m(44), claim: m(116), advance: m(100), balance: m(16), balanceCzk: m(389.6) }),
     ]);
     expect(s.employeeExpensesCzk).toBe(m(6123.67));
     expect(s.claimCzk).toBe(m(11665.45));
-    expect(s.payoutExact).toBe(m(12079.4));
-    expect(s.payout).toBe(m(12079));
+    expect(s.payoutExact).toBe(m(12055.05));
+    expect(s.payout).toBe(m(12055));
   });
 
   it('průjezd více státy: rozhoduje stát s nejdelším pobytem v daném dni', () => {
@@ -137,11 +137,50 @@ describe('zahraniční cesta', () => {
     // Den 1: ČR 7 h → 155 Kč; SK 12 h → 1/3 × 40 = 13,33; oběd −70 % × 13,33 = −9,33 → 4,00 EUR
     expect(d1!.domestic?.amount).toBe(m(155));
     expect(d1!.foreign).toMatchObject({ tierId: '1/3', tierAmount: m(13.33), reduction: m(9.33), amount: m(4) });
-    // Den 2: SK 8 h → 13,33 → 14 EUR (nahoru); ČR 12 h → 155 Kč
-    expect(d2!.foreign?.amount).toBe(m(14));
+    // Den 2: SK 8 h → 1/3 × 40 = 13,3333 EUR, zobrazí se 13,33; ČR 12 h → 155 Kč
+    expect(d2!.foreign?.amount).toBe(m(13.33));
     expect(d2!.domestic?.amount).toBe(m(155));
     expect(r.perDiem!.domesticTotal).toBe(m(310));
-    expect(r.perDiem!.foreignTotals).toEqual({ EUR: m(18) });
+    expect(r.perDiem!.foreignTotals).toEqual({ EUR: m(17.33) });
+    // Přepočet z přesné částky: 4 + 13,3333 = 17,3333 EUR × 24,30 = 421,20 Kč (z 17,33 by vyšlo 421,12)
+    expect(r.settlement!.convertedPerDiem).toEqual([{ currency: 'EUR', amount: m(17.33), exactAmount: '17.3333', rate: '24.30', rateUnit: 1, czk: m(421.2) }]);
+  });
+
+  it('stravné za den se nezaokrouhluje, přepočet na Kč je z přesné částky (Záhřeb 27. 9. – 2. 10. 2026, ověřeno s účetní)', () => {
+    // Skutečná cesta: výpočet účetní 159,1667 EUR × 24,350 = 3 875,71 Kč. Při zaokrouhlení dnů nahoru vycházelo 160 EUR = 3 896 Kč.
+    const r = calculate(
+      trip({
+        kind: 'foreign',
+        start: '2026-09-27T08:00',
+        end: '2026-10-02T23:00',
+        segments: [
+          seg('Ústí nad Labem/CZ', 'Záhřeb/HR', '2026-09-27T08:00', '2026-09-27T18:00', {
+            borderCrossings: [cross('2026-09-27T11:43', 'CZ', 'AT'), cross('2026-09-27T16:00', 'AT', 'SI'), cross('2026-09-27T17:00', 'SI', 'HR')],
+          }),
+          seg('Záhřeb/HR', 'Ústí nad Labem/CZ', '2026-10-02T13:00', '2026-10-02T23:00', {
+            borderCrossings: [cross('2026-10-02T13:00', 'HR', 'SI'), cross('2026-10-02T15:15', 'SI', 'AT'), cross('2026-10-02T19:30', 'AT', 'CZ')],
+          }),
+        ],
+        meals: [
+          { date: '2026-09-27', dinner: { free: true } },
+          ...['2026-09-28', '2026-09-29', '2026-09-30', '2026-10-01'].map((date) => ({ date, breakfast: { free: true }, dinner: { free: true } })),
+          { date: '2026-10-02', breakfast: { free: true } },
+        ],
+        perDiemRates: { EUR: { source: 'CNB', rate: '24.350', unit: 1, rateDate: '2026-09-25' } },
+      }),
+    );
+    expect(r.ok).toBe(true);
+    // 27. 9.: 12 h 17 min v zahraničí, rozhoduje HR (50 EUR): 2/3 = 33,3333 − 35 % = 21,6667 → zobrazeno 21,67
+    expect(r.perDiem!.days.map((d) => [d.foreign?.country, d.foreign?.tierId, d.foreign?.amount])).toEqual([
+      ['HR', '2/3', m(21.67)],
+      ['HR', '1/1', m(25)],
+      ['HR', '1/1', m(25)],
+      ['HR', '1/1', m(25)],
+      ['HR', '1/1', m(25)],
+      ['HR', '1/1', m(37.5)],
+    ]);
+    expect(r.settlement!.convertedPerDiem).toEqual([{ currency: 'EUR', amount: m(159.17), exactAmount: '159.1667', rate: '24.350', rateUnit: 1, czk: m(3875.71) }]);
+    expect(r.settlement!.payout).toBe(m(3876));
   });
 
   it('jídlo výslovně přiřazené k tuzemské části krátí tuzemské stravné', () => {

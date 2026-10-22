@@ -36,7 +36,7 @@ describe.each(['modern', 'conservative'] as const)('šablona %s', (layout) => {
     expect(all).toMatch(/vyúčtování pracovní cesty/i);
     expect(all).toContain('Jana Ukázková');
     expect(all).toContain('Účel');
-    expect(all).toContain('10 697,00 Kč');
+    expect(all).toContain('10 672,00 Kč');
     expect(all).toContain('24,422');
     expect(all).toContain('CZ-2026 v1.0.0');
   });

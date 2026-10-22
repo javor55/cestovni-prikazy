@@ -55,6 +55,13 @@ export interface PerDiemResult {
   pocketMoneyTotals: Record<string, number>;
 }
 
+/**
+ * Přesné součty zahraničního stravného a kapesného po měnách (v nejmenších jednotkách, bez zaokrouhlení).
+ * Při režimu zaokrouhlení NONE se do přepočtu na Kč bere přesná hodnota, např. 2/3 sazby 50 EUR po krácení
+ * o 35 % = 21,6667 EUR, ne 21,67 EUR. Drží se mimo výsledek, aby výsledek zůstal převoditelný do JSON.
+ */
+export const exactForeignTotals = new WeakMap<PerDiemResult, { perDiem: Record<string, Fraction>; pocketMoney: Record<string, Fraction> }>();
+
 type Minutes = { date: string; domestic: number; foreign: Map<CountryCode, number>; order: CountryCode[] };
 
 function minutesPerDay(trip: TripInput, tl: Timeline): Minutes[] {
@@ -124,6 +131,9 @@ export function computePerDiem(trip: TripInput, tl: Timeline, rules: RuleSet, is
   }
 
   const result: PerDiemResult = { days: [], domesticTotal: 0, foreignTotals: {}, pocketMoneyTotals: {} };
+  const exact = { perDiem: {} as Record<string, Fraction>, pocketMoney: {} as Record<string, Fraction> };
+  exactForeignTotals.set(result, exact);
+  const addExact = (to: Record<string, Fraction>, currency: string, value: Fraction) => (to[currency] = (to[currency] ?? ZERO).add(value));
 
   for (const d of days) {
     const foreignMinutes = [...d.foreign.values()].reduce((a, b) => a + b, 0);
@@ -205,6 +215,9 @@ export function computePerDiem(trip: TripInput, tl: Timeline, rules: RuleSet, is
         const reduction = reductionBase.mul(tier.mealReductionPct * meals.foreign).div(100);
         const before = tierAmount.sub(reduction).max(ZERO);
         const amount = roundMinor(before, rules.rounding.foreignPerDay, base.currency);
+        // Bez zaokrouhlení (NONE) se den zobrazí na centy, ale do součtu jde přesná hodnota.
+        const counted = rules.rounding.foreignPerDay === 'NONE' ? before : Fraction.of(amount);
+        addExact(exact.perDiem, base.currency, counted);
         day.foreign = {
           country,
           countryName: ruleRate?.name ?? country,
@@ -222,7 +235,9 @@ export function computePerDiem(trip: TripInput, tl: Timeline, rules: RuleSet, is
         result.foreignTotals[base.currency] = (result.foreignTotals[base.currency] ?? 0) + amount;
         if (pocketPct > 0) {
           const pct = Math.min(pocketPct, rules.foreign.pocketMoneyMaxPct);
-          const pm = Fraction.of(amount).mul(pct).div(100).toInt();
+          const pmExact = counted.mul(pct).div(100);
+          const pm = pmExact.toInt();
+          addExact(exact.pocketMoney, base.currency, pmExact);
           day.pocketMoney = { amount: pm, currency: base.currency, pct };
           result.pocketMoneyTotals[base.currency] = (result.pocketMoneyTotals[base.currency] ?? 0) + pm;
         }

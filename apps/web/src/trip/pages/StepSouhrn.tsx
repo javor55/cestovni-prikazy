@@ -2,7 +2,7 @@ import { formatMinutes } from '@cp/core';
 import { ruleSets } from '@cp/rules';
 import { Link } from 'react-router';
 import { countryName } from '../../model/countries.js';
-import { formatMinor, formatRate } from '../../model/format.js';
+import { formatExact, formatMinor, formatRate, perDiemRoundingNote } from '../../model/format.js';
 import { CnbButton } from '../../rates/CnbButton.js';
 import { actualTimes } from '../../model/toInput.js';
 import { Card, H2, Icon, icons, Notice, NumberField } from '../../ui/controls.js';
@@ -132,7 +132,7 @@ export function StepSouhrn() {
               </li>
             ))}
           </ul>
-          <p className="text-[13px] text-subtle">Stravné za den je zaokrouhleno na celé jednotky měny nahoru.</p>
+          <p className="text-[13px] text-subtle">{perDiemRoundingNote(ruleSets[0]!.rounding, Object.keys(result?.perDiem?.foreignTotals ?? {}).length > 0)}</p>
         </Card>
       )}
 
@@ -143,7 +143,7 @@ export function StepSouhrn() {
             <dt className="text-muted">Tuzemské stravné</dt>
             <dd className="text-right">{formatMinor(s.domesticPerDiemCzk)}</dd>
             {s.convertedPerDiem.map((c) => (
-              <Row key={c.currency} label={`Zahraniční stravné ${formatMinor(c.amount, c.currency)} × ${formatRate(c.rate)}`} value={formatMinor(c.czk)} />
+              <Row key={c.currency} label={`Zahraniční stravné ${c.exactAmount ? formatExact(c.exactAmount, c.currency) : formatMinor(c.amount, c.currency)} × ${formatRate(c.rate)}`} value={formatMinor(c.czk)} />
             ))}
             <Row label="Výdaje uhrazené zaměstnancem" value={formatMinor(s.employeeExpensesCzk)} />
             {result?.vehicle && <Row label="Náhrada za soukromé vozidlo" value={formatMinor(s.vehicleCzk)} />}
@@ -151,7 +151,7 @@ export function StepSouhrn() {
             {s.currencies.map((c) => (
               <Row
                 key={c.currency}
-                label={`${c.currency}: stravné ${formatMinor(c.perDiem + c.pocketMoney, c.currency)} + ze zálohy ${formatMinor(c.fromAdvance, c.currency)} − záloha ${formatMinor(c.advance, c.currency)}${c.rate ? ` × ${formatRate(c.rate)}` : ''}`}
+                label={`${c.currency}: stravné ${c.perDiemExact ? formatExact(c.perDiemExact, c.currency) : formatMinor(c.perDiem + c.pocketMoney, c.currency)} + ze zálohy ${formatMinor(c.fromAdvance, c.currency)} − záloha ${formatMinor(c.advance, c.currency)}${c.rate ? ` × ${formatRate(c.rate)}` : ''}`}
                 value={formatMinor(c.balanceCzk)}
               />
             ))}

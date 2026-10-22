@@ -57,7 +57,7 @@ Podle sazby kterého státu se počítá zahraniční stravné, pokud zaměstnan
 **Ú-17 – Krácení zahraničního stravného za bezplatná jídla**
 Jaká procenta krácení používáte v jednotlivých pásmech a z jakého základu (ze základní sazby, nebo z již poměrně snížené částky)?\
 *Návrh:* z částky pro dané pásmo (např. při 2/3 sazby 45 EUR = 30 EUR krátí snídaně 35 % × 30 = 10,50 EUR). Prosíme o potvrzení na příkladu.\
-*Jak je to teď v aplikaci:* Krátí se z částky pro dané pásmo (1/3, 2/3, plná sazba), a to o 70 / 35 / 25 %. Příklad z návrhu: 30 − 10,50 = 19,50 EUR, po zaokrouhlení nahoru 20 EUR.
+*Jak je to teď v aplikaci:* Krátí se z částky pro dané pásmo (1/3, 2/3, plná sazba), a to o 70 / 35 / 25 %. Příklad z návrhu: 30 − 10,50 = 19,50 EUR (zahraniční stravné se nezaokrouhluje, viz Ú-8). Postup odpovídá výpočtu účetní u skutečné cesty.
 
 **Ú-18 – Krátké cesty**
 Tuzemská cesta kratší než 5 hodin (bez nároku na stravné) a zahraniční cesta s pobytem v zahraničí do 1 hodiny: postupujete podle zákona, nebo poskytujete něco nad rámec?\
@@ -101,7 +101,8 @@ Poskytuje firma u zahraničních cest kapesné? Pokud ano, kolik procent zahrani
 **Ú-8 – Zaokrouhlování**
 Jak zaokrouhlujete?\
 *Návrh:* stravné za den na celé Kč nahoru, zahraniční stravné na celé jednotky měny nahoru, přepočet kurzem na haléře, celková částka k výplatě na celé Kč.\
-*Jak je to teď v aplikaci:* Stravné za den se zaokrouhluje nahoru – tuzemské na celé Kč, zahraniční na celé jednotky měny. Přepočty kurzem jsou na haléře. Výsledná částka k výplatě se zaokrouhluje matematicky na celé Kč.
+*Zjištěno ze skutečného vyúčtování účetní (říjen 2026):* zahraniční stravné za den se nezaokrouhluje, přepočte se na Kč z přesné částky a zaokrouhlí na haléře (např. 2/3 z 50 EUR = 33,3333 − 35 % = 21,6667 EUR; cesta celkem 159,1667 EUR × 24,350 = 3 875,71 Kč). Výplata se zaokrouhluje na celé Kč.\
+*Jak je to teď v aplikaci:* Podle zjištění výše (sada pravidel od verze 1.2.0). Zahraniční stravné za den je v Souhrnu a v PDF uvedeno na centy (21,67 EUR), do součtu a přepočtu jde přesná hodnota, u přepočtu je uvedena přesná částka (159,1667 EUR). Tuzemské stravné za den se dál zaokrouhluje nahoru na celé Kč – k ověření, zda účetní nezaokrouhluje ani to. Výsledná částka k výplatě se zaokrouhluje matematicky na celé Kč.
 
 ---
 

@@ -30,13 +30,13 @@ export function sample(): DocModel {
     perDiem: {
       days: [
         { date: 'st 14. 10. 2026', domesticTime: '3 h 15 min', foreignTime: '14 h 15 min', domestic: '', domesticAmount: '', country: 'Rakousko', tier: '2/3', base: '45,00 EUR', tierAmount: '30,00 EUR', meals: '', reduction: '', amount: '30,00 EUR', pocketMoney: '' },
-        { date: 'čt 15. 10. 2026', domesticTime: '0 h', foreignTime: '24 h', domestic: '', domesticAmount: '', country: 'Rakousko', tier: '1/1', base: '45,00 EUR', tierAmount: '45,00 EUR', meals: 'S + O', reduction: '2 × 25 % = −22,50 EUR', amount: '23,00 EUR', pocketMoney: '' },
-        { date: 'pá 16. 10. 2026', domesticTime: '3 h 15 min', foreignTime: '15 h 15 min', domestic: '', domesticAmount: '', country: 'Rakousko', tier: '2/3', base: '45,00 EUR', tierAmount: '30,00 EUR', meals: 'S', reduction: '1 × 35 % = −10,50 EUR', amount: '20,00 EUR', pocketMoney: '' },
+        { date: 'čt 15. 10. 2026', domesticTime: '0 h', foreignTime: '24 h', domestic: '', domesticAmount: '', country: 'Rakousko', tier: '1/1', base: '45,00 EUR', tierAmount: '45,00 EUR', meals: 'S + O', reduction: '2 × 25 % = −22,50 EUR', amount: '22,50 EUR', pocketMoney: '' },
+        { date: 'pá 16. 10. 2026', domesticTime: '3 h 15 min', foreignTime: '15 h 15 min', domestic: '', domesticAmount: '', country: 'Rakousko', tier: '2/3', base: '45,00 EUR', tierAmount: '30,00 EUR', meals: 'S', reduction: '1 × 35 % = −10,50 EUR', amount: '19,50 EUR', pocketMoney: '' },
       ],
       domesticTotal: '0,00 Kč',
-      foreignTotal: '73,00 EUR',
+      foreignTotal: '72,00 EUR',
       reductionTotal: '−33,00 EUR',
-      note: 'S/O/V = bezplatná snídaně/oběd/večeře. Stravné za den zaokrouhleno na celé jednotky měny nahoru.',
+      note: 'S/O/V = bezplatná snídaně/oběd/večeře. Tuzemské stravné za den se zaokrouhluje nahoru na celé Kč. Zahraniční stravné se nezaokrouhluje – za den je uvedeno na centy, na Kč se přepočítá z přesné částky.',
       hasForeign: true,
     },
     expenses: [
@@ -59,14 +59,14 @@ export function sample(): DocModel {
     },
     settlement: {
       rows: [
-        { label: 'Zahraniční stravné', foreign: '73,00 EUR', czk: '' },
+        { label: 'Zahraniční stravné', foreign: '72,00 EUR', czk: '' },
         { label: 'Výdaje uhrazené zaměstnancem', foreign: '', czk: '5 812,44' },
         { label: 'Náhrada za soukromé vozidlo', foreign: '', czk: '5 541,78' },
         { label: 'Záloha 12. 10. 2026', foreign: '−100,00 EUR', czk: '' },
-        { label: 'Přeplatek EUR × 24,35', foreign: '−27,00 EUR', czk: '−657,45' },
+        { label: 'Přeplatek EUR × 24,35', foreign: '−28,00 EUR', czk: '−681,80' },
       ],
       payoutLabel: 'K výplatě zaměstnanci',
-      payout: '10 697,00 Kč',
+      payout: '10 672,00 Kč',
       headline: [{ label: 'Nárok v Kč', value: '11 354,22 Kč' }],
     },
     documentCount: '2',

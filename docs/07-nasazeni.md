@@ -122,7 +122,7 @@ Sazby jsou v souboru `packages/rules/data/cz-2026.json` (postup je v [06 – Akt
 - **Cloudflare** nasadí novou verzi automaticky,
 - **Docker:** `git pull && sudo docker compose up -d --build`.
 
-Sazby se záměrně nemění za běhu souborem na serveru. Výpočet běží v prohlížeči a každé vytvořené PDF si pamatuje verzi sazeb (např. `CZ-2026 v1.1.0`). Změna v repozitáři má historii, projde testy a v dokumentu je vidět, podle které verze se počítalo. Jednotlivou sazbu pro konkrétní cestu (např. vyšší stravné u zaměstnavatele) lze zadat přímo v aplikaci.
+Sazby se záměrně nemění za běhu souborem na serveru. Výpočet běží v prohlížeči a každé vytvořené PDF si pamatuje verzi sazeb (např. `CZ-2026 v1.2.0`). Změna v repozitáři má historii, projde testy a v dokumentu je vidět, podle které verze se počítalo. Jednotlivou sazbu pro konkrétní cestu (např. vyšší stravné u zaměstnavatele) lze zadat přímo v aplikaci.
 
 ## 6. Bezpečnost provozu
 

@@ -1,9 +1,9 @@
 import type { RuleSet } from '@cp/rules';
-import { Fraction } from './fraction.js';
+import { Fraction, ZERO } from './fraction.js';
 import type { IssueList } from './issues.js';
 import type { Advance, Conversion, Expense, ExpensePayer, TripInput } from './model.js';
-import { convertToCzk, formatMoney, impliedRate, isCurrencyCode, roundMinor } from './money.js';
-import type { PerDiemResult } from './perDiem.js';
+import { convertToCzk, formatMoney, impliedRate, isCurrencyCode, minorPerUnit, roundMinor } from './money.js';
+import { exactForeignTotals, type PerDiemResult } from './perDiem.js';
 import { datePart } from './time.js';
 import type { VehicleResult } from './vehicle.js';
 
@@ -27,6 +27,8 @@ export interface CurrencySettlement {
   /** Nárok v měně: zahraniční stravné + kapesné + výdaje uhrazené ze zálohy. */
   perDiem: number;
   pocketMoney: number;
+  /** Přesné stravné + kapesné, pokud se liší od zaokrouhleného na centy (desetinné číslo s tečkou, 4 místa). */
+  perDiemExact?: string;
   fromAdvance: number;
   claim: number;
   advance: number;
@@ -40,7 +42,7 @@ export interface CurrencySettlement {
 export interface Settlement {
   currencies: CurrencySettlement[];
   /** Zahraniční stravné v měnách bez zálohy přepočtené na Kč. */
-  convertedPerDiem: { currency: string; amount: number; rate: string; rateUnit: number; czk: number }[];
+  convertedPerDiem: { currency: string; amount: number; exactAmount?: string; rate: string; rateUnit: number; czk: number }[];
   domesticPerDiemCzk: number;
   employeeExpensesCzk: number;
   vehicleCzk: number;
@@ -54,6 +56,17 @@ export interface Settlement {
 }
 
 const PRIVATE_PAYMENT = new Set(['PRIVATE_CARD', 'EMPLOYEE_TRANSFER']);
+
+/** Částka v nejmenších jednotkách jako desetinné číslo v jednotkách měny na 4 místa, např. „159.1667“. */
+function decimal4(minor: Fraction, currency: string): string {
+  const scaled = minor.div(minorPerUnit(currency)).mul(10000).toInt('HALF_UP');
+  return (scaled / 10000).toFixed(4);
+}
+
+/** Přepočet přesné částky (v nejmenších jednotkách) na Kč, zaokrouhleno na haléře. */
+function exactToCzk(minor: Fraction, currency: string, rate: string, unit: number): number {
+  return minor.div(minorPerUnit(currency)).mul(Fraction.parse(rate)).div(unit).mul(100).toInt('HALF_UP');
+}
 
 function rateOf(c: Conversion | undefined): { rate: string; unit: number } | undefined {
   return c?.rate ? { rate: c.rate, unit: c.unit ?? 1 } : undefined;
@@ -152,6 +165,10 @@ export function settle(
   foreignCurrencies.delete('CZK');
   const currencies: CurrencySettlement[] = [];
   const convertedPerDiem: Settlement['convertedPerDiem'] = [];
+  const exact = exactForeignTotals.get(perDiem);
+  // Přesné stravné + kapesné v měně; bez přesných součtů (starší výsledek) součet zaokrouhlených dní.
+  const exactPerDiem = (cur: string) =>
+    exact ? (exact.perDiem[cur] ?? ZERO).add(exact.pocketMoney[cur] ?? ZERO) : Fraction.of((perDiem.foreignTotals[cur] ?? 0) + (perDiem.pocketMoneyTotals[cur] ?? 0));
 
   for (const cur of [...foreignCurrencies].sort()) {
     const pd = perDiem.foreignTotals[cur] ?? 0;
@@ -165,23 +182,29 @@ export function settle(
         issues.error('PER_DIEM_MISSING_RATE', `Chybí kurz pro přepočet zahraničního stravného v ${cur} na Kč. Načtěte kurz ČNB.`, { currency: cur });
         continue;
       }
-      const amount = pd + pm;
-      convertedPerDiem.push({ currency: cur, amount, rate: r.rate, rateUnit: r.unit, czk: convertToCzk({ amount, currency: cur }, r.rate, r.unit) });
+      const e = exactPerDiem(cur);
+      const amount = e.toInt('HALF_UP');
+      const exactAmount = e.cmp(Fraction.of(amount)) === 0 ? undefined : decimal4(e, cur);
+      convertedPerDiem.push({ currency: cur, amount, ...(exactAmount && { exactAmount }), rate: r.rate, rateUnit: r.unit, czk: exactToCzk(e, cur, r.rate, r.unit) });
       continue;
     }
-    const claim = pd + pm + fromAdvance;
-    const balance = claim - adv;
+    const e = exactPerDiem(cur);
+    const exactBalance = e.add(Fraction.of(fromAdvance - adv));
+    const claim = e.add(Fraction.of(fromAdvance)).toInt('HALF_UP');
+    const balance = exactBalance.toInt('HALF_UP');
     const r = advanceRates.get(cur);
+    const perDiemExact = e.cmp(Fraction.of(pd + pm)) === 0 ? undefined : decimal4(e, cur);
     currencies.push({
       currency: cur,
       perDiem: pd,
       pocketMoney: pm,
+      ...(perDiemExact && { perDiemExact }),
       fromAdvance,
       claim,
       advance: adv,
       balance,
       ...(r && { rate: r.rate, rateUnit: r.unit }),
-      balanceCzk: r ? Math.sign(balance) * convertToCzk({ amount: Math.abs(balance), currency: cur }, r.rate, r.unit) : 0,
+      balanceCzk: r ? exactToCzk(exactBalance, cur, r.rate, r.unit) : 0,
     });
   }
 
@@ -199,7 +222,7 @@ export function settle(
   // Celkové náklady cesty v Kč: vše, co zaměstnavatel za cestu vynaloží.
   const foreignAdvanceCostCzk = currencies.reduce((s, c) => {
     const r = c.rate ? { rate: c.rate, unit: c.rateUnit ?? 1 } : undefined;
-    return s + (r ? convertToCzk({ amount: c.perDiem + c.pocketMoney, currency: c.currency }, r.rate, r.unit) : 0);
+    return s + (r ? exactToCzk(exactPerDiem(c.currency), c.currency, r.rate, r.unit) : 0);
   }, 0);
   const fromAdvanceCzk = expenses.filter((e) => e.payer === 'ADVANCE' && e.currency !== 'CZK').reduce((s, e) => s + e.czk, 0);
   const totalCostCzk = claimCzk + foreignAdvanceCostCzk + fromAdvanceCzk + employerPaidCzk;

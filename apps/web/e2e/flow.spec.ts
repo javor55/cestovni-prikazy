@@ -58,8 +58,8 @@ test('celá zahraniční cesta: vyplnění, výpočet, uložení a smazání', a
   // 4 Jídla: snídaně v hotelu, oběd 15. 10.
   await page.getByRole('button', { name: 'Snídaně každé ráno (v ceně ubytování)' }).click();
   await page.getByRole('region', { name: /15\. 10\. 2026/ }).getByRole('button', { name: 'Oběd' }).click();
-  await expect(page.getByRole('region', { name: /15\. 10\. 2026/ })).toContainText('23,00 EUR');
-  await expect(page.getByRole('region', { name: /16\. 10\. 2026/ })).toContainText('20,00 EUR');
+  await expect(page.getByRole('region', { name: /15\. 10\. 2026/ })).toContainText('22,50 EUR');
+  await expect(page.getByRole('region', { name: /16\. 10\. 2026/ })).toContainText('19,50 EUR');
   await shot(page, '04-jidla');
   await next(page);
 
@@ -84,10 +84,10 @@ test('celá zahraniční cesta: vyplnění, výpočet, uložení a smazání', a
   await expect(page.getByRole('region', { name: 'Výpočet náhrady' })).toContainText('5 541,78 Kč');
   await next(page);
 
-  // 7 Souhrn: 73 EUR stravné − záloha 100 = −27 EUR × 24,35 = −657,45; 5 812,44 + 5 541,78 − 657,45 = 10 696,77 → 10 697 Kč
+  // 7 Souhrn: 72 EUR stravné − záloha 100 = −28 EUR × 24,35 = −681,80; 5 812,44 + 5 541,78 − 681,80 = 10 672,42 → 10 672 Kč
   const result = page.getByRole('region', { name: 'Výsledek' });
   await expect(result).toContainText('K výplatě zaměstnanci');
-  await expect(result).toContainText('10 697,00 Kč');
+  await expect(result).toContainText('10 672,00 Kč');
   await shot(page, '07-souhrn');
   await next(page);
 

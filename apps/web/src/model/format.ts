@@ -43,3 +43,23 @@ export function formatDay(date: string): string {
   const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(date);
   return m ? `${+m[3]!}. ${+m[2]!}. ${m[1]}` : '';
 }
+
+/** Přesná částka z výpočtu („159.1667“) → „159,1667 EUR“. */
+export function formatExact(decimal: string, currency: string): string {
+  const [int = '0', frac = ''] = decimal.split('.');
+  const grouped = int.replace(/\B(?=(\d{3})+(?!\d))/g, '\u00a0');
+  return `${grouped}${frac ? `,${frac}` : ''} ${currency === 'CZK' ? 'Kč' : currency}`;
+}
+
+const roundingText = { NONE: 'nezaokrouhluje', HALF_UP_UNIT: 'zaokrouhluje matematicky na celé jednotky', CEIL_UNIT: 'zaokrouhluje nahoru na celé jednotky' } as const;
+
+/** Popis zaokrouhlení stravného podle sady pravidel – pro Souhrn a PDF. */
+export function perDiemRoundingNote(rounding: { domesticPerDay: keyof typeof roundingText; foreignPerDay: keyof typeof roundingText }, foreign: boolean): string {
+  const domestic = `Tuzemské stravné za den se ${roundingText[rounding.domesticPerDay].replace('jednotky', 'Kč')}.`;
+  if (!foreign) return domestic;
+  const abroad =
+    rounding.foreignPerDay === 'NONE'
+      ? 'Zahraniční stravné se nezaokrouhluje – za den je uvedeno na centy, na Kč se přepočítá z přesné částky.'
+      : `Zahraniční stravné za den se ${roundingText[rounding.foreignPerDay]} měny.`;
+  return `${domestic} ${abroad}`;
+}

@@ -87,6 +87,7 @@ calculate(trip: TripInput, ruleSets?: RuleSet[]): CalculationResult
 
 - Je to **čistá funkce**: nečte aktuální čas, síť ani úložiště. Kurzy ČNB dodá aplikace ve vstupu.
 - Počítá v přesných zlomcích (BigInt) a zaokrouhluje jen tam, kde to určuje sada pravidel.
+- Zaokrouhlení určuje `rounding` v sadě pravidel: tuzemské stravné za den nahoru na celé Kč, zahraniční stravné se nezaokrouhluje (`NONE`, od verze 1.2.0 podle výpočtu účetní – den se zobrazí na centy, ale sčítá a přepočítává se přesná hodnota), výplata matematicky na celé Kč.
 - Postup: kontrola a sestavení časové osy → rozdělení na kalendářní dny (včetně dnů se změnou času) → minuty v ČR a v jednotlivých státech → tuzemské a zahraniční stravné s krácením → kapesné → vozidlo → výdaje a kurzy → vyrovnání záloh po měnách → výsledek k výplatě.
 - Výsledek obsahuje všechny mezivýpočty pro rozpis v UI a PDF a seznam `issues` (chyba / varování / informace) se stabilními kódy a českými zprávami včetně rady, jak problém opravit.
 - `ok: false` znamená blokující chybu, při které nelze vytvořit PDF.
@@ -106,7 +107,7 @@ calculate(trip: TripInput, ruleSets?: RuleSet[]): CalculationResult
 | Elektřina | 7,20 Kč/kWh | 573/2025 Sb. |
 | Zahraniční stravné | úplná příloha: 227 států a území (např. AT 45, DE 50, HR 50 EUR, GB 45 GBP, CH 75 CHF, US 70 USD), ostatní země 35 EUR | 489/2025 Sb. |
 
-> **Stav ověření:** zahraniční stravné je převzaté z PDF vyhlášky 489/2025 Sb. od Ministerstva financí (verze sady 1.1.0). Tuzemské sazby, náhrada za km a ceny paliv pocházejí ze shodných sekundárních zdrojů. Primární texty vyhlášek nebyly z vývojového prostředí dostupné, před ostrým provozem je musí ověřit účetní. Každý zdroj v `sources` má odkaz (`url`) na úplné znění. Aplikace ho ukazuje v Souhrnu.
+> **Stav ověření:** zahraniční stravné je převzaté z PDF vyhlášky 489/2025 Sb. od Ministerstva financí (od verze sady 1.1.0). Tuzemské sazby, náhrada za km a ceny paliv pocházejí ze shodných sekundárních zdrojů. Primární texty vyhlášek nebyly z vývojového prostředí dostupné, před ostrým provozem je musí ověřit účetní. Každý zdroj v `sources` má odkaz (`url`) na úplné znění. Aplikace ho ukazuje v Souhrnu.
 
 Nová sada pravidel = nový soubor (např. `cz-2027.json`) + test s kontrolními hodnotami. Stará sada zůstává, takže výpočty starších cest se nezmění.
 

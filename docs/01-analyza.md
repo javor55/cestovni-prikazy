@@ -277,7 +277,7 @@ Varianta .NET (zadání § 26) je vhodná, pokud bude firemní verzi rozvíjet .
 | 2 | Sazba v rozpětí | Podnikatelská: zákonné minimum, lze zadat vyšší. Platová: dolní hranice, lze zvolit v rozpětí. | Ú-2 |
 | 3 | Zdroj kurzů | ČNB, denní kurz devizového trhu | rozhodnuto (R4) |
 | 4 | Datum kurzu | Viz Ú-10, výchozí podle odpovědi účetní | Ú-10 |
-| 5 | Zaokrouhlování | Stravné za den na celé Kč nahoru, přepočty kurzem na haléře, celková částka k výplatě na celé Kč | Ú-8 |
+| 5 | Zaokrouhlování | Stravné za den na celé Kč nahoru, přepočty kurzem na haléře, celková částka k výplatě na celé Kč (později upřesněno: zahraniční stravné se nezaokrouhluje, viz Ú-8) | Ú-8 |
 | 6 | Doklad o zaplacení | Nepovinný. Varování u výdaje placeného soukromou kartou bez potvrzení. | navrženo |
 | 7 | Limity souborů | 20 MB na soubor, 300 MB na cestu (omezeno úložištěm prohlížeče) | navrženo |
 | 8 | Doba uchování | 30 dní nečinnosti, nastavitelné | rozhodnuto (R10) |

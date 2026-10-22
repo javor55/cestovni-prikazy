@@ -166,7 +166,7 @@ export function CalculationOverview({ m }: { m: DocModel }) {
             d.foreignTime,
             d.country ? `${d.country}, ${d.tier} z ${d.base} = ${d.tierAmount}` : '–',
             dash(d.meals),
-            d.amount ? `${d.reduction ? `${d.reduction} → ` : ''}${d.amount}${d.pocketMoney ? ` + kapesné ${d.pocketMoney}` : ''}` : '–',
+            d.amount ? `${d.reduction ? `${d.reduction} » ` : ''}${d.amount}${d.pocketMoney ? ` + kapesné ${d.pocketMoney}` : ''}` : '–',
           ])}
           foot={['Celkem', '', pd.domesticTotal, '', '', '', dash(pd.foreignTotal)]}
         />

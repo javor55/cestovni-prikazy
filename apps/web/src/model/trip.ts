@@ -345,14 +345,17 @@ export function plannedTransportText(t: Pick<TripDoc, 'plannedTransportKinds' | 
   return [...t.plannedTransportKinds.map((k) => transportLabels[k]), t.plannedTransport].filter(Boolean).join(', ');
 }
 
-/** Přechody hranic úseku jako text, např. „CZ–AT 14. 10. 2026 9:45, AT–SI čas nezadán“. */
-export function crossingsText(s: Pick<SegmentDoc, 'fromCountry' | 'crossings'>, time: (local: string) => string): string {
+/**
+ * Přechody hranic úseku jako text, např. „CZ–AT 14. 10. 2026 9:45, AT–SI čas nezadán“.
+ * PDF je má pod sebou (`separator` = '\n') ve tvaru „CZ – AT“ (písmo PDF nemá šipku →).
+ */
+export function crossingsText(s: Pick<SegmentDoc, 'fromCountry' | 'crossings'>, time: (local: string) => string, separator = ', ', arrow = '–'): string {
   let from = s.fromCountry;
   return s.crossings
     .map((c) => {
-      const t = `${from}–${c.to} ${c.at ? time(c.at) : 'čas nezadán'}`;
+      const t = `${from}${arrow}${c.to} ${c.at ? time(c.at) : 'čas nezadán'}`;
       from = c.to;
       return t;
     })
-    .join(', ');
+    .join(separator);
 }

@@ -70,7 +70,8 @@ function PerDiemDay({ day, trip, colors }: { day: DayResult; trip: TripDoc; colo
       <div className="flex flex-wrap justify-between gap-x-3 text-sm">
         <strong>{day.label}</strong>
         <span className="text-muted">
-          ČR {formatMinutes(day.domesticMinutes)} · zahraničí {formatMinutes(day.foreignMinutes)}
+          ČR {formatMinutes(day.domesticMinutes)}
+          {(trip.kind === 'foreign' || day.foreignMinutes > 0) && ` · zahraničí ${formatMinutes(day.foreignMinutes)}`}
         </span>
       </div>
       {day.intervals.length > 0 && <DayBar day={day} colors={colors} />}
@@ -162,7 +163,7 @@ export function PerDiemProtocol({ result, trip }: { result: CalculationResult; t
   return (
     <Card aria-label="Stravné po dnech">
       <H2>Stravné po dnech</H2>
-      <div className="flex flex-wrap gap-3 text-[13px] text-muted" aria-hidden="true">
+      <div className={`flex flex-wrap gap-3 text-[13px] text-muted ${colors.size < 2 ? 'hidden' : ''}`} aria-hidden="true">
         {[...colors].map(([c, color]) => (
           <span key={c} className="flex items-center gap-1.5">
             <i className="inline-block size-3 rounded-sm" style={{ background: color }} />

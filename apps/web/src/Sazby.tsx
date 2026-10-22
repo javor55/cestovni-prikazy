@@ -1,10 +1,11 @@
 import { ruleSets } from '@cp/rules';
 import { useState } from 'react';
 import { Link, useSearchParams } from 'react-router';
+import { download } from './exports/download.js';
 import { bandLabel } from './model/bands.js';
 import { formatDay, formatMinor } from './model/format.js';
 import { fuelLabels } from './model/trip.js';
-import { Card, H2, Icon, icons, TextField } from './ui/controls.js';
+import { Button, Card, H2, Icon, icons, TextField } from './ui/controls.js';
 
 const fmtHours = (min: number | null) => (min === null ? '' : `${Math.round((min / 60) * 100) / 100}`.replace('.', ','));
 const band = bandLabel;
@@ -36,6 +37,13 @@ export function Sazby() {
           Sada pravidel <strong className="text-ink">{r.id} verze {r.version}</strong> platná {formatDay(r.validFrom)} – {formatDay(r.validTo)}. S těmito hodnotami aplikace počítá; každé
           vytvořené PDF uvádí verzi sady, podle které se počítalo. {r.verification}
         </p>
+        <Button
+          variant="secondary"
+          className="self-start"
+          onClick={() => download(new TextEncoder().encode(JSON.stringify(r, null, 2)), `${r.id}_v${r.version}_sada-pravidel.json`, 'application/json')}
+        >
+          <Icon d={icons.download} /> Stáhnout sadu pravidel {r.id} v{r.version} (JSON)
+        </Button>
 
         <Card aria-label="Tuzemské stravné">
           <H2>Tuzemské stravné (vyhláška {r.domestic.source})</H2>

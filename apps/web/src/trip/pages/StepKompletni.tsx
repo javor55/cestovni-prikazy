@@ -52,7 +52,7 @@ export function StepKompletni() {
       <Card>
         <H2>Kompletní dokumentace</H2>
         <p className="text-[15px] leading-relaxed text-muted">
-          Jedno PDF pro účetní: krycí list, obsah a seznam příloh, podepsaný cestovní příkaz a vyúčtování, přehled výpočtu a výdajů, u každého výdaje identifikační stránka a jeho doklady, doklady o zaplacení a doplňující přílohy.
+          Jedno PDF pro účetní: krycí list, obsah a seznam příloh, podepsaný cestovní příkaz a vyúčtování, přehled výpočtu a výdajů, u každého výdaje identifikační stránka a hned za ní všechny jeho doklady (účetní doklad, doklad o zaplacení, doplňující dokumenty), doklady k vozidlu a doplňující přílohy k cestě.
         </p>
         <Button className="self-start" onClick={create} disabled={busy}>
           {busy ? 'Sestavuji PDF…' : result ? 'Sestavit znovu' : 'Sestavit kompletní PDF'}

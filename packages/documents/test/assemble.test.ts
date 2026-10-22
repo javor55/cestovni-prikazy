@@ -41,6 +41,7 @@ async function input(over: Partial<AssemblyInput> = {}): Promise<AssemblyInput> 
         files: [
           { name: 'faktura.jpg', kind: 'accounting', type: 'jpeg', bytes: await fixture('uctenka.jpg') },
           { name: 'vypis.pdf', kind: 'payment', type: 'pdf', bytes: vypis },
+          { name: 'program-vydaje.jpg', kind: 'supporting', type: 'jpeg', bytes: await fixture('uctenka.jpg') },
         ],
       },
       { n: '2', files: [] },
@@ -71,20 +72,22 @@ describe('kompletní dokumentace', () => {
       next('Přehled výdajů'),
       next('Výdaj č. 1 · Ubytování Popis'),
       next('Výdaj č. 1 · Ubytování · Účetní doklad · faktura.jpg'),
+      // Přílohy výdaje jsou hned za jeho účetním dokladem, před dalším výdajem.
+      next('Výdaj č. 1 · Ubytování · Doklad o zaplacení · vypis.pdf'),
+      next('Výdaj č. 1 · Ubytování · Doplňující dokument · program-vydaje.jpg'),
       next('Výdaj č. 2 · Parkovné Popis'),
-      next('Doklad o zaplacení · vypis.pdf'),
       next('Doplňující dokument · program.jpg'),
     ];
     expect(order.every((x) => x >= 0)).toBe(true);
     // Obsah odkazuje na skutečnou stranu oddílu.
     expect(p[1]).toMatch(new RegExp(`Detailní přehled výpočtu ${order[3]! + 1}`));
-    expect(p[order[7]!]).toContain('K výdaji není přiložen žádný doklad');
+    expect(p[order[9]!]).toContain('K výdaji není přiložen žádný doklad');
 
     // Krycí list uvádí souhrn a obsah odkazuje na skutečné strany.
     expect(p[0]).toContain(`Celkem stran: ${p.length}`);
     expect(p[0]).toContain('Výdaje bez přiloženého dokladu: 1');
     expect(p[0]).toContain('vložený obrázek podpisu');
-    expect(stats).toMatchObject({ accountingDocs: 1, paymentDocs: 1, supportingDocs: 1, expensesWithoutDocs: 1, unsigned: false });
+    expect(stats).toMatchObject({ accountingDocs: 1, paymentDocs: 1, supportingDocs: 2, expensesWithoutDocs: 1, unsigned: false });
   });
 
   it('široký obrázek dostane stranu na šířku, záložky existují', async () => {
@@ -116,7 +119,7 @@ describe('kompletní dokumentace', () => {
     expect((await texts(none.bytes))[0]).toContain('NEPODEPSÁNO');
   });
 
-  it('doklady k vozidlu mají vlastní oddíl za doklady o zaplacení', async () => {
+  it('doklady k vozidlu mají vlastní oddíl za výdaji a jejich doklady', async () => {
     const tp = { name: 'technicky-prukaz.jpg', kind: 'vehicle' as const, type: 'jpeg' as const, bytes: await fixture('uctenka.jpg') };
     const { bytes, stats } = await assemble(await input({ vehicle: [tp] }));
     const p = await texts(bytes);

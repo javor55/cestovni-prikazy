@@ -149,21 +149,15 @@ export async function assemble(input: AssemblyInput): Promise<{ bytes: Uint8Arra
   section('Podepsaný cestovní příkaz a žádost o vyplacení', signed);
   section('Detailní přehled výpočtu', calc);
   section('Přehled výdajů', overview);
-  let firstAccounting = true;
+  // Každý výdaj pohromadě: identifikační stránka a za ní všechny jeho přílohy
+  // (účetní doklad, doklad o zaplacení, doplňující dokumenty).
+  if (expenseSources.length) toc.push({ title: 'Výdaje a jejich doklady', page: 0, level: 0, rel: body.length });
   expenseSources.forEach((g, i) => {
-    const pages = [idPages[i]!, ...g.accounting];
-    if (firstAccounting) toc.push({ title: 'Účetní doklady', page: 0, level: 0, rel: body.length });
-    firstAccounting = false;
     toc.push({ title: `Výdaj č. ${g.n}${g.accounting.length ? '' : ' – bez účetního dokladu'}`, page: 0, level: 1, rel: body.length });
-    body.push(...pages);
+    body.push(idPages[i]!, ...g.accounting, ...g.payment, ...g.supporting);
   });
-  if (expenseSources.some((g) => g.payment.length)) {
-    toc.push({ title: 'Doklady o zaplacení', page: 0, level: 0, rel: body.length });
-    for (const g of expenseSources) if (g.payment.length) section(`Výdaj č. ${g.n}`, g.payment, 1);
-  }
   section('Doklady k vozidlu', vehicle);
-  const allSupporting = [...expenseSources.flatMap((g) => g.supporting), ...supporting];
-  section('Doplňující přílohy', allSupporting);
+  section('Doplňující přílohy', supporting);
 
   const count = (k: FileKind) => input.expenses.reduce((s, e) => s + e.files.filter((f) => f.kind === k).length, 0);
   const info = (totalPages: number): CoverInfo => ({

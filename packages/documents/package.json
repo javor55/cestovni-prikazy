@@ -19,6 +19,6 @@
   "devDependencies": {
     "@types/react": "^19.3.0",
     "exceljs": "^4.4.0",
-    "pdfjs-dist": "6.4.299"
+    "pdfjs-dist": "6.5.438"
   }
 }
